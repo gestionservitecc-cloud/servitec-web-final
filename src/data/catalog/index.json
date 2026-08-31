@@ -1,0 +1,3940 @@
+{
+  "motherboard": [
+    {
+      "nombre": "Mother Asrock B450M-HDV 4.0 AM4 HDMI M.2",
+      "precio": 98705,
+      "imagen": "/img/b2e760cd56d0168b.webp"
+    },
+    {
+      "nombre": "Mother Asrock A520M-HDV AM4",
+      "precio": 100522,
+      "imagen": "/img/64fa3e0ba37ca2ec.webp"
+    },
+    {
+      "nombre": "Mother Gigabyte A520M K V2 DDR4 AM4",
+      "precio": 104688,
+      "imagen": "/img/52722914170ea453.webp"
+    },
+    {
+      "nombre": "Mother ASUS PRIME A520M-K DDR4 AM4",
+      "precio": 112664,
+      "imagen": "/img/a9c4194d68293daf.webp"
+    },
+    {
+      "nombre": "Mother Asrock H610M-HDVM2 R2.0 DDR4 S1700",
+      "precio": 112781,
+      "imagen": "/img/2ffcea7f10dfd5e3.webp"
+    },
+    {
+      "nombre": "Mother ASUS PRIME H610M-F DDR4 R2.0 S1700",
+      "precio": 131508,
+      "imagen": "/img/76f3cb2420ed5d63.webp"
+    },
+    {
+      "nombre": "Mother MSI PRO H610M-S DDR5 S1700",
+      "precio": 134121,
+      "imagen": "/img/73dcd6d48f809d7f.webp"
+    },
+    {
+      "nombre": "Mother MSI PRO H610M-G DDR4 S1700",
+      "precio": 145418,
+      "imagen": "/img/29fa652ba05e5f9d.webp"
+    },
+    {
+      "nombre": "Mother Asrock H610M-HDVM2+ DDR5 S1700",
+      "precio": 145535,
+      "imagen": "/img/e210272505e088bd.webp"
+    },
+    {
+      "nombre": "Mother ASUS PRIME H610M-K CSM DDR4 S1700",
+      "precio": 147212,
+      "imagen": "/img/1f663d8d1d91a1ae.webp"
+    },
+    {
+      "nombre": "Mother Asrock B550M-HDV DDR4 AM4",
+      "precio": 149334,
+      "imagen": "/img/55ebab2224e849a0.webp"
+    },
+    {
+      "nombre": "Mother ASUS PRIME A620M-K AM5 DDR5",
+      "precio": 154180,
+      "imagen": "/img/2cdc4bd32897ca57.webp"
+    },
+    {
+      "nombre": "Mother MSI B550M-A PRO AM4",
+      "precio": 158470,
+      "imagen": "/img/a80cd699027e9d80.webp"
+    },
+    {
+      "nombre": "Mother ASUS PRIME H610M-K DDR5 S1700",
+      "precio": 159510,
+      "imagen": "/img/9eb476437cb8f7de.webp"
+    },
+    {
+      "nombre": "Mother Gigabyte A520M DS3H V2 AM4",
+      "precio": 171600,
+      "imagen": "/img/6021bbe3fdb59098.webp"
+    },
+    {
+      "nombre": "Mother MSI PRO B760M-E DDR4 S1700",
+      "precio": 183989,
+      "imagen": "/img/95e7faff119f536a.webp"
+    },
+    {
+      "nombre": "Mother MSI PRO B650M-B AM5",
+      "precio": 188825,
+      "imagen": "/img/da18bd0c017ad4d4.webp"
+    },
+    {
+      "nombre": "Mother Asrock H810M-X WIFI LGA1851 DDR5",
+      "precio": 189612,
+      "imagen": "/img/3d86ceb195c7db63.webp"
+    },
+    {
+      "nombre": "Mother ASUS PRIME B760M-K D4 121314th Gen LGA1700 DDR4",
+      "precio": 194018,
+      "imagen": "/img/bdbe256985e16529.webp"
+    },
+    {
+      "nombre": "Mother Asrock B550M Pro4 AM4",
+      "precio": 196538,
+      "imagen": "/img/dcee860f584f7388.webp"
+    },
+    {
+      "nombre": "Mother ASUS PRIME B760M-K DDR5 121314th Gen LGA1700",
+      "precio": 197044,
+      "imagen": "/img/627b79b80f16382d.webp"
+    },
+    {
+      "nombre": "Mother ASUS Prime H810M-K LGA1851 DDR5",
+      "precio": 198414,
+      "imagen": "/img/59b391fd2976693f.webp"
+    },
+    {
+      "nombre": "Mother ASUS Prime H810M-E LGA1851 DDR5",
+      "precio": 203515,
+      "imagen": "/img/dea5ad4fdfd9c2af.webp"
+    },
+    {
+      "nombre": "Mother ASUS PRIME B650M-F AM5 DDR5",
+      "precio": 204880,
+      "imagen": "/img/bd4d3b078cbc30ad.webp"
+    },
+    {
+      "nombre": "Mother MSI B550M PRO-VDH WIFI AM4",
+      "precio": 208520,
+      "imagen": "/img/18ed599283802e02.webp"
+    },
+    {
+      "nombre": "Mother MSI PRO H810M-E",
+      "precio": 209161,
+      "imagen": "/img/49769e1eaa4ba77a.webp"
+    },
+    {
+      "nombre": "Mother Asrock A620M-C R2.0 WIFI BULK AM5 DDR5",
+      "precio": 209616,
+      "imagen": "/img/4fc6a1549a19091e.webp"
+    },
+    {
+      "nombre": "Mother Asrock H810M-H LGA1851 DDR5",
+      "precio": 211604,
+      "imagen": "/img/149abb13c98235e1.webp"
+    },
+    {
+      "nombre": "Mother Asrock B760M PRO RS S1700 DDR5",
+      "precio": 215865,
+      "imagen": "/img/08ddc73d593cc14e.webp"
+    },
+    {
+      "nombre": "Mother Asrock B860M-H2 LGA1851 DDR5",
+      "precio": 218608,
+      "imagen": "/img/93e32086ca3fd0f2.webp"
+    },
+    {
+      "nombre": "Mother MSI PRO B760M-E S1700 DDR5",
+      "precio": 219570,
+      "imagen": "/img/671f357b50809cbd.webp"
+    },
+    {
+      "nombre": "Mother ASUS PRIME B760M-A D4 1213th Gen LGA1700 DDR4",
+      "precio": 224640,
+      "imagen": "/img/696fd60af1f96bfa.webp"
+    },
+    {
+      "nombre": "Mother Asrock B760M PRO RS WIFI DDR5",
+      "precio": 226629,
+      "imagen": "/img/51df82fc351860ad.webp"
+    },
+    {
+      "nombre": "Mother ASUS PRIME B550M-A AC AM4 WIFI",
+      "precio": 229775,
+      "imagen": "/img/d86820259ff37eb8.webp"
+    },
+    {
+      "nombre": "Mother ASUS PRIME B760M-A 121314th Gen LGA1700 DDR5",
+      "precio": 236782,
+      "imagen": "/img/b0b9e61cf22f59fc.webp"
+    },
+    {
+      "nombre": "Mother MSI H810M-B LGA1851 DDR5",
+      "precio": 243710,
+      "imagen": "/img/235ad00b121673c3.webp"
+    },
+    {
+      "nombre": "Mother ASUS PRIME B860M-K LGA1851 DDR5",
+      "precio": 244780,
+      "imagen": "/img/b8eb4a4308cb35b2.webp"
+    },
+    {
+      "nombre": "Mother ASUS PRIME B650M-A II AM5 DDR5",
+      "precio": 251615,
+      "imagen": "/img/25e9348b2d107e53.webp"
+    },
+    {
+      "nombre": "Mother ASUS PRIME B760M-A CSM LGA1700 DDR5",
+      "precio": 254787,
+      "imagen": "/img/aa5bd6bc1e3ef5aa.webp"
+    },
+    {
+      "nombre": "Mother ASUS TUF GAMING A620AM-PLUS AM5 DDR5",
+      "precio": 256324,
+      "imagen": "/img/7fc72b0a8a4b47e2.webp"
+    },
+    {
+      "nombre": "Mother MSI B650M GAMING WIFI AM5 DDR5",
+      "precio": 283527,
+      "imagen": "/img/b38d7e7bfbfa5a5a.webp"
+    },
+    {
+      "nombre": "Mother MSI B840M-P PRO WIFI6E",
+      "precio": 284404,
+      "imagen": "/img/4cc7d51200dffe87.webp"
+    },
+    {
+      "nombre": "Mother ASUS TUF GAMING A620AM-PLUS WIFI AM5 DDR5",
+      "precio": 290102,
+      "imagen": "/img/05a3f14af2df0431.webp"
+    },
+    {
+      "nombre": "Mother Asrock B760M PG Riptide WIFI S1700 DDR5",
+      "precio": 291086,
+      "imagen": "/img/ae2a9e623d1fd2c5.webp"
+    },
+    {
+      "nombre": "Mother MSI B760M-A PRO S1700 DDR5 WIFI",
+      "precio": 295601,
+      "imagen": "/img/4c68b9a6452bba07.webp"
+    },
+    {
+      "nombre": "Mother ASUS PRIME B860M-A LGA1851 DDR5",
+      "precio": 299984,
+      "imagen": "/img/da1c6a1be3112cfa.webp"
+    },
+    {
+      "nombre": "Mother Asrock A620AI WIFI AM5 DDR5",
+      "precio": 303801,
+      "imagen": "/img/fccbdeb35a25f5d4.webp"
+    },
+    {
+      "nombre": "Mother ASUS B650EM-A WIFI AM5 DDR5",
+      "precio": 320946,
+      "imagen": "/img/4566fcccbf0e2517.webp"
+    },
+    {
+      "nombre": "Mother Asrock B860 PRO-A LGA1851 DDR5",
+      "precio": 328142,
+      "imagen": "/img/034af93fecbc6c32.webp"
+    },
+    {
+      "nombre": "Mother MSI B760 GAMING PLUS WIFI S1700",
+      "precio": 331965,
+      "imagen": "/img/d01b5f027b326eff.webp"
+    },
+    {
+      "nombre": "Mother Asrock B850M PRO RS AM5 DDR5",
+      "precio": 338831,
+      "imagen": "/img/1d85228b6216b610.webp"
+    },
+    {
+      "nombre": "Mother ASUS PRIME B840M-A WIFI AM5 DDR5",
+      "precio": 339255,
+      "imagen": "/img/5ea30d8efe698328.webp"
+    },
+    {
+      "nombre": "Mother MSI B760M GAMING PLUS WIFI DDR5 S1700",
+      "precio": 341078,
+      "imagen": "/img/0e1e4c00eaac5868.webp"
+    },
+    {
+      "nombre": "Mother Asrock B650M PRO X3D WIFI",
+      "precio": 341866,
+      "imagen": "/img/5ba09bfd65ceca15.webp"
+    },
+    {
+      "nombre": "Mother Asrock B860 PRO-A WIFI LGA1851 DDR5",
+      "precio": 350051,
+      "imagen": "/img/79ad7440f0749d36.webp"
+    },
+    {
+      "nombre": "Mother ASUS PRIME B850M-A AM5 DDR5",
+      "precio": 355455,
+      "imagen": "/img/15a95d1dafa2d3cc.webp"
+    },
+    {
+      "nombre": "Mother Asrock B860M PRO-A WIFI LGA1851 DDR5",
+      "precio": 357736,
+      "imagen": "/img/e213fb481618e125.webp"
+    },
+    {
+      "nombre": "Mother Asrock B650 PRO RS WIFI AM5 DDR5",
+      "precio": 361005,
+      "imagen": "/img/ccf1026da6207b47.webp"
+    },
+    {
+      "nombre": "Mother Asrock B650M PG RIPTIDE WIFI AM5 DDR5",
+      "precio": 361176,
+      "imagen": "/img/19f684521f3f03a2.webp"
+    },
+    {
+      "nombre": "Mother MSI B840 GAMING PLUS WIFI",
+      "precio": 364365,
+      "imagen": "/img/f095b295c3fe5ea4.webp"
+    },
+    {
+      "nombre": "Mother Asrock B850M PRO RS WIFI AM5 DDR5",
+      "precio": 364636,
+      "imagen": "/img/5b8217be4c95eb6b.webp"
+    },
+    {
+      "nombre": "Mother ASUS TUF GAMING B550M-PLUS WIFI II AM4",
+      "precio": 370170,
+      "imagen": "/img/1a5758f732331099.webp"
+    },
+    {
+      "nombre": "Mother Asrock B860 PRO RS WIFI LGA1851 DDR5",
+      "precio": 370526,
+      "imagen": "/img/36b27facd72d3fe1.webp"
+    },
+    {
+      "nombre": "Mother ASUS PRIME B850M-A WIFI AM5 DDR5",
+      "precio": 371284,
+      "imagen": "/img/35f6db2c36b9b514.webp"
+    },
+    {
+      "nombre": "Mother Asrock Z790I Lightning WIFI ITX DDR5 S1700",
+      "precio": 380118,
+      "imagen": "/img/b39ad5efab09342c.webp"
+    },
+    {
+      "nombre": "Mother Asrock B850M PRO RS WIFI WHITE AM5 DDR5",
+      "precio": 381449,
+      "imagen": "/img/96968d6198f4218d.webp"
+    },
+    {
+      "nombre": "Mother Asrock B860M PRO RS WIFI LGA1851 DDR5",
+      "precio": 384334,
+      "imagen": "/img/07df0074d0f619ed.webp"
+    },
+    {
+      "nombre": "Mother Asrock B760M Steel Legend WIFI LGA1700 DDR5",
+      "precio": 385159,
+      "imagen": "/img/848c62113ac818e0.webp"
+    },
+    {
+      "nombre": "Mother ASUS TUF B650EM-E WIFI",
+      "precio": 387659,
+      "imagen": "/img/61dadc4debedfd56.webp"
+    },
+    {
+      "nombre": "Mother Asrock B860M STEEL LEGEND WIFI LGA1851 DDR5",
+      "precio": 428915,
+      "imagen": "/img/7c7b8a469f7d5d8e.webp"
+    },
+    {
+      "nombre": "Mother MSI PRO B850-S WIFI6E",
+      "precio": 434029,
+      "imagen": "/img/82a79224e31077bb.webp"
+    },
+    {
+      "nombre": "Mother MSI B860M GAMING PLUS WIFI LGA1851 DDR5",
+      "precio": 438950,
+      "imagen": "/img/5607cfff05ca0a82.webp"
+    },
+    {
+      "nombre": "Mother ASUS TUF B650EM-PLUS WIFI",
+      "precio": 450999,
+      "imagen": "/img/56d6dc251af9218f.webp"
+    },
+    {
+      "nombre": "Mother Asrock B850 PRO-A WIFI",
+      "precio": 451829,
+      "imagen": "/img/7bc7f9defde37784.webp"
+    },
+    {
+      "nombre": "Mother ASUS TUF B650M-PLUS WIFI",
+      "precio": 452367,
+      "imagen": "/img/5a2278637fa04121.webp"
+    },
+    {
+      "nombre": "Mother Asrock B850 ROCK WIFI7 AM5 DDR5",
+      "precio": 453769,
+      "imagen": "/img/3334a1ae38d6f7fe.webp"
+    },
+    {
+      "nombre": "Mother Gigabyte B860M AORUS ELITE WIFI 6E ICE S1851",
+      "precio": 457577,
+      "imagen": "/img/46d39e0e6da4cedd.webp"
+    },
+    {
+      "nombre": "Mother MSI B850-S PRO WIFI6E",
+      "precio": 458424,
+      "imagen": "/img/fa21580e597ee39c.webp"
+    },
+    {
+      "nombre": "Mother Asrock B860M LIGHTNING WIFI LGA1851 DDR5",
+      "precio": 461882,
+      "imagen": "/img/7c2edb41148e02ba.webp"
+    },
+    {
+      "nombre": "Mother Asrock Z890 PRO-A LGA1851 DDR5",
+      "precio": 461903,
+      "imagen": "/img/036320c758966df6.webp"
+    },
+    {
+      "nombre": "Mother MSI B860 GAMING PLUS WIFI LGA1851 DDR5",
+      "precio": 466355,
+      "imagen": "/img/338cb29d94602f82.webp"
+    },
+    {
+      "nombre": "Mother Asrock B850 PRO RS WIFI AM5 DDR5",
+      "precio": 468786,
+      "imagen": "/img/6b4707b3d859eaf9.webp"
+    },
+    {
+      "nombre": "Mother ASUS PRIME B850-PLUS AM5 DDR5",
+      "precio": 469476,
+      "imagen": "/img/64fcf3295e03753f.webp"
+    },
+    {
+      "nombre": "Mother Asrock B650I Lightning WIFI AM5 DDR5 ITX",
+      "precio": 469937,
+      "imagen": "/img/f6e27c8c59697949.webp"
+    },
+    {
+      "nombre": "Mother ASUS TUF GAMING B850M-E WIFI AM5 DDR5",
+      "precio": 478761,
+      "imagen": "/img/1786d3a8fc58eeaf.webp"
+    },
+    {
+      "nombre": "Mother Asrock X870 PRO RS DDR5 AM5",
+      "precio": 480564,
+      "imagen": "/img/67d7840e38e25409.webp"
+    },
+    {
+      "nombre": "Mother Asrock Z890 PRO-A WIFI LGA1851 DDR5",
+      "precio": 482145,
+      "imagen": "/img/7a135b1df205309c.webp"
+    },
+    {
+      "nombre": "Mother ASUS TUF GAMING B850-E WIFI AM5 DDR5",
+      "precio": 486265,
+      "imagen": "/img/e8c23a06900e6b2e.webp"
+    },
+    {
+      "nombre": "Mother Asrock B860 STEEL LEGEND WIFI LGA1851 DDR5",
+      "precio": 488348,
+      "imagen": "/img/7a1a51b31fa01e9f.webp"
+    },
+    {
+      "nombre": "Mother ASUS TUF GAMING B760M-PLUS WIFI II 121314th Gen LGA1700 DDR5",
+      "precio": 490350,
+      "imagen": "/img/5a245d07bc18e3b6.webp"
+    },
+    {
+      "nombre": "Mother Asrock B850M RIPTIDE WIFI AM5 DDR5",
+      "precio": 492225,
+      "imagen": "/img/7f8e9731b01195fd.webp"
+    },
+    {
+      "nombre": "Mother ASUS TUF GAMING B850M-PLUS WIFI AM5 DDR5",
+      "precio": 499401,
+      "imagen": "/img/807ff22959be5e44.webp"
+    },
+    {
+      "nombre": "Mother ASUS TUF GAMING B860-PLUS WIFI LGA1851 DDR5",
+      "precio": 504672,
+      "imagen": "/img/bb8a1201480bf4ae.webp"
+    },
+    {
+      "nombre": "Mother MSI PRO Z790-P WIFI DDR5 S1700",
+      "precio": 511336,
+      "imagen": "/img/81ce54e207a1fbe7.webp"
+    },
+    {
+      "nombre": "Mother Asrock X870 PRO RS WIFI DDR5 AM5",
+      "precio": 512001,
+      "imagen": "/img/4cb386f415628a94.webp"
+    },
+    {
+      "nombre": "Mother Gigabyte B860I AORUS PRO ICE S1851",
+      "precio": 516657,
+      "imagen": "/img/f5a08b229ef0f152.webp"
+    },
+    {
+      "nombre": "Mother Asrock B860I LIGHTNING WIFI LGA1851 DDR5 ITX",
+      "precio": 532375,
+      "imagen": "/img/aafdaa2b63402ced.webp"
+    },
+    {
+      "nombre": "Mother MSI MAG B860 TOMAHAWK WIFI LGA1851 DDR5",
+      "precio": 540980,
+      "imagen": "/img/b26d0266c90216aa.webp"
+    },
+    {
+      "nombre": "Mother Asrock Z890 PRO RS LGA1851 DDR5",
+      "precio": 549108,
+      "imagen": "/img/ca274ccd2d62d74f.webp"
+    },
+    {
+      "nombre": "Mother MSI PRO X870-P WIFI",
+      "precio": 549522,
+      "imagen": "/img/aee2203039940704.webp"
+    },
+    {
+      "nombre": "Mother Asrock B850 RIPTIDE WIFI AM5 DDR5",
+      "precio": 551284,
+      "imagen": "/img/418c5c7c4905214a.webp"
+    },
+    {
+      "nombre": "Mother MSI PRO Z890-S WIFI WHITE",
+      "precio": 553140,
+      "imagen": "/img/fefc6fbc0881261d.webp"
+    },
+    {
+      "nombre": "Mother MSI PRO Z890-P WIFI",
+      "precio": 554610,
+      "imagen": "/img/d36a8f0628319c0f.webp"
+    },
+    {
+      "nombre": "Mother ASUS PRIME Z890-P WIFI LGA1851 DDR5",
+      "precio": 565426,
+      "imagen": "/img/0e333eaee2eb61f5.webp"
+    },
+    {
+      "nombre": "Mother Asrock Z890 PRO RS WIFI LGA1851 DDR5",
+      "precio": 573363,
+      "imagen": "/img/2f9d4e2631105a98.webp"
+    },
+    {
+      "nombre": "Mother ASUS PRIME X870-P WIFI DDR5 AM5",
+      "precio": 578151,
+      "imagen": "/img/f69c2968144af0a6.webp"
+    },
+    {
+      "nombre": "Mother ASUS Z890 AYW GAMING WIFI W LGA1851",
+      "precio": 584136,
+      "imagen": "/img/139a4eeac7945825.webp"
+    },
+    {
+      "nombre": "Mother Asrock Z890 PRO RS WIFI WHITE LGA1851 DDR5",
+      "precio": 593695,
+      "imagen": "/img/a5fc3175b1070137.webp"
+    },
+    {
+      "nombre": "Mother ASUS TUF GAMING B850-PLUS WIFI AM5 DDR5",
+      "precio": 594300,
+      "imagen": "/img/b9f90c07528975b2.webp"
+    },
+    {
+      "nombre": "Mother ASUS ROG STRIX B650E-F GAMING WIFI",
+      "precio": 609837,
+      "imagen": "/img/160dac0e4ac91e1a.webp"
+    },
+    {
+      "nombre": "Mother MSI MAG B850 TOMAHAWK MAX WIFI II AM5",
+      "precio": 632786,
+      "imagen": "/img/f38414c4173ca8e5.webp"
+    },
+    {
+      "nombre": "Mother Asrock Z890 STEEL LEGEND WIFI LGA1851 DDR5",
+      "precio": 652317,
+      "imagen": "/img/4c6fdf5a2a1b092a.webp"
+    },
+    {
+      "nombre": "Mother MSI MAG X870E GAMING MAX WIFI",
+      "precio": 655648,
+      "imagen": "/img/474f91204faf00e8.webp"
+    },
+    {
+      "nombre": "Mother ASUS ROG STRIX B850-A GAMING WIFI AM5 DDR5",
+      "precio": 679963,
+      "imagen": "/img/4ff460b848e627b0.webp"
+    },
+    {
+      "nombre": "Mother Asrock X870 RIPTIDE WIFI DDR5 AM5",
+      "precio": 685412,
+      "imagen": "/img/7495e4a78cc61bf5.webp"
+    },
+    {
+      "nombre": "Mother ASUS ROG STRIX B650E-E GAMING WIFI",
+      "precio": 705935,
+      "imagen": "/img/c10c0c111efd989b.webp"
+    },
+    {
+      "nombre": "Mother Asrock Z890 RIPTIDE WIFI LGA1851 DDR5",
+      "precio": 720846,
+      "imagen": "/img/267d19cc4685b92f.webp"
+    },
+    {
+      "nombre": "Mother Asrock X870 STEEL LEGEND WIFI DDR5 AM5",
+      "precio": 724220,
+      "imagen": "/img/2741bfd261611a38.webp"
+    },
+    {
+      "nombre": "Mother ASUS ROG STRIX B850-F GAMING WIFI AM5 DDR5",
+      "precio": 730342,
+      "imagen": "/img/eff1c29c7ad03d03.webp"
+    },
+    {
+      "nombre": "Mother Asrock Z890I NOVA WIFI ITX LGA1851 DDR5",
+      "precio": 734203,
+      "imagen": "/img/a6ac9e1890323870.webp"
+    },
+    {
+      "nombre": "Mother ASUS TUF GAMING Z890-PLUS WIFI LGA1851",
+      "precio": 734665,
+      "imagen": "/img/3657d93074301c89.webp"
+    },
+    {
+      "nombre": "Mother ASUS TUF GAMING X870-PLUS WIFI DDR5 AM5",
+      "precio": 755639,
+      "imagen": "/img/ab44a07a76a3cc20.webp"
+    },
+    {
+      "nombre": "Mother Gigabyte Z890I AORUS ULTRA S1851",
+      "precio": 767941,
+      "imagen": "/img/52b4c4cf7a1701ff.webp"
+    },
+    {
+      "nombre": "Mother Asrock X870 TAICHI CREATOR WIFI DDR5 AM5",
+      "precio": 790146,
+      "imagen": "/img/35d235eb8dc061fb.webp"
+    },
+    {
+      "nombre": "Mother ASUS ROG STRIX X670E-E GAMING WIFI AM5 DDR5",
+      "precio": 837029,
+      "imagen": "/img/8aa0048ddd010022.webp"
+    },
+    {
+      "nombre": "Mother Asrock X870E NOVA WIFI DDR5 AM5",
+      "precio": 874822,
+      "imagen": "/img/79db0ddae460ef5d.webp"
+    },
+    {
+      "nombre": "Mother ASUS ROG STRIX B850-E GAMING WIFI AM5 DDR5",
+      "precio": 910836,
+      "imagen": "/img/ecb9e962ba93ec02.webp"
+    },
+    {
+      "nombre": "Mother ASUS ROG STRIX Z890-A GAMING WIFI LGA1851",
+      "precio": 941366,
+      "imagen": "/img/e4834ce6c25ad098.webp"
+    },
+    {
+      "nombre": "Mother Asrock X870E TAICHI LITE DDR5 AM5",
+      "precio": 953631,
+      "imagen": "/img/464b4e40f6549349.webp"
+    },
+    {
+      "nombre": "Mother Asrock Z890 TAICHI LITE WIFI LGA1851 DDR5",
+      "precio": 995252,
+      "imagen": "/img/09b48434ccd6bac0.webp"
+    },
+    {
+      "nombre": "Mother Asrock X870E TAICHI DDR5 AM5",
+      "precio": 1025640,
+      "imagen": "/img/5c1007b81b51baa1.webp"
+    },
+    {
+      "nombre": "Mother Asrock X870E TAICHI OCF DDR5 AM5",
+      "precio": 1077688,
+      "imagen": "/img/532bfe9f3f959fec.webp"
+    },
+    {
+      "nombre": "Mother Asrock Z890 TAICHI OCF WIFI LGA1851 DDR5",
+      "precio": 1191154,
+      "imagen": "/img/80ae3bd3b454e609.webp"
+    },
+    {
+      "nombre": "Mother ASUS ROG STRIX Z890-E GAMING WIFI LGA1851",
+      "precio": 1191347,
+      "imagen": "/img/4ef298ec5323fb6e.webp"
+    },
+    {
+      "nombre": "Mother Asrock Z890 TAICHI WIFI LGA1851 DDR5",
+      "precio": 1212817,
+      "imagen": "/img/e1d5d623765fa07d.webp"
+    },
+    {
+      "nombre": "Mother ASUS ROG STRIX X870E-E GAMING WIFI DDR5 AM5",
+      "precio": 1220566,
+      "imagen": "/img/be51a50c6cc2755d.webp"
+    },
+    {
+      "nombre": "Mother ASUS ROG MAXIMUS Z890 HERO LGA1851",
+      "precio": 1279092,
+      "imagen": "/img/818a5bebfa0c505e.webp"
+    },
+    {
+      "nombre": "Mother ASUS ROG CROSSHAIR X670E HERO AM5",
+      "precio": 1351119,
+      "imagen": "/img/94522a0b31552bce.webp"
+    },
+    {
+      "nombre": "Mother Asrock Z890 TAICHI AQUA WIFI LGA1851 DDR5",
+      "precio": 1418084,
+      "imagen": "/img/b88f3ed94266fc45.webp"
+    },
+    {
+      "nombre": "Mother ASUS ROG CROSSHAIR X870E HERO DDR5 AM5",
+      "precio": 1579108,
+      "imagen": "/img/8f1decf161eee946.webp"
+    },
+    {
+      "nombre": "Mother ASUS ROG CROSSHAIR X870E DARK HERO DDR5 AM5",
+      "precio": 1742160,
+      "imagen": "/img/0db3fcb763542482.webp"
+    },
+    {
+      "nombre": "Mother Gigabyte X870E AORUS XTREME AI TOP AM5",
+      "precio": 2330790,
+      "imagen": "/img/0d7528495b3c21c0.webp"
+    }
+  ],
+  "processor": [
+    {
+      "nombre": "Procesador AMD Athlon 3000G 3.5GHz + Radeon Vega 3 AM4",
+      "precio": 73625,
+      "imagen": "/img/58bd336b58c70f3f.webp"
+    },
+    {
+      "nombre": "Procesador AMD Ryzen 3 4100 + Wraith Stealth Cooler AM4",
+      "precio": 133055,
+      "imagen": "/img/519458d8312630be.webp"
+    },
+    {
+      "nombre": "Procesador AMD Ryzen 3 3200G 4.0GHz Turbo + Radeon Vega 8 AM4 + Wraith Stealth Cooler",
+      "precio": 141830,
+      "imagen": "/img/d4197e1e87978edb.webp"
+    },
+    {
+      "nombre": "Procesador AMD Ryzen 5 4500 + Wraith Stealth Cooler AM4",
+      "precio": 175045,
+      "imagen": "/img/a63313e5951a1f5b.webp"
+    },
+    {
+      "nombre": "Procesador AMD Ryzen 5 3400G 4.2GHz Turbo Radeon Vega 11 AM4 Wraith Spire Cooler",
+      "precio": 179595,
+      "imagen": "/img/7e99afea1d257fcb.webp"
+    },
+    {
+      "nombre": "Procesador Intel Core i3 12100F 4.3GHz Turbo Socket 1700 Alder Lake",
+      "precio": 194987,
+      "imagen": "/img/234e98bfb72814f1.webp"
+    },
+    {
+      "nombre": "Procesador AMD Ryzen 5 5500 4.2GHz Turbo AM4 + Wraith Stealth Cooler",
+      "precio": 223561,
+      "imagen": "/img/17b7bad0180c4caf.webp"
+    },
+    {
+      "nombre": "Procesador Intel Core i3 14100F 4.7GHz Turbo Socket 1700 Raptor Lake",
+      "precio": 232895,
+      "imagen": "/img/712efb9d12e75dd0.webp"
+    },
+    {
+      "nombre": "Procesador AMD Ryzen 5 5600GE 4.4GHz Turbo AM4 + Wraith Stealth Cooler",
+      "precio": 328590,
+      "imagen": "/img/b7535943dd9b4c12.webp"
+    },
+    {
+      "nombre": "Procesador AMD Ryzen 7 5700 4.6GHz Turbo AM4 + Wraith Stealth Cooler",
+      "precio": 331628,
+      "imagen": "/img/c7ef8bd484cc5c60.webp"
+    },
+    {
+      "nombre": "Procesador AMD Ryzen 5 8500G 5.0GHz Turbo AM5 + Wraith Stealth Cooler",
+      "precio": 334598,
+      "imagen": "/img/bc532a3bdf48e98c.webp"
+    },
+    {
+      "nombre": "Procesador Intel Core i3 14100 4.7GHz Turbo Socket 1700 Raptor Lake",
+      "precio": 351405,
+      "imagen": "/img/831e3114bbbfed5d.webp"
+    },
+    {
+      "nombre": "Procesador Intel Core i5 12400F 4.4GHz Turbo Socket 1700 Alder Lake",
+      "precio": 352733,
+      "imagen": "/img/41c06669e582c4ba.webp"
+    },
+    {
+      "nombre": "Procesador AMD Ryzen 5 5600GT 4.6GHz Turbo AM4 + Wraith Stealth Cooler",
+      "precio": 353228,
+      "imagen": "/img/b12e4a97fb7e3be8.webp"
+    },
+    {
+      "nombre": "Procesador AMD Ryzen 5 8400F 4.7GHz Turbo AM5 Wraith Stealth Cooler",
+      "precio": 364095,
+      "imagen": "/img/8232b2de636c3834.webp"
+    },
+    {
+      "nombre": "Procesador Intel Core i5 14400F 4.7GHz Turbo Socket 1700 Raptor Lake Tray -No Incluye Cooler",
+      "precio": 380362,
+      "imagen": "/img/4f49b89b1734ddff.webp"
+    },
+    {
+      "nombre": "Procesador AMD Ryzen 5 5600T 4.5GHz Turbo AM4 + Wraith Stealth Cooler",
+      "precio": 384818,
+      "imagen": "/img/e5bafce7ce34769b.webp"
+    },
+    {
+      "nombre": "Procesador AMD Ryzen 5 5600XT 4.6GHz Turbo AM4 + Wraith Stealth Cooler",
+      "precio": 388414,
+      "imagen": "/img/b169aa23ce188457.webp"
+    },
+    {
+      "nombre": "Procesador AMD Ryzen 7 5700GE 4.6GHz Turbo AM4 + Wraith Stealth Cooler OEM",
+      "precio": 402570,
+      "imagen": "/img/300fcad3edc5b847.webp"
+    },
+    {
+      "nombre": "Procesador AMD Ryzen 5 8600G 5.0GHz Turbo AM5 + Wraith Stealth Cooler",
+      "precio": 403042,
+      "imagen": "/img/c535b584069a8286.webp"
+    },
+    {
+      "nombre": "Procesador Intel Core Ultra 5 225F 4.9Ghz Turbo Socket 1851 Arrow Lake",
+      "precio": 431970,
+      "imagen": "/img/e44acdbf146dfb33.webp"
+    },
+    {
+      "nombre": "Procesador AMD Ryzen 7 PRO 5755GE 4.6GHz Turbo AM4 + Wraith Stealth Cooler OEM",
+      "precio": 433999,
+      "imagen": "/img/e09ab7a9f471a1d7.webp"
+    },
+    {
+      "nombre": "Procesador Intel Core i5 14400F 4.7GHz Turbo Socket 1700 Raptor Lake",
+      "precio": 456960,
+      "imagen": "/img/824425f5ab8be278.webp"
+    },
+    {
+      "nombre": "Procesador Intel Core i5 12400 4.4GHz Turbo Socket 1700 Alder Lake",
+      "precio": 463680,
+      "imagen": "/img/b69c9c414c1544bb.webp"
+    },
+    {
+      "nombre": "Procesador AMD Ryzen 7 5700G 4.6GHz Turbo AM4 + Wraith Stealth Cooler",
+      "precio": 477400,
+      "imagen": "/img/c0b732369c6886d7.webp"
+    },
+    {
+      "nombre": "Procesador AMD Ryzen 5 7600 5.1GHz Turbo AM5 + Wraith Stealth Cooler",
+      "precio": 493360,
+      "imagen": "/img/f4d924509b7c59de.webp"
+    },
+    {
+      "nombre": "Procesador Intel Core Ultra 5 225 4.9Ghz Turbo Socket 1851 Arrow Lake",
+      "precio": 500640,
+      "imagen": "/img/985fda204588e94d.webp"
+    },
+    {
+      "nombre": "Procesador AMD Ryzen 7 5700X 4.6GHz Turbo AM4 - No incluye Cooler",
+      "precio": 508970,
+      "imagen": "/img/c092f3ada2c582e0.webp"
+    },
+    {
+      "nombre": "Procesador Intel Core Ultra 5 245KF 5.2Ghz Turbo Socket 1851 Arrow Lake",
+      "precio": 523390,
+      "imagen": "/img/d3bc8d4538a066fb.webp"
+    },
+    {
+      "nombre": "Procesador Intel Core i5 14400 4.7GHz Turbo Socket 1700 Raptor Lake",
+      "precio": 534170,
+      "imagen": "/img/aa4d116c80f0ee94.webp"
+    },
+    {
+      "nombre": "Procesador AMD Ryzen 5 7600X 5.3GHz Turbo AM5 - No incluye Cooler - CVIDEO",
+      "precio": 541030,
+      "imagen": "/img/ff98d3685bbcd875.webp"
+    },
+    {
+      "nombre": "Procesador AMD Ryzen 5 9600 5.2GHz Turbo AM5",
+      "precio": 553070,
+      "imagen": "/img/96f6665ba149e4f5.webp"
+    },
+    {
+      "nombre": "Procesador Intel Core i5 12600K 4.90GHz Turbo Socket 1700 Alder Lake",
+      "precio": 558950,
+      "imagen": "/img/5b3fce73108e61b9.webp"
+    },
+    {
+      "nombre": "Procesador AMD Ryzen 5 9600X 5.4GHz Turbo AM5 - No Incluye Cooler",
+      "precio": 562100,
+      "imagen": "/img/5f785598c9c993d0.webp"
+    },
+    {
+      "nombre": "Procesador AMD Ryzen 7 8700F 5.0GHz Turbo AM5 + Wraith Stealth Cooler",
+      "precio": 562590,
+      "imagen": "/img/b18f3f6504cbe55f.webp"
+    },
+    {
+      "nombre": "Procesador Intel Core Ultra 5 245K 5.2Ghz Turbo Socket 1851 Arrow Lake",
+      "precio": 564550,
+      "imagen": "/img/2f9b57a64e3fc0ba.webp"
+    },
+    {
+      "nombre": "Procesador AMD Ryzen 7 5800XT 4.8GHz Turbo AM4 - No incluye Cooler",
+      "precio": 569439,
+      "imagen": "/img/024763afc5e27437.webp"
+    },
+    {
+      "nombre": "Procesador AMD Ryzen 7 8700G 5.1GHz Turbo AM5 + Wraith Stealth Cooler",
+      "precio": 573930,
+      "imagen": "/img/9dfc6c2d5cb2456f.webp"
+    },
+    {
+      "nombre": "Procesador Intel Core Ultra 5 250K 5.6GHz Turbo Socket 1851 Arrow Lake",
+      "precio": 582540,
+      "imagen": "/img/30f18d6b0c0db7f2.webp"
+    },
+    {
+      "nombre": "Procesador Intel Core i5 14600KF 5.3GHz Turbo Socket 1700 Raptor Lake",
+      "precio": 645750,
+      "imagen": "/img/c38a884b558ff3ff.webp"
+    },
+    {
+      "nombre": "Procesador Intel Core i5 14600K 5.3GHz Turbo Socket 1700 Raptor Lake",
+      "precio": 662130,
+      "imagen": "/img/9963996ecb5a32c4.webp"
+    },
+    {
+      "nombre": "Procesador AMD Ryzen 7 7700 5.3GHz Turbo AM5",
+      "precio": 746480,
+      "imagen": "/img/4aab5f87d3af6874.webp"
+    },
+    {
+      "nombre": "Procesador Intel Core Ultra 7 265KF 5.5Ghz Turbo Socket 1851 Arrow Lake",
+      "precio": 773220,
+      "imagen": "/img/83b3e99845cd66fa.webp"
+    },
+    {
+      "nombre": "Procesador AMD Ryzen 9 5900XT 4.8GHz Turbo AM4 - No incluye Cooler",
+      "precio": 780990,
+      "imagen": "/img/2010a26267346760.webp"
+    },
+    {
+      "nombre": "Procesador Intel Core i7 12700KF 5.0GHz Turbo Socket 1700 Alder Lake",
+      "precio": 784630,
+      "imagen": "/img/91b143cfd9e67aa7.webp"
+    },
+    {
+      "nombre": "Procesador Intel Core i7 12700F 4.9GHz Turbo Socket 1700 Alder Lake",
+      "precio": 787360,
+      "imagen": "/img/eb6ff782f7f0c0c5.webp"
+    },
+    {
+      "nombre": "Procesador AMD Ryzen 7 9700X 5.5GHz Turbo AM5 - No Incluye Cooler",
+      "precio": 811860,
+      "imagen": "/img/0dfa662126db378b.webp"
+    },
+    {
+      "nombre": "Procesador Intel Core i7 12700 4.9GHz Turbo Socket 1700 Alder Lake",
+      "precio": 831460,
+      "imagen": "/img/9180d35198fadf45.webp"
+    },
+    {
+      "nombre": "Procesador AMD Ryzen 7 7700X 5.4GHz Turbo AM5 - No incluye Cooler - CVIDEO",
+      "precio": 831810,
+      "imagen": "/img/db37776109a2b9b6.webp"
+    },
+    {
+      "nombre": "Procesador Intel Core Ultra 7 265K 5.5Ghz Turbo Socket 1851 Arrow Lake",
+      "precio": 833630,
+      "imagen": "/img/ad3108cca7d2aa60.webp"
+    },
+    {
+      "nombre": "Procesador Intel Core Ultra 7 270K 5.7GHz Turbo Socket 1851 Arrow Lake",
+      "precio": 848960,
+      "imagen": "/img/47773949e22e36cd.webp"
+    },
+    {
+      "nombre": "Procesador Intel Core i7 12700K 5.0GHz Turbo Socket 1700 Alder Lake",
+      "precio": 863940,
+      "imagen": "/img/58636077f010e50f.webp"
+    },
+    {
+      "nombre": "Procesador Intel Core i7 14700KF 5.6GHz Turbo Socket 1700 Raptor Lake",
+      "precio": 867941,
+      "imagen": "/img/ceafc1a71a8fdd9a.webp"
+    },
+    {
+      "nombre": "Procesador AMD Ryzen 9 7900 5.4GHz Turbo AM5 - Sin Cooler",
+      "precio": 884730,
+      "imagen": "/img/67fddb9686e735ec.webp"
+    },
+    {
+      "nombre": "Procesador AMD Ryzen 7 7700X3D 4.5GHz Turbo AM5 - No incluye cooler",
+      "precio": 884940,
+      "imagen": "/img/2d38a6796ad8995c.webp"
+    },
+    {
+      "nombre": "Procesador Intel Core i7 14700F 5.4GHz Turbo Socket 1700 Raptor Lake",
+      "precio": 905030,
+      "imagen": "/img/d573eaa0ce2a9cf7.webp"
+    },
+    {
+      "nombre": "Procesador AMD Ryzen 7 5800X3D 4.5GHz Turbo AM4 10th Anniversary Edition",
+      "precio": 925407,
+      "imagen": "/img/7dcd4c9cd257a6df.webp"
+    },
+    {
+      "nombre": "Procesador AMD Ryzen 9 7900X 5.6GHz Turbo AM5 - No incluye Cooler - CVideo",
+      "precio": 944790,
+      "imagen": "/img/47115fd607b77515.webp"
+    },
+    {
+      "nombre": "Procesador Intel Core i9 12900F 5.1GHz Turbo Socket 1700 Alder Lake",
+      "precio": 952980,
+      "imagen": "/img/1abd1613babc694e.webp"
+    },
+    {
+      "nombre": "Procesador Intel Core i9 12900K 5.2GHz Turbo Socket 1700 Alder Lake",
+      "precio": 1015070,
+      "imagen": "/img/1e6e3a490232325d.webp"
+    },
+    {
+      "nombre": "Procesador Intel Core i7 14700 5.4GHz Turbo Socket 1700 Raptor Lake",
+      "precio": 1022210,
+      "imagen": "/img/a2a57089a0968b0d.webp"
+    },
+    {
+      "nombre": "Procesador AMD Ryzen 7 7800X3D 5.0GHz Turbo AM5 - No incluye cooler",
+      "precio": 1030050,
+      "imagen": "/img/c46f34dc1899d00b.webp"
+    },
+    {
+      "nombre": "Procesador Intel Core i7 14700K 5.6GHz Turbo Socket 1700 Raptor Lake",
+      "precio": 1030750,
+      "imagen": "/img/81da574c7f7ece3c.webp"
+    },
+    {
+      "nombre": "Procesador AMD Ryzen 9 9900X 5.6GHz Turbo AM5 - No Incluye Cooler",
+      "precio": 1065470,
+      "imagen": "/img/be0bed96e9877913.webp"
+    },
+    {
+      "nombre": "Procesador AMD Ryzen 7 9800X3D 5.2GHz Turbo AM5 - No Incluye Cooler",
+      "precio": 1157450,
+      "imagen": "/img/d824067a11517089.webp"
+    },
+    {
+      "nombre": "Procesador Intel Core i9 14900KF 6.0GHz Turbo Socket 1700 Raptor Lake",
+      "precio": 1263850,
+      "imagen": "/img/5fd69758fcf40ac3.webp"
+    },
+    {
+      "nombre": "Procesador AMD Ryzen 7 9850X3D 5.6GHz Turbo AM5 - No Incluye Cooler",
+      "precio": 1297450,
+      "imagen": "/img/66851918decf05fc.webp"
+    },
+    {
+      "nombre": "Procesador Intel Core i9 14900K 6.0GHz Turbo Socket 1700 Raptor Lake",
+      "precio": 1384110,
+      "imagen": "/img/1236b0fc3dd6d68a.webp"
+    },
+    {
+      "nombre": "Procesador Intel Core Ultra 9 285K 5.7Ghz Turbo Socket 1851 Arrow Lake",
+      "precio": 1472173,
+      "imagen": "/img/375840d455aab5d8.webp"
+    },
+    {
+      "nombre": "Procesador AMD Ryzen 9 9950X 5.7GHz Turbo AM5 - No incluye cooler",
+      "precio": 1490580,
+      "imagen": "/img/cb1ec4a5e024d4e2.webp"
+    },
+    {
+      "nombre": "Procesador Intel Core i9 14900F 5.8GHz Turbo Socket 1700 Raptor Lake",
+      "precio": 1518580,
+      "imagen": "/img/278d7f2fabbc0a25.webp"
+    },
+    {
+      "nombre": "Procesador Intel Core Ultra 9 285 5.6Ghz Turbo Socket 1851 Arrow Lake",
+      "precio": 1533350,
+      "imagen": "/img/b7d752641dea1e0f.webp"
+    },
+    {
+      "nombre": "Procesador AMD Ryzen 9 9900X3D 5.5GHz Turbo AM5 - No Incluye Cooler",
+      "precio": 1567440,
+      "imagen": "/img/c8822d5077cee8df.webp"
+    },
+    {
+      "nombre": "Procesador Intel Core i9 14900 5.8GHz Turbo Socket 1700 Raptor Lake",
+      "precio": 1601390,
+      "imagen": "/img/fd6e6d44d59db003.webp"
+    },
+    {
+      "nombre": "Procesador AMD Ryzen 9 9950X3D 5.7GHz Turbo AM5 - No Incluye Cooler",
+      "precio": 1819650,
+      "imagen": "/img/8faef4e868dbf1da.webp"
+    },
+    {
+      "nombre": "Procesador AMD Ryzen 9 9950X3D2 Dual Edition 5.6GHz Turbo AM5 - No Incluye Cooler",
+      "precio": 2400930,
+      "imagen": "/img/01ce3af9928ecade.webp"
+    }
+  ],
+  "memory": [
+    {
+      "nombre": "Memoria KingDian DDR4 8GB 2666MHz CL22 Solo Intel",
+      "precio": 93405,
+      "imagen": "/img/e83c0d68826913d2.webp"
+    },
+    {
+      "nombre": "Memoria KingDian DDR4 8GB 2666MHz CL22",
+      "precio": 100325,
+      "imagen": "/img/0bca8033abd6dec7.webp"
+    },
+    {
+      "nombre": "Memoria Mancer DDR4 8GB 3200MHz Vant S Black CL19",
+      "precio": 135967,
+      "imagen": "/img/b52b6677c0abfba6.webp"
+    },
+    {
+      "nombre": "Memoria Team DDR4 8GB 3200MHz Elite Plus CL22",
+      "precio": 142987,
+      "imagen": "/img/88e66f43237e2ea2.webp"
+    },
+    {
+      "nombre": "Memoria Adata DDR4 8GB 3200MHz XPG Gammix D35",
+      "precio": 153400,
+      "imagen": "/img/23f7033846767109.webp"
+    },
+    {
+      "nombre": "Memoria Team DDR4 8GB 3200MHz T-Force Vulcan Z Grey CL16",
+      "precio": 162500,
+      "imagen": "/img/1e826d4364cf34fe.webp"
+    },
+    {
+      "nombre": "Memoria Adata DDR4 8GB 3200MHz XPG Spectrix D35G RGB",
+      "precio": 166400,
+      "imagen": "/img/f4ba18d244e3783c.webp"
+    },
+    {
+      "nombre": "Memoria Team DDR4 8GB 3200Mhz Vulcan ASUS TUF Alliance CL16",
+      "precio": 169000,
+      "imagen": "/img/cee7b7062ee30a14.webp"
+    },
+    {
+      "nombre": "Memoria Mancer DDR4 8GB 3200MHz Astrion Black CL19 BULK",
+      "precio": 170690,
+      "imagen": "/img/712086499bc5e13a.webp"
+    },
+    {
+      "nombre": "Memoria Adata DDR4 8GB 3200MHz XPG Spectrix D35G RGB White",
+      "precio": 179400,
+      "imagen": "/img/6841e48b36bd98ea.webp"
+    },
+    {
+      "nombre": "Memoria Adata DDR4 8GB 3600MHz XPG Spectrix D35G RGB White",
+      "precio": 181415,
+      "imagen": "/img/928ecce119432be2.webp"
+    },
+    {
+      "nombre": "Memoria Corsair DDR4 8GB 3200Mhz Vengeance LPX Black CL16",
+      "precio": 186420,
+      "imagen": "/img/631897f93d4d3a00.webp"
+    },
+    {
+      "nombre": "Memoria Adata DDR4 8GB 3600MHz XPG Spectrix D35G RGB",
+      "precio": 186810,
+      "imagen": "/img/4e45523f208e6c86.webp"
+    },
+    {
+      "nombre": "Memoria Corsair DDR4 8GB 3200MHz Vengeance RGB RS",
+      "precio": 194090,
+      "imagen": "/img/ec8db4927ffe0ec1.webp"
+    },
+    {
+      "nombre": "Memoria Corsair DDR4 8GB 3200MHz Vengeance RGB PRO",
+      "precio": 200200,
+      "imagen": "/img/202bc6b357c79d3e.webp"
+    },
+    {
+      "nombre": "Memoria Mancer DDR4 16GB 3200MHz Vant S Black CL19",
+      "precio": 253500,
+      "imagen": "/img/2e494f437d75afde.webp"
+    },
+    {
+      "nombre": "Memoria Timetec DDR4 16GB 3200MHz BULK",
+      "precio": 270364,
+      "imagen": "/img/9f8ac0bb626fa4ff.webp"
+    },
+    {
+      "nombre": "Memoria KingDian DDR4 16GB 2666MHz",
+      "precio": 272632,
+      "imagen": "/img/e80e80caed7eda8b.webp"
+    },
+    {
+      "nombre": "Memoria Kingston DDR4 8GB 3200MHz KVR CL22 Low Profile",
+      "precio": 277222,
+      "imagen": "/img/cdf6d60bc8492708.webp"
+    },
+    {
+      "nombre": "Memoria Kingston DDR4 16GB 3200MHz KVR CL22 Low Profile",
+      "precio": 300038,
+      "imagen": "/img/c36ff36c10096f7e.webp"
+    },
+    {
+      "nombre": "Memoria Adata DDR4 16GB 3200MHz XPG Gammix D35 White",
+      "precio": 304600,
+      "imagen": "/img/e65908f5b2e6a053.webp"
+    },
+    {
+      "nombre": "Memoria Adata DDR4 16GB 3200MHz XPG Gammix D35 Black",
+      "precio": 304668,
+      "imagen": "/img/22ccc47dbeecc65b.webp"
+    },
+    {
+      "nombre": "Memoria Adata DDR4 16GB 3200MHz XPG Spectrix D35G RGB White",
+      "precio": 310500,
+      "imagen": "/img/8dd10390104fd874.webp"
+    },
+    {
+      "nombre": "Memoria Adata DDR4 16GB 3200MHz XPG Spectrix D35G RGB Black",
+      "precio": 310838,
+      "imagen": "/img/2e65811c6708c476.webp"
+    },
+    {
+      "nombre": "Memoria Adata DDR5 8GB 5600MHz XPG Lancer Blade White RGB CL46",
+      "precio": 311242,
+      "imagen": "/img/5ad26a27cd9546f5.webp"
+    },
+    {
+      "nombre": "Memoria Corsair DDR5 8GB 5200MHz Vengeance Grey CL40",
+      "precio": 340808,
+      "imagen": "/img/e3056a9d473186b5.webp"
+    },
+    {
+      "nombre": "Memoria Corsair DDR4 16GB 3200MHz Vengeance LPX Black CL16",
+      "precio": 353092,
+      "imagen": "/img/e51d331fac6c2ce3.webp"
+    },
+    {
+      "nombre": "Memoria Team DDR4 16GB (2x8GB) 3200MHz Vulcan Z Grey CL16",
+      "precio": 365040,
+      "imagen": "/img/8a387e547b384c73.webp"
+    },
+    {
+      "nombre": "Memoria Corsair DDR4 16GB 3200MHz Vengeance RGB RS Black CL16",
+      "precio": 380362,
+      "imagen": "/img/bd71ea244ae6334e.webp"
+    },
+    {
+      "nombre": "Memoria KingDian DDR5 16GB 4800MHz CL40",
+      "precio": 440230,
+      "imagen": "/img/c14456c7909a8ae4.webp"
+    },
+    {
+      "nombre": "Memoria Kingston DDR4 32GB 3200MHz CL22 KVR32N22D83",
+      "precio": 592480,
+      "imagen": "/img/88fdd9ebcd8051e9.webp"
+    },
+    {
+      "nombre": "Memoria KLEVV DDR5 16GB 6000MHz FIT V CL30 White",
+      "precio": 609266,
+      "imagen": "/img/842dec2f09e843da.webp"
+    },
+    {
+      "nombre": "Memoria Adata DDR5 16GB 5600MHz XPG Lancer Blade White CL46",
+      "precio": 610960,
+      "imagen": "/img/4019dd68bfaeb754.webp"
+    },
+    {
+      "nombre": "Memoria Team DDR5 16GB 6400MHz T-Force Vulcan Black CL38",
+      "precio": 614040,
+      "imagen": "/img/8fdc6589e18f6b3c.webp"
+    },
+    {
+      "nombre": "Memoria Adata DDR5 16GB 5600MHz XPG Lancer Blade Black CL46 Intel XMP 3.0  AMD EXPO",
+      "precio": 618030,
+      "imagen": "/img/e25cf01bbd71347f.webp"
+    },
+    {
+      "nombre": "Memoria KLEVV DDR5 16GB 6000MHz FIT V CL30",
+      "precio": 618310,
+      "imagen": "/img/2b64eb920eaf3602.webp"
+    },
+    {
+      "nombre": "Memoria Corsair DDR5 16GB 5600MHz Vengeance CL40 Intel XMP 3.0",
+      "precio": 620830,
+      "imagen": "/img/1e5a88dc0f4c56d5.webp"
+    },
+    {
+      "nombre": "Memoria Team DDR5 16GB 6400MHz T-Force Vulcan Black CL32",
+      "precio": 626640,
+      "imagen": "/img/70a525c26096b743.webp"
+    },
+    {
+      "nombre": "Memoria Adata DDR5 16GB 5600MHz XPG Lancer Blade White RGB CL46",
+      "precio": 646100,
+      "imagen": "/img/f946813ca9c23915.webp"
+    },
+    {
+      "nombre": "Memoria Team DDR5 16GB 6400MHz T-Force Delta RGB White CL38",
+      "precio": 650790,
+      "imagen": "/img/2b2cef6a4bc59f7e.webp"
+    },
+    {
+      "nombre": "Memoria Patriot DDR5 16GB 6000MHz Viper Elite 5 Black & White CL30 XMP 3.0AMD EXPO",
+      "precio": 655340,
+      "imagen": "/img/45cc9c4ae7651362.webp"
+    },
+    {
+      "nombre": "Memoria Patriot Viper DDR4 32Gb (2x16GB) 3200Mhz Elit 2 RED",
+      "precio": 674086,
+      "imagen": "/img/7399cd6359b6f80a.webp"
+    },
+    {
+      "nombre": "Memoria Adata DDR4 32GB 3200MHz XPG Spectrix D35G RGB White",
+      "precio": 680680,
+      "imagen": "/img/a1304e4fdfb27f28.webp"
+    },
+    {
+      "nombre": "Memoria Team DDR5 16GB 6000MHz T-Force Delta RGB White CL38 Intel XMP  AMD EXPO",
+      "precio": 702240,
+      "imagen": "/img/a7465ebc5466be34.webp"
+    },
+    {
+      "nombre": "Memoria ADATA DDR4 32GB 3200MHz XPG Spectrix D35G RGB Black CL16",
+      "precio": 727230,
+      "imagen": "/img/002038c8d56ba231.webp"
+    },
+    {
+      "nombre": "Memoria Corsair DDR5 16GB 6000MHz Vengeance CL36 Black Intel XMP 3.0  AMD EXPO",
+      "precio": 736330,
+      "imagen": "/img/cd1178e158a8bf35.webp"
+    },
+    {
+      "nombre": "Memoria Team DDR4 32GB (2x16GB) 3200MHz T-Create White",
+      "precio": 737380,
+      "imagen": "/img/4aa9a01f076986a7.webp"
+    },
+    {
+      "nombre": "Memoria Corsair DDR4 32GB (2x16GB) 3200MHz Vengeance RGB PRO Black CL16",
+      "precio": 755510,
+      "imagen": "/img/2dfa093f92723498.webp"
+    },
+    {
+      "nombre": "Memoria Team DDR4 32GB (2x16GB) 3200MHz T-Create Expert CL16",
+      "precio": 758450,
+      "imagen": "/img/fbfd2354d80164a9.webp"
+    },
+    {
+      "nombre": "Memoria Corsair DDR5 16GB 6000MHz Vengeance RGB CL36 Black Intel XMP 3.0  AMD EXPO",
+      "precio": 764120,
+      "imagen": "/img/7d501751e7578395.webp"
+    },
+    {
+      "nombre": "Memoria Corsair DDR4 32GB (2x16GB) 3200MHz Vengeance C16",
+      "precio": 789460,
+      "imagen": "/img/39cd343fb64b04ab.webp"
+    },
+    {
+      "nombre": "Memoria Team DDR4 32GB (2x16GB) 3200MHz T-Force Vulcan Z Grey CL16",
+      "precio": 839650,
+      "imagen": "/img/0d1dc3b922c1fcc4.webp"
+    },
+    {
+      "nombre": "Memoria Patriot DDR5 32GB (2x16GB) 6000MHz Viper Venom CL36 XMP 3.0AMD EXPO",
+      "precio": 1150030,
+      "imagen": "/img/8adb582abe8d2499.webp"
+    },
+    {
+      "nombre": "Memoria Patriot DDR5 32GB (2x16GB) 6400MHz Viper Venom CL36 XMP 3.0AMD EXPO",
+      "precio": 1173620,
+      "imagen": "/img/b44f1e4d63d4a7f2.webp"
+    },
+    {
+      "nombre": "Memoria Crucial PRO DDR5 32GB (2x16GB) 6000MHz CL36",
+      "precio": 1180200,
+      "imagen": "/img/fd4a2c4d7e5cc531.webp"
+    },
+    {
+      "nombre": "Memoria KLEVV DDR5 32GB (2x16GB) 6000MHz FIT V White CL30 IC Hynix",
+      "precio": 1211070,
+      "imagen": "/img/171dffee4be2a972.webp"
+    },
+    {
+      "nombre": "Memoria KLEVV DDR5 32GB (2X16GB) 6400MHz BOLT V CL30",
+      "precio": 1240302,
+      "imagen": "/img/e0e6f1370a084525.webp"
+    },
+    {
+      "nombre": "Memoria KLEVV DDR5 32GB (2X16GB) 6400MHz BOLT V White CL30",
+      "precio": 1240302,
+      "imagen": "/img/6f79d8b8446756f9.webp"
+    },
+    {
+      "nombre": "Memoria Crucial PRO DDR5 32GB (2x16GB) 6400MHz CL32",
+      "precio": 1258180,
+      "imagen": "/img/f60b35ecc3b17d07.webp"
+    },
+    {
+      "nombre": "Memoria Patriot DDR5 32GB (2x16GB) 7600MHz Viper XTREME CL36 Intel XMP 3.0",
+      "precio": 1258320,
+      "imagen": "/img/ab4fc12ab1abe288.webp"
+    },
+    {
+      "nombre": "Memoria Patriot DDR5 32GB (2x16GB) 8000MHz Viper XTREME RGB CL38 Intel XMP 3.0",
+      "precio": 1300740,
+      "imagen": "/img/faa342e19ad96aba.webp"
+    },
+    {
+      "nombre": "Memoria Team DDR5 32GB (2x16GB) 7200MHz T-Create Expert CL34",
+      "precio": 1374240,
+      "imagen": "/img/3b6e272c4be61abd.webp"
+    },
+    {
+      "nombre": "Memoria Corsair DDR5 32GB (2x16GB) 6000MHz Vengeance CL36 Black Intel XMP 3.0  AMD EXPO",
+      "precio": 1419460,
+      "imagen": "/img/4f3a4f0c79af4838.webp"
+    },
+    {
+      "nombre": "Memoria Team DDR5 32GB (2x16GB) 6000MHz T-Force Vulcan Black CL30 Intel XMP  AMD EXPO",
+      "precio": 1427300,
+      "imagen": "/img/5544c8dd9176051b.webp"
+    },
+    {
+      "nombre": "Memoria Corsair DDR5 32GB (2x16GB) 6000MHz Vengeance RGB CL36 Black Intel XMP 3.0  AMD EXPO",
+      "precio": 1454040,
+      "imagen": "/img/c988da030536ca42.webp"
+    },
+    {
+      "nombre": "Memoria Team DDR5 32GB (2x16GB) 6000MHz T-Force Delta RGB White CL30",
+      "precio": 1458800,
+      "imagen": "/img/b4d6d738f6c02412.webp"
+    },
+    {
+      "nombre": "Memoria Team DDR5 32GB (2x16GB) 7600MHz T-Force Delta RGB Black CL36",
+      "precio": 1543080,
+      "imagen": "/img/9e471e7b0b6a5024.webp"
+    },
+    {
+      "nombre": "Memoria Team DDR5 32GB (2x16GB) 7200MHz T-Force Delta RGB Black CL34 Intel XMP 3.0",
+      "precio": 1569260,
+      "imagen": "/img/8ffada64ca86faa5.webp"
+    },
+    {
+      "nombre": "Memoria Corsair DDR5 64GB (2x32GB) 6000MHz Vengeance CL40 AMD EXPOIntel XMP 3.0 Grey",
+      "precio": 2406460,
+      "imagen": "/img/2aad84a2c3f15fe8.webp"
+    },
+    {
+      "nombre": "Memoria KLEVV DDR5 64GB (2X32GB) 6000MHz BOLT V White CL30",
+      "precio": 2459310,
+      "imagen": "/img/a185f9362d90bbed.webp"
+    },
+    {
+      "nombre": "Memoria Corsair DDR5 64GB (2x32GB) 6000MHz Vengeance XMP 3.0 RGB",
+      "precio": 2493260,
+      "imagen": "/img/ae65610c3768040a.webp"
+    },
+    {
+      "nombre": "Memoria KLEVV DDR5 64GB (2X32GB) 6000MHz BOLT V CL30",
+      "precio": 2513952,
+      "imagen": "/img/a8b9007df3b2d3d2.webp"
+    },
+    {
+      "nombre": "Memoria Patriot DDR5 64GB (2x32GB) 6000MHz Viper Venom RGB CL30 Intel XMP 3.0  AMD EXPO",
+      "precio": 2615550,
+      "imagen": "/img/77cd7fffcc4d5ff5.webp"
+    },
+    {
+      "nombre": "Memoria Team DDR5 64GB (2x32GB) 6400Mhz T-CREATE EXPERT CL34 Black Intel XMP 3.0  AMD EXPO",
+      "precio": 2615550,
+      "imagen": "/img/6a9ebc4334c8fe1b.webp"
+    }
+  ],
+  "storage": [
+    {
+      "nombre": "Disco Sólido SSD Adata 256GB SU650SS 520MBs",
+      "precio": 98172,
+      "imagen": "/img/8ef03ec37660427e.webp"
+    },
+    {
+      "nombre": "Disco Solido SSD M.2 WD 240GB Green SATA 545MBs",
+      "precio": 127575,
+      "imagen": "/img/9c3b903f0746aeea.webp"
+    },
+    {
+      "nombre": "Disco Solido SSD Mancer 480GB Reaper S 530MBs BULK",
+      "precio": 161895,
+      "imagen": "/img/cf6b64e67ac7f17f.webp"
+    },
+    {
+      "nombre": "Disco Solido SSD Adata 512GB SU650SS 520MBs",
+      "precio": 162309,
+      "imagen": "/img/fa04e3e9d8443b3d.webp"
+    },
+    {
+      "nombre": "Disco Sólido SSD Kingston 480GB A400 500MBs",
+      "precio": 215600,
+      "imagen": "/img/46b61cedc17c7bda.webp"
+    },
+    {
+      "nombre": "Disco Solido SSD M.2 Team 500GB MP44L 5000MBs NVMe PCI-E x4 Gen4",
+      "precio": 245770,
+      "imagen": "/img/ccec1a33f9278387.webp"
+    },
+    {
+      "nombre": "Disco Solido SSD M.2 ADATA 500GB Legend 860 6000MBs NVMe PCIe Gen4 x4",
+      "precio": 304500,
+      "imagen": "/img/b75166cbcd457c80.webp"
+    },
+    {
+      "nombre": "Disco Solido SSD M.2 WD 500GB Green SN350 2400Mbs PCI-e Gen 3",
+      "precio": 340779,
+      "imagen": "/img/fcff013726834962.webp"
+    },
+    {
+      "nombre": "Disco Solido SSD ADATA 1TB SU650SS 520MBs",
+      "precio": 343092,
+      "imagen": "/img/3b1169e60a094039.webp"
+    },
+    {
+      "nombre": "Disco Sólido SSD Kingston 960GB A400 500MBs",
+      "precio": 355105,
+      "imagen": "/img/76b8f12ecae32a93.webp"
+    },
+    {
+      "nombre": "Disco Solido SSD Team 1TB T-Force Vulcan Z 550MBs",
+      "precio": 373375,
+      "imagen": "/img/a4ba208554ecbfb3.webp"
+    },
+    {
+      "nombre": "Disco Solido SSD M.2 WD 1TB Green SN350 2400MBs NVMe PCI-E Gen3 x4",
+      "precio": 403970,
+      "imagen": "/img/a583908887f43d76.webp"
+    },
+    {
+      "nombre": "Disco Solido SSD M.2 Sandisk 1TB Plus 3200MBs NVMe PCI-E Gen3 x4",
+      "precio": 408465,
+      "imagen": "/img/bddc66801c2112a3.webp"
+    },
+    {
+      "nombre": "Disco Sólido SSD M.2 Kingston 1TB NV3 6000MBs NVMe PCI-E Gen4 x4",
+      "precio": 423320,
+      "imagen": "/img/98f16447003287e1.webp"
+    },
+    {
+      "nombre": "Disco Solido SSD M.2 ADATA 1TB Legend 860 6000MBs NVMe PCIe Gen4 x4",
+      "precio": 494175,
+      "imagen": "/img/2265f41e35267b48.webp"
+    },
+    {
+      "nombre": "Disco Solido SSD M.2 Team 1TB NV5000 4500MBs NVMe PCI-E x4 Gen4",
+      "precio": 512925,
+      "imagen": "/img/d1861d1eab48f89f.webp"
+    },
+    {
+      "nombre": "Disco Solido SSD M.2 ADATA 1TB Legend 900 PRO 7400MBs NVMe PCIe Gen4 x4",
+      "precio": 541275,
+      "imagen": "/img/5cd0cbb1e6a49046.webp"
+    },
+    {
+      "nombre": "Disco Solido SSD M.2 Team 1TB MP44L 5000MBs NVMe PCI-E x4 Gen4",
+      "precio": 550725,
+      "imagen": "/img/449086d899708fb4.webp"
+    },
+    {
+      "nombre": "Disco Solido SSD M.2 ADATA 1TB XPG MARS 970 PLUS 11000MBs NVMe PCIe Gen5 x4",
+      "precio": 573075,
+      "imagen": "/img/8fafec3aa3214cbf.webp"
+    },
+    {
+      "nombre": "Disco Solido SSD M.2 ADATA 1TB XPG MARS 980 PRO AIR 14000MBs NVMe PCIe Gen5 x4 Heatsink Cooler",
+      "precio": 628725,
+      "imagen": "/img/86ac960f70820bb3.webp"
+    },
+    {
+      "nombre": "Disco Solido SSD M.2 Crucial 1TB T710 14900MBs NVMe PCI-E Gen5 x4",
+      "precio": 680475,
+      "imagen": "/img/afafb5d9b3383f15.webp"
+    },
+    {
+      "nombre": "Disco Solido SSD M.2 Crucial 2TB E100 5000MBs NVMe PCI-E Gen4 x4",
+      "precio": 760425,
+      "imagen": "/img/d0d7e7380acceeb2.webp"
+    },
+    {
+      "nombre": "Disco Sólido SSD M.2 Kingston 2TB NV3 6000MBs NVMe PCI-E Gen4 x4 BULK",
+      "precio": 786300,
+      "imagen": "/img/53e7ba2b1818358d.webp"
+    },
+    {
+      "nombre": "Disco Solido SSD M.2 ADATA 2TB Legend 860 6000MBs NVMe PCIe Gen4 x4",
+      "precio": 929985,
+      "imagen": "/img/24408d7e0b578800.webp"
+    },
+    {
+      "nombre": "Disco Solido SSD M.2 Samsung 2TB 990 EVO 5000MBs NVMe PCI-E Gen4 x4 Gen5 x2",
+      "precio": 974775,
+      "imagen": "/img/118db77c0ea0bc7f.webp"
+    },
+    {
+      "nombre": "Disco Solido SSD M.2 ADATA 2TB XPG MARS 970 PLUS 11000MBs NVMe PCIe Gen5 x4",
+      "precio": 1060215,
+      "imagen": "/img/9b82c33f22146b2f.webp"
+    },
+    {
+      "nombre": "Disco Solido SSD M.2 ADATA 2TB XPG MARS 980 PRO AIR 14000MBs NVMe PCIe Gen5 x4 Heatsink Cooler",
+      "precio": 1161525,
+      "imagen": "/img/f4141d42c4ac79a6.webp"
+    },
+    {
+      "nombre": "Disco Solido SSD M.2 ADATA 2TB XPG MARS 980 Blade 14000MBs NVMe PCIe Gen5 x4",
+      "precio": 1183500,
+      "imagen": "/img/6ca2bce52551ef38.webp"
+    },
+    {
+      "nombre": "Disco Sólido SSD M.2 Kingston 4TB NV3 6000MBs NVMe PCI-E Gen4 x4",
+      "precio": 1378680,
+      "imagen": "/img/45f93bd41698458a.webp"
+    },
+    {
+      "nombre": "Disco Solido SSD M.2 ADATA 4TB Legend 900 PRO 7400MBs NVMe PCIe Gen4 x4",
+      "precio": 1724280,
+      "imagen": "/img/665ec8a4f0667ce8.webp"
+    },
+    {
+      "nombre": "Disco Solido SSD M.2 ADATA 4TB XPG MARS 980 Blade 14000MBs NVMe PCIe Gen5 x4",
+      "precio": 2041650,
+      "imagen": "/img/e5332f0792faa7d5.webp"
+    },
+    {
+      "nombre": "Disco Solido SSD M.2 ADATA 4TB XPG MARS 980 PRO AIR 14000MBs NVMe PCIe Gen5 x4 Heatsink Cooler",
+      "precio": 2084850,
+      "imagen": "/img/817e5d4da9d9eb90.webp"
+    }
+  ],
+  "graphics": [
+    {
+      "nombre": "Placa de Video Biostar Radeon RX 580 8GB GDDR5 2048SP 256bit Gaming",
+      "precio": 327038,
+      "imagen": "/img/3e6976fcb68a4c30.webp"
+    },
+    {
+      "nombre": "Placa de Video Biostar Radeon RX 580 8GB GDDR5 2048SP 256bit Gaming White Edition",
+      "precio": 327038,
+      "imagen": "/img/25c43fcdf4779e95.webp"
+    },
+    {
+      "nombre": "Placa de Video Asrock Intel ARC A380 6GB GDDR6 Challenger ITX OC",
+      "precio": 364499,
+      "imagen": "/img/bb7a9184f0f6d33d.webp"
+    },
+    {
+      "nombre": "Placa de Video Zotac GeForce RTX 3050 6GB GDDR6 Twin Edge OC",
+      "precio": 657986,
+      "imagen": "/img/5f34646e9603f5f4.webp"
+    },
+    {
+      "nombre": "Placa de Video MSI GeForce RTX 3050 6GB GDDR6 Ventus 2X OC",
+      "precio": 671986,
+      "imagen": "/img/a362e8ac6012da4a.webp"
+    },
+    {
+      "nombre": "Placa de Video Asrock Intel ARC B570 10GB GDDR6 Challenger OC",
+      "precio": 699986,
+      "imagen": "/img/e16c3f0b0ff12eba.webp"
+    },
+    {
+      "nombre": "Placa de Video ASUS DUAL GeForce RTX 3050 6GB GDDR6 OC",
+      "precio": 705460,
+      "imagen": "/img/5684adfe5380bfc2.webp"
+    },
+    {
+      "nombre": "Placa de Video Asrock Radeon RX 7600 8GB GDDR6 Challenger OC",
+      "precio": 727986,
+      "imagen": "/img/f0713f451acd3982.webp"
+    },
+    {
+      "nombre": "Placa de Video Asrock Radeon RX 7600 8GB GDDR6 Challenger PRO OC",
+      "precio": 741986,
+      "imagen": "/img/b8893793b083c446.webp"
+    },
+    {
+      "nombre": "Placa de Video XFX Radeon RX 7600 8GB GDDR6 SPEEDSTER SWIFT 210",
+      "precio": 743386,
+      "imagen": "/img/e56045bda13d137e.webp"
+    },
+    {
+      "nombre": "Placa de Video Gigabyte Radeon RX 7600 8GB GDDR6 Gaming OC",
+      "precio": 755986,
+      "imagen": "/img/1692653aa0dec847.webp"
+    },
+    {
+      "nombre": "Placa de Video XFX Radeon RX 7600 8GB GDDR6 SPEEDSTER QICK 308",
+      "precio": 768586,
+      "imagen": "/img/771c8196762c7358.webp"
+    },
+    {
+      "nombre": "Placa de Video XFX Radeon RX 7600 8GB GDDR6 SPEEDSTER QICK 308 WHITE",
+      "precio": 789460,
+      "imagen": "/img/02db45013a5401c4.webp"
+    },
+    {
+      "nombre": "Placa de Video INNO3D GeForce RTX 5050 8GB GDDR6 Twin X2",
+      "precio": 839986,
+      "imagen": "/img/db9810984fa40fec.webp"
+    },
+    {
+      "nombre": "Placa de Video Asrock Intel ARC B580 12GB GDDR6 Challenger OC",
+      "precio": 862890,
+      "imagen": "/img/fd5a773367a5f8b6.webp"
+    },
+    {
+      "nombre": "Placa de Video Zotac GeForce RTX 5050 8GB GDDR6 Twin Edge OC",
+      "precio": 889182,
+      "imagen": "/img/b6e1e180604eab4d.webp"
+    },
+    {
+      "nombre": "Placa de Video MSI GeForce RTX 5050 8GB VENTUS 2X OC",
+      "precio": 889560,
+      "imagen": "/img/d7be3788a183293c.webp"
+    },
+    {
+      "nombre": "Placa de Video Gigabyte GeForce RTX 5050 8GB Windforce OC",
+      "precio": 923860,
+      "imagen": "/img/04da96be85d26899.webp"
+    },
+    {
+      "nombre": "Placa de Video ASUS DUAL GeForce RTX 5050 8GB GDDR6 OC",
+      "precio": 937860,
+      "imagen": "/img/0be5b78030fba017.webp"
+    },
+    {
+      "nombre": "Placa de Video MSI GeForce RTX 5050 8GB GAMING OC",
+      "precio": 942060,
+      "imagen": "/img/3bfc5f0b454b8c98.webp"
+    },
+    {
+      "nombre": "Placa de Video Gigabyte GeForce RTX 5050 8GB GAMING OC",
+      "precio": 951860,
+      "imagen": "/img/5a8bded36a6d99fe.webp"
+    },
+    {
+      "nombre": "Placa de Video Gigabyte Radeon RX 9060 XT 8GB GDDR6 GAMING",
+      "precio": 1103620,
+      "imagen": "/img/c99ceff30363b1bb.webp"
+    },
+    {
+      "nombre": "Placa de Video INNO3D GeForce RTX 5060 8GB GDDR7 Twin X2",
+      "precio": 1105986,
+      "imagen": "/img/138f28af3db74660.webp"
+    },
+    {
+      "nombre": "Placa de Video Gigabyte Radeon RX 9060 XT 8GB GDDR6 GAMING OC",
+      "precio": 1122590,
+      "imagen": "/img/d18ce2d57d60de40.webp"
+    },
+    {
+      "nombre": "Placa de Video Gigabyte GeForce RTX 5060 8GB GDDR7 Gaming OC",
+      "precio": 1123640,
+      "imagen": "/img/c9292c1dfa9017a7.webp"
+    },
+    {
+      "nombre": "Placa de Video Zotac GeForce RTX 3060 12GB GDDR6 Twin Edge",
+      "precio": 1142260,
+      "imagen": "/img/6e4e61ffc80edddd.webp"
+    },
+    {
+      "nombre": "Placa de Video MSI GeForce RTX 5060 8GB SHADOW 2X OC",
+      "precio": 1151276,
+      "imagen": "/img/19b505730cff7304.webp"
+    },
+    {
+      "nombre": "Placa de Video ASUS DUAL GeForce RTX 5060 8GB GDDR7 EVO OC",
+      "precio": 1181810,
+      "imagen": "/img/055512e596dfd205.webp"
+    },
+    {
+      "nombre": "Placa de Video ASUS DUAL GeForce RTX 5060 8GB GDDR7 OC ADVANCED",
+      "precio": 1193500,
+      "imagen": "/img/ae6ed9e03daf97f4.webp"
+    },
+    {
+      "nombre": "Placa de Video ASUS DUAL GeForce RTX 5060 8GB GDDR7 OC",
+      "precio": 1215270,
+      "imagen": "/img/917b1fadb19c034d.webp"
+    },
+    {
+      "nombre": "Placa de Video INNO3D GeForce RTX 5060 Ti 8GB GDDR7 Twin X2 OC",
+      "precio": 1224336,
+      "imagen": "/img/a30a8ab3426b09e2.webp"
+    },
+    {
+      "nombre": "Placa de Video ASUS DUAL GeForce RTX 5060 8GB GDDR7 OC WHITE",
+      "precio": 1227170,
+      "imagen": "/img/e8bcd83f188429b7.webp"
+    },
+    {
+      "nombre": "Placa de Video Gigabyte GeForce RTX 5060 Ti 8GB GDDR7 WINDFORCE OC",
+      "precio": 1242640,
+      "imagen": "/img/72d299a1cc40fb10.webp"
+    },
+    {
+      "nombre": "Placa de Video Asrock Radeon RX 9060 XT 16GB GDDR6 Challenger OC",
+      "precio": 1245999,
+      "imagen": "/img/192b6e1f5cec344b.webp"
+    },
+    {
+      "nombre": "Placa de Video MSI GeForce RTX 5060 TI 8GB SHADOW X2 OC PLUS",
+      "precio": 1259986,
+      "imagen": "/img/9fb9ee3b1febfcdf.webp"
+    },
+    {
+      "nombre": "Placa de Video Gigabyte GeForce RTX 5060 Ti 8GB GDDR7 EAGLE OC",
+      "precio": 1268330,
+      "imagen": "/img/a071063be6953c75.webp"
+    },
+    {
+      "nombre": "Placa de Video Gigabyte GeForce RTX 5060 Ti 8GB GDDR7 EAGLE OC ICE",
+      "precio": 1281210,
+      "imagen": "/img/99d74cfcd2dc75b6.webp"
+    },
+    {
+      "nombre": "Placa de Video XFX Radeon RX 9060 XT 16GB GDDR6 Mercury OC White Gaming Edition",
+      "precio": 1282120,
+      "imagen": "/img/079bc8fc3dadd199.webp"
+    },
+    {
+      "nombre": "Placa de Video Gigabyte GeForce RTX 5060 Ti 8GB GDDR7 EAGLE MAX OC",
+      "precio": 1300460,
+      "imagen": "/img/bce23480b93f9759.webp"
+    },
+    {
+      "nombre": "Placa de Video Gigabyte GeForce RTX 5060 Ti 8GB GDDR7 GAMING OC",
+      "precio": 1313270,
+      "imagen": "/img/be696f28ce4b7add.webp"
+    },
+    {
+      "nombre": "Placa de Video XFX Radeon RX 9060 XT 16GB GDDR6 Swift OC Gaming Edition",
+      "precio": 1328880,
+      "imagen": "/img/a2c75b0b9944f271.webp"
+    },
+    {
+      "nombre": "Placa de Video ASUS TUF GeForce RTX 5060 8GB GDDR7 Gaming OC",
+      "precio": 1329230,
+      "imagen": "/img/b13b02a4107962fd.webp"
+    },
+    {
+      "nombre": "Placa de Video Gigabyte GeForce RTX 5060 Ti 8GB GDDR7 AERO OC",
+      "precio": 1338960,
+      "imagen": "/img/09d8a9e6794c37aa.webp"
+    },
+    {
+      "nombre": "Placa de Video ASUS DUAL GeForce RTX 5060 Ti 8GB GDDR7 OC",
+      "precio": 1339030,
+      "imagen": "/img/e1bff88e1ad2be3e.webp"
+    },
+    {
+      "nombre": "Placa de Video MSI GeForce RTX 5060 TI 8GB GAMING OC",
+      "precio": 1357230,
+      "imagen": "/img/fb13d6618404ed46.webp"
+    },
+    {
+      "nombre": "Placa de Video ASUS DUAL Radeon RX 9060 XT 16GB GDDR6",
+      "precio": 1365000,
+      "imagen": "/img/36403b2950446924.webp"
+    },
+    {
+      "nombre": "Placa de Video Gigabyte Radeon RX 9060 XT 16GB GDDR6 GAMING OC",
+      "precio": 1407350,
+      "imagen": "/img/ed595bb74bd3ed5b.webp"
+    },
+    {
+      "nombre": "Placa de Video MSI GeForce RTX 5060 TI 8GB GAMING TRIO OC",
+      "precio": 1426530,
+      "imagen": "/img/861d4d06e5f51dd5.webp"
+    },
+    {
+      "nombre": "Placa de Video Gigabyte Radeon RX 9060 XT 16GB GDDR6 GAMING OC ICE",
+      "precio": 1428420,
+      "imagen": "/img/ad2bc5bf87a9853e.webp"
+    },
+    {
+      "nombre": "Placa de Video MSI GeForce RTX 5060 TI 8GB GAMING TRIO OC WHITE",
+      "precio": 1431780,
+      "imagen": "/img/ed536c774c819345.webp"
+    },
+    {
+      "nombre": "Placa de Video ASUS T1 GeForce RTX 5060 Ti 8GB GDDR7 OC",
+      "precio": 1456070,
+      "imagen": "/img/efc0af25f4f6ff58.webp"
+    },
+    {
+      "nombre": "Placa de Video XFX Radeon RX 9070 GRE 12GB GDDR6 Swift Triple Fan Gaming Edition OC",
+      "precio": 1553530,
+      "imagen": "/img/1da293e7bc4163ba.webp"
+    },
+    {
+      "nombre": "Placa de Video XFX Radeon RX 9070 GRE 12GB GDDR6 Swift Triple Fan Gaming Edition OC White",
+      "precio": 1618260,
+      "imagen": "/img/370b293b3d074b19.webp"
+    },
+    {
+      "nombre": "Placa de Video MSI GeForce RTX 5060 Ti 16GB VENTUS 2X OC PLUS",
+      "precio": 1936760,
+      "imagen": "/img/cb44da071ddcecb3.webp"
+    },
+    {
+      "nombre": "Placa de Video MSI GeForce RTX 5060 Ti 16GB VENTUS 2X OC BLACK PLUS",
+      "precio": 1950900,
+      "imagen": "/img/64a54c7b1cabf40e.webp"
+    },
+    {
+      "nombre": "Placa de Video ASUS DUAL GeForce RTX 5060 TI 16GB GDDR7 OC EVO",
+      "precio": 1952930,
+      "imagen": "/img/fbfc13f768e84e5a.webp"
+    },
+    {
+      "nombre": "Placa de Video ASUS PRIME GeForce RTX 5060 Ti 16GB GDDR7 OC",
+      "precio": 2049880,
+      "imagen": "/img/208e00ad091c904d.webp"
+    },
+    {
+      "nombre": "Placa de Video MSI GeForce RTX 5070 12GB GDDR7 VENTUS 2X OC",
+      "precio": 2050986,
+      "imagen": "/img/648d3fcb4030f2c0.webp"
+    },
+    {
+      "nombre": "Placa de Video MSI GeForce RTX 5070 12GB GDDR7 SHADOW 2X OC",
+      "precio": 2077390,
+      "imagen": "/img/287569ae91360544.webp"
+    },
+    {
+      "nombre": "Placa de Video Gigabyte GeForce RTX 5070 12GB GDDR7 AERO OC",
+      "precio": 2099986,
+      "imagen": "/img/4896de042c5f27b5.webp"
+    },
+    {
+      "nombre": "Placa de Video Gigabyte GeForce RTX 5070 12GB GDDR7 EAGLE OC ICE",
+      "precio": 2099986,
+      "imagen": "/img/fa8dc89fc9e9e931.webp"
+    },
+    {
+      "nombre": "Placa de Video MSI GeForce RTX 5070 12GB GDDR7 SHADOW 3X OC",
+      "precio": 2120720,
+      "imagen": "/img/c33eca77116f7d09.webp"
+    },
+    {
+      "nombre": "Placa de Video MSI GeForce RTX 5070 12GB GDDR7 VENTUS 3X OC",
+      "precio": 2127986,
+      "imagen": "/img/413021f3cbe8f88a.webp"
+    },
+    {
+      "nombre": "Placa de Video ASUS TUF GeForce RTX 5060 Ti 16GB GDDR7 GAMING OC",
+      "precio": 2143260,
+      "imagen": "/img/b91c6a6113fa096c.webp"
+    },
+    {
+      "nombre": "Placa de Video Gigabyte Radeon RX 9070 XT 16GB GDDR6 Gaming OC",
+      "precio": 2171092,
+      "imagen": "/img/9564c2fa8beeb82e.webp"
+    },
+    {
+      "nombre": "Placa de Video Gigabyte Radeon RX 9070 XT 16GB GDDR6 Gaming OC ICE",
+      "precio": 2218622,
+      "imagen": "/img/623f2c71555ade0b.webp"
+    },
+    {
+      "nombre": "Placa de Video MSI GeForce RTX 5070 12GB GDDR7 GAMING TRIO OC",
+      "precio": 2244200,
+      "imagen": "/img/9c831b4e2b7d151d.webp"
+    },
+    {
+      "nombre": "Placa de Video ASUS T1 GeForce RTX 5070 12GB GDDR7 OC",
+      "precio": 2286172,
+      "imagen": "/img/b746679e9fb393eb.webp"
+    },
+    {
+      "nombre": "Placa de Video Gigabyte Radeon RX 9070 XT 16GB GDDR6 AORUS ELITE",
+      "precio": 2337706,
+      "imagen": "/img/a821e8999cf6d780.webp"
+    },
+    {
+      "nombre": "Placa de Video Gigabyte GeForce RTX 5070 12GB GDDR7 AORUS MASTER",
+      "precio": 2365986,
+      "imagen": "/img/273427c36ba37d1b.webp"
+    },
+    {
+      "nombre": "Placa de Video ASUS TUF GeForce RTX 5070 12GB GDDR7 Gaming OC",
+      "precio": 2379986,
+      "imagen": "/img/968213c87dc38a05.webp"
+    },
+    {
+      "nombre": "Placa de Video ASUS ROG Strix GeForce RTX 5070 12GB GDDR7 Gaming OC",
+      "precio": 2510690,
+      "imagen": "/img/34fbf7ead7ccf4a8.webp"
+    },
+    {
+      "nombre": "Placa de Video MSI GeForce RTX 5070 Ti 16GB GDDR7 VENTUS 3X OC",
+      "precio": 3079986,
+      "imagen": "/img/9038d324eb987730.webp"
+    },
+    {
+      "nombre": "Placa de Video ASUS PRIME GeForce RTX 5070 Ti 16GB GDDR7 OC",
+      "precio": 3163986,
+      "imagen": "/img/6d15668913632854.webp"
+    },
+    {
+      "nombre": "Placa de Video MSI GeForce RTX 5070 Ti 16GB GDDR7 GAMING TRIO OC",
+      "precio": 3359986,
+      "imagen": "/img/39b5e003138a1c22.webp"
+    },
+    {
+      "nombre": "Placa de Video Zotac GeForce RTX 5080 16GB GDDR7 SOLID CORE OC",
+      "precio": 3919999,
+      "imagen": "/img/e478e77df0eea34c.webp"
+    },
+    {
+      "nombre": "Placa de Video ASUS PRIME GeForce RTX 5080 16GB GDDR7 OC",
+      "precio": 4185986,
+      "imagen": "/img/305c1bbc68baacb7.webp"
+    },
+    {
+      "nombre": "Placa de Video MSI GeForce RTX 5080 16GB GDDR7 SHADOW 3X OC",
+      "precio": 4185986,
+      "imagen": "/img/a8f73139ad1ce141.webp"
+    },
+    {
+      "nombre": "Placa de Video ASUS TUF GeForce RTX 5080 16GB GDDR7 Gaming OC",
+      "precio": 4552380,
+      "imagen": "/img/9c607a89b9df5ef1.webp"
+    },
+    {
+      "nombre": "Placa de Video MSI GeForce RTX 5080 16GB GDDR7 GAMING TRIO OC",
+      "precio": 4619860,
+      "imagen": "/img/d5999c39519a99b0.webp"
+    },
+    {
+      "nombre": "Placa de Video ASUS ROG GeForce RTX 5080 16GB GDDR7 ASTRAL OC",
+      "precio": 5213810,
+      "imagen": "/img/86d27239b4cbe381.webp"
+    },
+    {
+      "nombre": "Placa de Video ASUS GeForce RTX 5080 16GB GDDR7 NOCTUA EDITION OC",
+      "precio": 5372360,
+      "imagen": "/img/668d7f3736a0064c.webp"
+    },
+    {
+      "nombre": "Placa de Video Gigabyte AORUS GeForce RTX 5090 32GB GDDR7 MASTER",
+      "precio": 9799986,
+      "imagen": "/img/eeae0356afc8c715.webp"
+    },
+    {
+      "nombre": "Placa de Video Gigabyte AORUS GeForce RTX 5090 32GB GDDR7 MASTER ICE",
+      "precio": 9799986,
+      "imagen": "/img/5cfe4e0a0a7f7bf2.webp"
+    },
+    {
+      "nombre": "Placa de Video ASUS TUF GeForce RTX 5090 32GB GDDR7 GAMING OC",
+      "precio": 10886400,
+      "imagen": "/img/302708d84b9931c1.webp"
+    },
+    {
+      "nombre": "Placa de Video ASUS ROG GeForce RTX 5090 32GB GDDR7 ASTRAL OC",
+      "precio": 11339986,
+      "imagen": "/img/d45735d9a087bb02.webp"
+    },
+    {
+      "nombre": "Placa de Video ASUS ROG GeForce RTX 5090 32GB GDDR7 ASTRAL WHITE OC",
+      "precio": 11593260,
+      "imagen": "/img/f9a96869abf1a9e6.webp"
+    }
+  ],
+  "power": [
+    {
+      "nombre": "Fuente Magnum Tech 600W Cooler 120mm MT-PSU600",
+      "precio": 24375,
+      "imagen": "/img/dcccd1d9601630f8.webp"
+    },
+    {
+      "nombre": "Fuente Segotep 500W ATX Cables Largos 23a Cooler 120mm Negro",
+      "precio": 35000,
+      "imagen": "/img/100aadaf468d71ad.webp"
+    },
+    {
+      "nombre": "Fuente Antec 650W 80 Plus Bronze ATX 3.1 PCIe 5.1 CSK650DC AR",
+      "precio": 91125,
+      "imagen": "/img/ff199dbb046a1085.webp"
+    },
+    {
+      "nombre": "Fuente Antec 750W 80 Plus Bronze ATX 3.1 PCIe 5.1 CSK750DC AR",
+      "precio": 92375,
+      "imagen": "/img/73c7d8bb948a3d15.webp"
+    },
+    {
+      "nombre": "Fuente XYZ 650W 80 Plus Bronze ARGB Phantom",
+      "precio": 93238,
+      "imagen": "/img/51cbeae423d87a2a.webp"
+    },
+    {
+      "nombre": "Fuente XYZ 750W 80 Plus Bronze ARGB Phantom",
+      "precio": 97188,
+      "imagen": "/img/37d529729126a05d.webp"
+    },
+    {
+      "nombre": "Fuente Deepcool 650W 80 Plus Bronze PL650D ATX 3.1 PCIe 5.1",
+      "precio": 111000,
+      "imagen": "/img/cceb0d07c8f64f9a.webp"
+    },
+    {
+      "nombre": "Fuente ADATA XPG 650W 80 Plus Bronze PYLON",
+      "precio": 111562,
+      "imagen": "/img/4a151a1cd6e31c01.webp"
+    },
+    {
+      "nombre": "Fuente Deepcool 750W 80 Plus Bronze PL750D ATX 3.1 PCIe 5.1",
+      "precio": 118250,
+      "imagen": "/img/90c5a24ee09ac928.webp"
+    },
+    {
+      "nombre": "Fuente Be Quiet! 650W 80 Plus Bronze ATX 3.1 PCIe 5.1 SYSTEM POWER 11 U",
+      "precio": 119312,
+      "imagen": "/img/84ba6c77af56c9de.webp"
+    },
+    {
+      "nombre": "Fuente Thermaltake 750W 80 Plus Bronze SMART BX1 BULK",
+      "precio": 132275,
+      "imagen": "/img/7ac88dc04bcb6981.webp"
+    },
+    {
+      "nombre": "Fuente Be Quiet! 750W 80 Plus Bronze ATX 3.1 PCIe 5.1 SYSTEM POWER 11 U",
+      "precio": 135070,
+      "imagen": "/img/f9367e8312f6724e.webp"
+    },
+    {
+      "nombre": "Fuente ASUS PRIME 650W 80 Plus Bronze Black",
+      "precio": 136955,
+      "imagen": "/img/6bce6a1fa4648b2b.webp"
+    },
+    {
+      "nombre": "Fuente Seasonic 650W 80 Plus Bronze S12III SSR-650GB3",
+      "precio": 137085,
+      "imagen": "/img/9af050aa537daef3.webp"
+    },
+    {
+      "nombre": "Fuente Antec 750W 80 Plus Bronze ATX 3.1 PCIe 5.1 CSK750DC White AR",
+      "precio": 142090,
+      "imagen": "/img/a1d8159023b6572d.webp"
+    },
+    {
+      "nombre": "Fuente ASUS PRIME 750W 80 Plus Bronze Black",
+      "precio": 156000,
+      "imagen": "/img/cbd37a6fb63a9305.webp"
+    },
+    {
+      "nombre": "Fuente XYZ 750W 80 Plus Gold ATX 3.1 PCIe 5.1 Full Modular HYPERVOLT Black",
+      "precio": 184210,
+      "imagen": "/img/6b5a5bcd125c8c9a.webp"
+    },
+    {
+      "nombre": "Fuente Lian Li 750W 80 Plus Gold Full Modular ATX 3.1 PCIe 5.1 Edge Black",
+      "precio": 201760,
+      "imagen": "/img/03be942a4567da6f.webp"
+    },
+    {
+      "nombre": "Fuente XYZ 850W 80 Plus Gold ATX 3.1 PCIe 5.1 Full Modular HYPERVOLT Black",
+      "precio": 207090,
+      "imagen": "/img/0e9f19ccf73cbe0d.webp"
+    },
+    {
+      "nombre": "Fuente Cooler Master 750W 80 Plus Gold Full Modular MWE V3 ATX 3.1 PCIe 5.1",
+      "precio": 225615,
+      "imagen": "/img/08bb4b8a4ff951c7.webp"
+    },
+    {
+      "nombre": "Fuente ASUS PRIME 750W 80 Plus Gold AP-750G Full Modular ATX 3.1 PCIe 5.1",
+      "precio": 228215,
+      "imagen": "/img/d47485d3a5bf3822.webp"
+    },
+    {
+      "nombre": "Fuente ASUS TUF Gaming 750W EVO 80 Plus Gold Full Modular ATX 3.1 PCIe 5.1 750G",
+      "precio": 240500,
+      "imagen": "/img/b1f6178823d1f6b4.webp"
+    },
+    {
+      "nombre": "Fuente XYZ 1000W 80 Plus Gold ATX 3.1 PCIe 5.1 Full Modular HYPERVOLT White",
+      "precio": 272498,
+      "imagen": "/img/b6c60cd86207f3a1.webp"
+    },
+    {
+      "nombre": "Fuente Seasonic 750W 80 Plus Gold CORE GX ATX 3.1 PCIe 5.1 SRP-CGX751",
+      "precio": 272498,
+      "imagen": "/img/1166e10d90103cb8.webp"
+    },
+    {
+      "nombre": "Fuente Cooler Master 850W 80 Plus Gold Full Modular ATX 3.1 PCIe 5.1",
+      "precio": 276548,
+      "imagen": "/img/482a8c00924aa8f3.webp"
+    },
+    {
+      "nombre": "Fuente ASUS PRIME 850W 80 Plus Gold AP-850G Full Modular ATX 3.1 PCIe 5.1",
+      "precio": 277628,
+      "imagen": "/img/c2bec6c1002e6218.webp"
+    },
+    {
+      "nombre": "Fuente Seasonic 750W 80 Plus Gold CORE GX White ATX 3.1 PCIe 5.1 SRP-CGX751",
+      "precio": 293355,
+      "imagen": "/img/ecd95fa462076e7f.webp"
+    },
+    {
+      "nombre": "Fuente ASUS TUF Gaming 850W EVO 80 Plus Gold Full Modular ATX 3.1 PCIe 5.1 850G",
+      "precio": 297945,
+      "imagen": "/img/0249d92984c26e27.webp"
+    },
+    {
+      "nombre": "Fuente Seasonic 850W 80 Plus Gold CORE GX ATX 3.1 PCIe 5.1 SRP-CGX851",
+      "precio": 357345,
+      "imagen": "/img/48fa27c54ef85c63.webp"
+    },
+    {
+      "nombre": "Fuente Antec 850W 80 Plus Gold Full Modular SFX 4.1 ATX 3.1 PCIe 5.1 SF850X AR ITX",
+      "precio": 364905,
+      "imagen": "/img/22965a381ffa069c.webp"
+    },
+    {
+      "nombre": "Fuente Antec 1000W 80 Plus Platinum Full Modular ATX 3.1 PCIe 5.1 HCG1000 PRO AR",
+      "precio": 460320,
+      "imagen": "/img/15c5087dc595b5ca.webp"
+    },
+    {
+      "nombre": "Fuente Corsair SFX 850W 80 Plus Platinum Full Modular SF850 ITX ATX 3.1 PCIe 5.1",
+      "precio": 464310,
+      "imagen": "/img/18eff898b1e422b0.webp"
+    },
+    {
+      "nombre": "Fuente ASUS ROG STRIX 1000W 80 Plus Platinum Full Modular ATX 3.1 PCIe 5.1 1000P Gaming",
+      "precio": 561820,
+      "imagen": "/img/007c0e1f7ce2e612.webp"
+    },
+    {
+      "nombre": "Fuente Antec 1200W 80 Plus Platinum Full Modular ATX 3.1 PCIe 5.1 HCG1200 PRO AR",
+      "precio": 565600,
+      "imagen": "/img/5bb5c2d16d197bde.webp"
+    },
+    {
+      "nombre": "Fuente ASUS ROG STRIX 1000W 80 Plus Platinum Full Modular ATX 3.1 PCIe 5.1 1000P Gaming Equalizer",
+      "precio": 588000,
+      "imagen": "/img/a4da7cdeec2f54fa.webp"
+    },
+    {
+      "nombre": "Fuente ASUS ROG Thor 3 1000W 80 Plus Platinum III 1000P3 Full Modular ATX 3.1 PCIe 5.1",
+      "precio": 1014580,
+      "imagen": "/img/17cc63188d5ae98f.webp"
+    },
+    {
+      "nombre": "Fuente ASUS ROG Thor 3 1200W 80 Plus Platinum III 1200P3 Full Modular ATX 3.1 PCIe 5.1 con Cable ROG Equalizer",
+      "precio": 1106000,
+      "imagen": "/img/c32fba12112e0029.webp"
+    },
+    {
+      "nombre": "Fuente ASUS ROG Thor 3 1600W 80 Plus Titanium III 1600T3 Full Modular ATX 3.1 PCIe 5.1",
+      "precio": 2070530,
+      "imagen": "/img/dac614dc390b225f.webp"
+    }
+  ],
+  "case": [
+    {
+      "nombre": "Gabinete Magnum Tech MT-K835 con Fuente 500W",
+      "precio": 41535,
+      "imagen": "/img/a6e0565b3e5e49da.webp"
+    },
+    {
+      "nombre": "Gabinete Magnum Tech 436B 1x120mm FRGB Fan",
+      "precio": 43225,
+      "imagen": "/img/cb2b22422efae0b8.webp"
+    },
+    {
+      "nombre": "Gabinete Kit Magnum Tech MT-K735 Fuente 600W + Teclado y Mouse de Regalo",
+      "precio": 46215,
+      "imagen": "/img/ce7a4d3c2be043d7.webp"
+    },
+    {
+      "nombre": "Gabinete Kit Spartan A1 + Fuente + Teclado y Mouse de Regalo",
+      "precio": 52845,
+      "imagen": "/img/3b267ae383d7482f.webp"
+    },
+    {
+      "nombre": "Gabinete Antec VX310 ARGB Black 4x120mm Vidrio Templado",
+      "precio": 76131,
+      "imagen": "/img/134b3052e700e3b8.webp"
+    },
+    {
+      "nombre": "Gabinete 1st Player AU8E Black 4x120mm ARGB Fans Vidrio Templado",
+      "precio": 81389,
+      "imagen": "/img/33846d5203699e3a.webp"
+    },
+    {
+      "nombre": "Gabinete Deepcool CC550 4F ARGB 4x120mm ARGB Fans Vidrio Templado",
+      "precio": 82464,
+      "imagen": "/img/9498d4c4cb15738b.webp"
+    },
+    {
+      "nombre": "Gabinete XPG Valor Air Plus White 4x120mm ARGB Fans Vidrio Templado",
+      "precio": 83395,
+      "imagen": "/img/0a643ecc8ca3df2e.webp"
+    },
+    {
+      "nombre": "Gabinete Zalman M4 SE Black 6x120mm FRGB Fan",
+      "precio": 85965,
+      "imagen": "/img/5fc222bde087e2ec.webp"
+    },
+    {
+      "nombre": "Gabinete Cooler Master Masterbox NR200P Black Mini ITX",
+      "precio": 91910,
+      "imagen": "/img/79510879bb9597ab.webp"
+    },
+    {
+      "nombre": "Gabinete Cooler Master Masterbox NR200P White Mini ITX",
+      "precio": 91910,
+      "imagen": "/img/261456b98159baf7.webp"
+    },
+    {
+      "nombre": "Gabinete Antec CX200M ELITE Black RGB 5x120mm RGB Fans Vidrio Templado 270°",
+      "precio": 92755,
+      "imagen": "/img/423d3da0bd8e9016.webp"
+    },
+    {
+      "nombre": "Gabinete Antec CX200M ELITE White RGB 5x120mm RGB Fans Vidrio Templado 270°",
+      "precio": 92755,
+      "imagen": "/img/39f4f87111ae4ea5.webp"
+    },
+    {
+      "nombre": "Gabinete XYZ ATOM Black 3x120mm ARGB Fans Mesh Black USB-C Gen2 Vidrio Templado",
+      "precio": 95680,
+      "imagen": "/img/79a8db4506659076.webp"
+    },
+    {
+      "nombre": "Gabinete XYZ ATOM White 3x120mm ARGB Fans Mesh White USB-C Gen2 Vidrio Templado",
+      "precio": 103675,
+      "imagen": "/img/647378b29417716e.webp"
+    },
+    {
+      "nombre": "Gabinete ASUS A21 Mesh Vidrio Templado Black",
+      "precio": 126100,
+      "imagen": "/img/8caeeb4307e98396.webp"
+    },
+    {
+      "nombre": "Gabinete ASUS A21 Mesh Vidrio Templado White",
+      "precio": 126100,
+      "imagen": "/img/98a8cd4f19bb474d.webp"
+    },
+    {
+      "nombre": "Gabinete Corsair 3000D TG Airflow Black RGB 3x120mm AR120 ARGB Fans ATX",
+      "precio": 126425,
+      "imagen": "/img/aa05fc277aca0e4c.webp"
+    },
+    {
+      "nombre": "Gabinete XPG Valor Air Nano Black 1x120mm ARGB Fan USB-C M-ATX",
+      "precio": 142100,
+      "imagen": "/img/afa354c003b000e0.webp"
+    },
+    {
+      "nombre": "Gabinete DeepCool CH270 Digital White Vertical USB-C",
+      "precio": 149520,
+      "imagen": "/img/d4fea68dec48fc68.webp"
+    },
+    {
+      "nombre": "Gabinete Corsair 3000D TG Airflow White RGB 3x120mm AR120 ARGB Fans USB-A ATX",
+      "precio": 156800,
+      "imagen": "/img/351bdfccf6249cd7.webp"
+    },
+    {
+      "nombre": "Gabinete Corsair FRAME 4000D TG Modular Black ATX",
+      "precio": 161350,
+      "imagen": "/img/a8e05d23161d3c9a.webp"
+    },
+    {
+      "nombre": "Gabinete Corsair FRAME 4000D TG Modular White ATX",
+      "precio": 162960,
+      "imagen": "/img/6952027bbf235d9b.webp"
+    },
+    {
+      "nombre": "Gabinete Lian Li Vector V100X Black 4x120mm ARGB Fans USB-C",
+      "precio": 174370,
+      "imagen": "/img/4e9bcf8462859b54.webp"
+    },
+    {
+      "nombre": "Gabinete Lian Li Vector V150 INF Black 2x140mm + 1x120mm ARGB Fans Vidrio Templado",
+      "precio": 179970,
+      "imagen": "/img/85b8e0d422bccbfc.webp"
+    },
+    {
+      "nombre": "Gabinete Lian Li Vector V100W White 4x120mm ARGB Fans USB-C",
+      "precio": 181300,
+      "imagen": "/img/941c601e92eff3e4.webp"
+    },
+    {
+      "nombre": "Gabinete Lian Li Lancool 207RX Black 2x140mm ARGB + 2x120mm PWM Fans Mesh USB-C",
+      "precio": 186200,
+      "imagen": "/img/d0e35909013cc9e3.webp"
+    },
+    {
+      "nombre": "Gabinete Corsair FRAME 4000D ARGB 3x120mm ARGB RS120 Fans TG Modular White ATX",
+      "precio": 198590,
+      "imagen": "/img/975d870e8b52e75b.webp"
+    },
+    {
+      "nombre": "Gabinete Corsair iCUE 220T TG Airflow 3x120mm RGB Black Vidrio Templado",
+      "precio": 213500,
+      "imagen": "/img/8f22ed2fded3cf86.webp"
+    },
+    {
+      "nombre": "Gabinete Lian Li Lancool 216RX Black 2x160mm + 1x140mm ARGB Fans Mesh USB-C",
+      "precio": 224490,
+      "imagen": "/img/3b0b8f3c2753bb78.webp"
+    },
+    {
+      "nombre": "Gabinete Lian Li Lancool 216RX White 2x160mm + 1x140mm ARGB Fans Mesh USB-C",
+      "precio": 229740,
+      "imagen": "/img/5b425d9bc5d56344.webp"
+    },
+    {
+      "nombre": "Gabinete Corsair 2000D RGB AIRFLOW White Mini ITX 3x120mm AF120 ARGB Slim Fans PSU SFXL USB-C",
+      "precio": 250390,
+      "imagen": "/img/8cef5016bfb61443.webp"
+    },
+    {
+      "nombre": "Gabinete ASUS PRIME AP202 TG 3x120mm Black ARGB Light Band Vidrio Templado",
+      "precio": 265986,
+      "imagen": "/img/ef3d4cca9ec92a49.webp"
+    },
+    {
+      "nombre": "Gabinete Lian Li Lancool 217 INF 2x170mm ARGB Fans Mirror USB-C Black",
+      "precio": 300150,
+      "imagen": "/img/f73206947b9fce01.webp"
+    },
+    {
+      "nombre": "Gabinete HYTE Y40 Black Cherry Vidrio Templado 2x120mm Fans Vertical GPU Mount Inc. Cable Riser PCIe 4x16 USB-C 3.2",
+      "precio": 302012,
+      "imagen": "/img/502ea817bf4d5392.webp"
+    },
+    {
+      "nombre": "Gabinete HYTE Y40 Snow White Vidrio Templado 2x120mm Fans Vertical GPU Mount Inc. Cable Riser PCIe 4x16 USB-C 3.2",
+      "precio": 302382,
+      "imagen": "/img/d728a3b8127cf475.webp"
+    },
+    {
+      "nombre": "Gabinete Lian Li O11 Vision Compact White Vidrio Templado 270° USB-C",
+      "precio": 303600,
+      "imagen": "/img/769f2b149a043dbe.webp"
+    },
+    {
+      "nombre": "Gabinete Cougar DUST 2 Mini ITX Iron Gray USB-C Gen2",
+      "precio": 305775,
+      "imagen": "/img/a09f7e41d3487d2d.webp"
+    },
+    {
+      "nombre": "Gabinete Cougar DUST 2 Mini ITX Desert Sand USB-C Gen2",
+      "precio": 306825,
+      "imagen": "/img/f25ae7e89927fcc3.webp"
+    },
+    {
+      "nombre": "Gabinete Lian Li O11 Vision Compact Black Vidrio Templado 270° USB-C",
+      "precio": 317700,
+      "imagen": "/img/65f865ae402b6612.webp"
+    },
+    {
+      "nombre": "Gabinete HYTE Y60 BlackRed Vidrio Templado 3x120mm Flow FE12 Fans Vertical GPU Mount Inc. Cable Riser PCIe 4x16 USB-C 3.2",
+      "precio": 381940,
+      "imagen": "/img/536a89d874171bac.webp"
+    },
+    {
+      "nombre": "Gabinete Lian Li O11 Dynamic EVO ARGB Strips Black Dual Chamber Vidrio Templado 270° USB-C",
+      "precio": 428775,
+      "imagen": "/img/e4f65bad9644f75c.webp"
+    },
+    {
+      "nombre": "Gabinete HYTE Y70 Black Cherry Vidrio Templado Inc. Cable Riser PCIe 4x16 USB-C 3.2",
+      "precio": 492861,
+      "imagen": "/img/982422b7ad5bc7ae.webp"
+    },
+    {
+      "nombre": "Gabinete Lian Li O11 Dynamic EVO XL Black ARGB Strip Dual Chamber Vidrio Templado 270° USB-C",
+      "precio": 635888,
+      "imagen": "/img/d8be4ea418d3984e.webp"
+    },
+    {
+      "nombre": "Gabinete Antec Performance 1 M Black ITX Inc. Cable Riser PCIe 4.0 Aluminium USB-C Solo fuente SFXSFX-L",
+      "precio": 711450,
+      "imagen": "/img/41f3210a3023f723.webp"
+    },
+    {
+      "nombre": "Gabinete Antec Performance 1 M Aventurine Black ITX Inc. Cable Riser PCIe 4.0 Aluminium USB-C Solo fuente SFXSFX-L",
+      "precio": 711450,
+      "imagen": "/img/4cbf3d09be0ea137.webp"
+    },
+    {
+      "nombre": "Gabinete Corsair ICUE 5000T RGB White 3x120mm LL120 ARGB Fans + HUB",
+      "precio": 815068,
+      "imagen": "/img/3bc06d539920b73c.webp"
+    },
+    {
+      "nombre": "Gabinete HYTE Y70 TOUCH INFINITE Black Cherry Vidrio Templado Pantalla Tactil 2.5K LCD IPS 60Hz Inc. Cable Riser PCIe 4x16 USB-C 3.2",
+      "precio": 937167,
+      "imagen": "/img/2eb7663e6ba675d5.webp"
+    },
+    {
+      "nombre": "Gabinete HYTE Y70 TOUCH INFINITE Panda Vidrio Templado Pantalla Tactil 2.5K LCD IPS 60Hz Inc. Cable Riser PCIe 4x16 USB-C 3.2",
+      "precio": 937869,
+      "imagen": "/img/bdb2f89417be4963.webp"
+    },
+    {
+      "nombre": "Gabinete HYTE Y70 TOUCH INFINITE Snow White Vidrio Templado Pantalla Tactil 2.5K LCD IPS 60Hz Inc. Cable Riser PCIe 4x16 USB-C 3.2",
+      "precio": 938558,
+      "imagen": "/img/16e8af651b666cd2.webp"
+    },
+    {
+      "nombre": "Gabinete ASUS ROG Hyperion GR701 E-ATX Vidrio Templado 4x140mm ARGB Fan USB-C Fast Charge Black",
+      "precio": 1174946,
+      "imagen": "/img/906265c3d1bb4618.webp"
+    },
+    {
+      "nombre": "Gabinete ASUS ROG Hyperion GR701 E-ATX Vidrio Templado 4x140mm ARGB Fan USB-C Fast Charge White",
+      "precio": 1227368,
+      "imagen": "/img/a7303114fc4d94f7.webp"
+    }
+  ],
+  "cooling": [
+    {
+      "nombre": "Usar Cooler CPU incluido en el procesador Intel",
+      "precio": 0,
+      "imagen": "/img/af43a4f3082cd2b9.webp"
+    },
+    {
+      "nombre": "Usar Cooler CPU incluido en el procesador AMD",
+      "precio": 0,
+      "imagen": "/img/64384d9f7b9d4fe4.webp"
+    },
+    {
+      "nombre": "Cooler CPU ID-Cooling SE-903-XT Basic",
+      "precio": 30738,
+      "imagen": "/img/d37c660b6d2c6d05.webp"
+    },
+    {
+      "nombre": "Cooler CPU ID-Cooling SE-214-XT ARGB White",
+      "precio": 48250,
+      "imagen": "/img/574fd3cf7fec0a70.webp"
+    },
+    {
+      "nombre": "Cooler CPU ID-Cooling SE-214-XT ARGB",
+      "precio": 49000,
+      "imagen": "/img/5ee588f07306abff.webp"
+    },
+    {
+      "nombre": "Cooler CPU ID-Cooling SE-214-XT",
+      "precio": 49188,
+      "imagen": "/img/1f9002d1b836760d.webp"
+    },
+    {
+      "nombre": "Cooler CPU ID-Cooling FROZN A410 SE",
+      "precio": 58412,
+      "imagen": "/img/711fb84b50056dbd.webp"
+    },
+    {
+      "nombre": "Cooler CPU ID-Cooling FROZN A410 SE ARGB",
+      "precio": 58412,
+      "imagen": "/img/af86edfd9a08e6af.webp"
+    },
+    {
+      "nombre": "Cooler CPU ID-Cooling FROZN A410 Black",
+      "precio": 61750,
+      "imagen": "/img/f72341ead5cd936d.webp"
+    },
+    {
+      "nombre": "Cooler Fan DeepCool AG620 G2 WH ARGB 120mm",
+      "precio": 76062,
+      "imagen": "/img/b34d65a04a30b1a5.webp"
+    },
+    {
+      "nombre": "Cooler CPU ID-Cooling FROZN A410 DW",
+      "precio": 79375,
+      "imagen": "/img/62e51c529756ace4.webp"
+    },
+    {
+      "nombre": "Cooler CPU ID-Cooling FROZN A410 DK Black",
+      "precio": 81288,
+      "imagen": "/img/167a4c672687e7d3.webp"
+    },
+    {
+      "nombre": "Cooler CPU ID-Cooling FROZN A410 ARGB White",
+      "precio": 89062,
+      "imagen": "/img/6a7dc95e1afec223.webp"
+    },
+    {
+      "nombre": "Cooler CPU ID-Cooling FROZN A620 PRO SE",
+      "precio": 111688,
+      "imagen": "/img/3fe7d6f9db1efb35.webp"
+    },
+    {
+      "nombre": "Cooler CPU ID-Cooling FROZN A620 PRO SE ARGB",
+      "precio": 111688,
+      "imagen": "/img/6d90476136c72dd0.webp"
+    },
+    {
+      "nombre": "Cooler CPU ID-Cooling FROZN A620 PRO SE ARGB Snow",
+      "precio": 111688,
+      "imagen": "/img/0eda6c367fcf549b.webp"
+    },
+    {
+      "nombre": "Cooler CPU ID-Cooling FROZN A620 Black",
+      "precio": 120425,
+      "imagen": "/img/95612fae8c8a9f51.webp"
+    },
+    {
+      "nombre": "Cooler CPU Corsair ICUE TITAN LINK 240 RX RGB Water Cooler",
+      "precio": 124875,
+      "imagen": "/img/92b709c293b57977.webp"
+    },
+    {
+      "nombre": "Cooler CPU Corsair ICUE TITAN LINK 240 RX RGB White Water Cooler",
+      "precio": 124875,
+      "imagen": "/img/22cc4abd28d1da34.webp"
+    },
+    {
+      "nombre": "Cooler CPU DeepCool LT240 ARGB Water Cooler",
+      "precio": 153725,
+      "imagen": "/img/4ef72031b3d639d2.webp"
+    },
+    {
+      "nombre": "Cooler CPU DeepCool LE720 360 ARGB Black Water Cooler",
+      "precio": 155552,
+      "imagen": "/img/9d81e4daed69b0eb.webp"
+    },
+    {
+      "nombre": "Cooler CPU Be Quiet! PURE ROCK PRO 3 LX Black",
+      "precio": 156390,
+      "imagen": "/img/364e9e0ec8a35cc6.webp"
+    },
+    {
+      "nombre": "Cooler CPU Corsair NAUTILUS 240 RS LCD White Water Cooler",
+      "precio": 160114,
+      "imagen": "/img/8f56ddae6f6b3e67.webp"
+    },
+    {
+      "nombre": "Cooler CPU Corsair NAUTILUS 240 RS LCD Water Cooler",
+      "precio": 161168,
+      "imagen": "/img/41b3dda133876290.webp"
+    },
+    {
+      "nombre": "Cooler CPU ASUS PRIME LC 240 ARGB",
+      "precio": 166907,
+      "imagen": "/img/13d1992e942510b3.webp"
+    },
+    {
+      "nombre": "Cooler CPU ID-Cooling FX360 PRO Water Cooler",
+      "precio": 169390,
+      "imagen": "/img/73d9f22ddca10dc5.webp"
+    },
+    {
+      "nombre": "Cooler CPU Asrock PRO WHITE 360 ARGB Water Cooler",
+      "precio": 174785,
+      "imagen": "/img/4a3bc13083dd42df.webp"
+    },
+    {
+      "nombre": "Cooler CPU Cooler Master MasterLiquid 360L Core II ARGB Water Cooler",
+      "precio": 177970,
+      "imagen": "/img/33760ecea49025c2.webp"
+    },
+    {
+      "nombre": "Cooler CPU Be Quiet! PURE LOOP 3 240mm Water Cooling",
+      "precio": 182780,
+      "imagen": "/img/dbdb4c7d5c5798f2.webp"
+    },
+    {
+      "nombre": "Cooler CPU DeepCool AK620 G2 DIGITAL NYX Display CTT 2.0",
+      "precio": 190450,
+      "imagen": "/img/c287d3ef92d9c7f2.webp"
+    },
+    {
+      "nombre": "Cooler CPU Be Quiet! DARK ROCK 5",
+      "precio": 194090,
+      "imagen": "/img/52aec23ea0829e9f.webp"
+    },
+    {
+      "nombre": "Cooler CPU DeepCool LM240 White ARGB LCD IPS 2,4 Water Cooler",
+      "precio": 205855,
+      "imagen": "/img/0a6c1b3ab4d4cc15.webp"
+    },
+    {
+      "nombre": "Cooler CPU Be Quiet! PURE LOOP 3 360mm Water Cooler",
+      "precio": 207805,
+      "imagen": "/img/a7d03f4dd4ce39f3.webp"
+    },
+    {
+      "nombre": "Cooler CPU Be Quiet! PURE LOOP 3 FX 240mm ARGB Water Cooler",
+      "precio": 213590,
+      "imagen": "/img/7f2506d01d9d4b70.webp"
+    },
+    {
+      "nombre": "Cooler CPU Be Quiet! PURE LOOP 3 280mm Water Cooling",
+      "precio": 213590,
+      "imagen": "/img/25939cae8f7226f9.webp"
+    },
+    {
+      "nombre": "Cooler CPU ASUS PRIME LC 360 ARGB White",
+      "precio": 223210,
+      "imagen": "/img/b683e56c8fce4919.webp"
+    },
+    {
+      "nombre": "Cooler CPU Be Quiet! PURE LOOP 3 FX 360mm ARGB Water Cooler",
+      "precio": 242450,
+      "imagen": "/img/a8f8049d65317794.webp"
+    },
+    {
+      "nombre": "Cooler CPU Cooler Master MasterLiquid 240 ATMOS White Water Cooling ARGB",
+      "precio": 243945,
+      "imagen": "/img/3718bcbe90abbddc.webp"
+    },
+    {
+      "nombre": "Cooler CPU DeepCool LM360 ARGB LCD IPS 2,4 Water Cooler",
+      "precio": 273645,
+      "imagen": "/img/b35bae4325a14ace.webp"
+    },
+    {
+      "nombre": "Cooler CPU ASUS TUF GAMING LC III 360 ARGB White Edition Water Cooler",
+      "precio": 300712,
+      "imagen": "/img/c2443cae97e8d1fd.webp"
+    },
+    {
+      "nombre": "Cooler CPU Be Quiet! LIGHT LOOP 360mm ARGB Water Cooler",
+      "precio": 301388,
+      "imagen": "/img/38e67570f8607613.webp"
+    },
+    {
+      "nombre": "Cooler CPU Be Quiet! SILENT LOOP 3 360mm Water Cooler",
+      "precio": 301388,
+      "imagen": "/img/0a0805c3390f5821.webp"
+    },
+    {
+      "nombre": "Cooler CPU Be Quiet! DARK ROCK PRO 5",
+      "precio": 303480,
+      "imagen": "/img/76abc08057a6b6e8.webp"
+    },
+    {
+      "nombre": "Cooler CPU DeepCool ASSASSIN VC ELITE Vapor Chamber",
+      "precio": 308070,
+      "imagen": "/img/d541aa597a367c02.webp"
+    },
+    {
+      "nombre": "Cooler CPU DeepCool ASSASSIN VC ELITE White Vapor Chamber",
+      "precio": 312458,
+      "imagen": "/img/c7eab3eabe1326b5.webp"
+    },
+    {
+      "nombre": "Cooler CPU Be Quiet! LIGHT LOOP 360mm White ARGB Water Cooler",
+      "precio": 321975,
+      "imagen": "/img/b4ebf4e85fdf8ca7.webp"
+    },
+    {
+      "nombre": "Cooler CPU Be Quiet! SILENT LOOP 3 420mm Water Cooler",
+      "precio": 340808,
+      "imagen": "/img/85d471ce8c1b95d6.webp"
+    },
+    {
+      "nombre": "Cooler CPU DeepCool ASSASSIN IV VC Vision Display",
+      "precio": 359235,
+      "imagen": "/img/8462f3b8b5ebf223.webp"
+    },
+    {
+      "nombre": "Cooler CPU Be Quiet! DARK ROCK ELITE",
+      "precio": 365175,
+      "imagen": "/img/c6f2f3ff3d4fca52.webp"
+    },
+    {
+      "nombre": "Cooler CPU DeepCool LT360 ARGB White Water Cooler",
+      "precio": 366458,
+      "imagen": "/img/b343948b2775d307.webp"
+    },
+    {
+      "nombre": "Cooler CPU DeepCool LT360 ARGB Water Cooler",
+      "precio": 373950,
+      "imagen": "/img/f3ef8ad26d223040.webp"
+    },
+    {
+      "nombre": "Cooler CPU ASUS TUF GAMING LC III 360 ARGB LCD Water Cooler",
+      "precio": 421400,
+      "imagen": "/img/a1ded18ab7222a10.webp"
+    },
+    {
+      "nombre": "Cooler CPU ASUS TUF GAMING LC III 360 ARGB LCD White Edition Water Cooler",
+      "precio": 435400,
+      "imagen": "/img/0a6583d75fad5170.webp"
+    },
+    {
+      "nombre": "Cooler CPU ASUS ROG STRIX LC III 360",
+      "precio": 501550,
+      "imagen": "/img/db6f06f90e21f104.webp"
+    },
+    {
+      "nombre": "Cooler CPU DeepCool SPARTACUS 360 LCD 3,4 Water Cooler",
+      "precio": 514010,
+      "imagen": "/img/8d98ad5687f755e1.webp"
+    },
+    {
+      "nombre": "Cooler CPU ASUS ROG STRIX LC III 360 ARGB",
+      "precio": 550970,
+      "imagen": "/img/d148a96153cca699.webp"
+    },
+    {
+      "nombre": "Cooler CPU ASUS ROG STRIX LC III 360 ARGB LCD Water Cooler",
+      "precio": 607670,
+      "imagen": "/img/48f77d1098ce7acd.webp"
+    },
+    {
+      "nombre": "Cooler CPU ASUS ROG RYUJIN III 360 ARGB EXTREME",
+      "precio": 941080,
+      "imagen": "/img/a5ccfc107a50c2ad.webp"
+    },
+    {
+      "nombre": "Cooler CPU ASUS ROG RYUJIN III 360 ARGB EXTREME White Edition Water Cooler",
+      "precio": 962150,
+      "imagen": "/img/0b4c0300e68c25e9.webp"
+    }
+  ],
+  "peripherals": [
+    {
+      "nombre": "Monitor Gamer ASUS VY229HF-J 22 FHD IPS 100Hz",
+      "precio": 149022,
+      "imagen": "/img/af0237940a35080a.webp"
+    },
+    {
+      "nombre": "Monitor Gamer ASUS VA24EHF-J 24 FHD IPS 100Hz",
+      "precio": 156021,
+      "imagen": "/img/1c54392128e30cc8.webp"
+    },
+    {
+      "nombre": "Monitor Gamer AsRock Challenger CL25FFA 24.5 IPS FHD 120Hz Flicker Free Technology",
+      "precio": 156038,
+      "imagen": "/img/e04065d24b47c4a5.webp"
+    },
+    {
+      "nombre": "Monitor Gamer SAMSUNG S3 S30GD 24 FHD IPS 100Hz LS24D300GALXZB",
+      "precio": 162957,
+      "imagen": "/img/8997882adfa28754.webp"
+    },
+    {
+      "nombre": "Monitor Gamer AsRock Challenger CL27FFA 27 IPS FHD 120Hz Flicker Free Technology",
+      "precio": 181212,
+      "imagen": "/img/8e06be4308f6d004.webp"
+    },
+    {
+      "nombre": "Monitor Gamer Gigabyte GS25F14 24.5 FHD SS IPS 144Hz 1ms Adaptive-Sync",
+      "precio": 182162,
+      "imagen": "/img/aa2022ad6dc5bfdd.webp"
+    },
+    {
+      "nombre": "Monitor Gamer ASUS VA27EHF-J 27 FHD IPS 100Hz",
+      "precio": 191643,
+      "imagen": "/img/c9912bec942d4954.webp"
+    },
+    {
+      "nombre": "Monitor Gamer Acer Nitro 23.8 KG241Y FHD VA 180Hz 1ms AMD FreeSync Premium",
+      "precio": 193999,
+      "imagen": "/img/7b932958616c91ac.webp"
+    },
+    {
+      "nombre": "Monitor Gamer ViewSonic VX2429 24 1080p IPS 200Hz FreeSync Premium Ficha de poder Americana",
+      "precio": 212150,
+      "imagen": "/img/07a3ca73b8f620ba.webp"
+    },
+    {
+      "nombre": "Monitor Gamer Acer Nitro KG241Y X1biip 23.8 FHD IPS 200Hz Freesync",
+      "precio": 214890,
+      "imagen": "/img/00b1b866c456c10d.webp"
+    },
+    {
+      "nombre": "Monitor Gamer KTC 27GR951 27 FHD Fast IPS 180Hz 1ms FreeSync Premium G-SYNC",
+      "precio": 228715,
+      "imagen": "/img/a1be6de01ace62f1.webp"
+    },
+    {
+      "nombre": "Monitor Gamer AsRock Phantom PG27FFT1A 27 FHD IPS 180Hz FreeSync",
+      "precio": 237072,
+      "imagen": "/img/13893fc4b47478ec.webp"
+    },
+    {
+      "nombre": "Monitor Gamer Samsung Odyssey G3 G30D 24 VA FHD 180Hz LS24DG300ELXZB",
+      "precio": 242191,
+      "imagen": "/img/5ecdd6af91de59e6.webp"
+    },
+    {
+      "nombre": "Monitor Gamer ViewSonic VX2428A 24 FHD IPS 180Hz FreeSync Premium",
+      "precio": 244650,
+      "imagen": "/img/7748e1c002d9e233.webp"
+    },
+    {
+      "nombre": "Monitor Gamer ViewSonic VX2729 27 1080p IPS 200Hz FreeSync Premium",
+      "precio": 252379,
+      "imagen": "/img/215e117c573ab86e.webp"
+    },
+    {
+      "nombre": "Monitor Gamer Acer Nitro KG271 X1biip 27 FHD IPS 200Hz Freesync",
+      "precio": 258110,
+      "imagen": "/img/19d338de888ac776.webp"
+    },
+    {
+      "nombre": "Monitor Gamer ASUS TUF VG249QL3A-J 24 FHD IPS 180Hz Freesync Premium G-SYNC Compatible",
+      "precio": 264850,
+      "imagen": "/img/6275e937836273e9.webp"
+    },
+    {
+      "nombre": "Monitor Gamer ASUS TUF VG279Q3A-J 27 FHD IPS 180Hz Freesync Premium G-SYNC Compatible",
+      "precio": 280635,
+      "imagen": "/img/1495554e519f7d77.webp"
+    },
+    {
+      "nombre": "Monitor Gamer Lenovo Legion 27-10 27 FHD IPS 240Hz FreeSync Premium G-SYNC",
+      "precio": 304190,
+      "imagen": "/img/4be6af2ffc2b39c5.webp"
+    },
+    {
+      "nombre": "Monitor Gamer Samsung Odyssey G3 G30D 27 VA FHD 180Hz LS27DG300ELXZB",
+      "precio": 310650,
+      "imagen": "/img/146720132ae5c489.webp"
+    },
+    {
+      "nombre": "Monitor Gamer Samsung Odyssey G4 25 FHD 1080p IPS 240Hz 1ms G-SYNC FreeSync Premium",
+      "precio": 315750,
+      "imagen": "/img/16a6dba6c959f5e1.webp"
+    },
+    {
+      "nombre": "Monitor Gamer Samsung Odyssey G4 S25HG400EL 25 FHD 300Hz LS25HG400ELXZB",
+      "precio": 373699,
+      "imagen": "/img/1e19cd42f461b249.webp"
+    },
+    {
+      "nombre": "Monitor Gamer Lenovo Legion R27fc-30 27 Curvo FHD VA 240Hz FreeSync G-SYNC",
+      "precio": 382627,
+      "imagen": "/img/ffc704542652a081.webp"
+    },
+    {
+      "nombre": "Monitor Gamer ViewSonic VX2718-2KPC-MHD 27 Curvo QHD 1440p VA 180Hz 1500R FreeSync Premium Pro Parlantes Internos",
+      "precio": 392700,
+      "imagen": "/img/75c4701c9fa9e608.webp"
+    },
+    {
+      "nombre": "Monitor Gamer Samsung Odyssey G4 27 FHD 1080p IPS 300Hz 1ms G-SYNC FreeSync Premium",
+      "precio": 394527,
+      "imagen": "/img/300d87c4d96340e6.webp"
+    },
+    {
+      "nombre": "Monitor LG 24BR550Y 24 IPS FHD 75Hz parlantes integrados",
+      "precio": 421700,
+      "imagen": "/img/9c5de34de5626de0.webp"
+    },
+    {
+      "nombre": "Monitor Gamer Samsung Odyssey G5 S27FG500EL 27 QHD IPS 180Hz HAS LS27FG500ELXZB",
+      "precio": 460050,
+      "imagen": "/img/669580be28e9608b.webp"
+    },
+    {
+      "nombre": "Monitor Gamer ASUS TUF VG32AQA1A-J 32 QHD 1440p VA 170Hz Max FreeSync Premium G-Sync Compatible",
+      "precio": 534182,
+      "imagen": "/img/baa07c60ca69ec57.webp"
+    },
+    {
+      "nombre": "Monitor Gamer Gigabyte GS32QCA 31.5 Curvo 1500R QHD VA 180Hz 1ms FreeSync",
+      "precio": 545535,
+      "imagen": "/img/81468f1b8039fa3a.webp"
+    },
+    {
+      "nombre": "Monitor Gamer AsRock Phantom PG32QF2B 31.5 VA QHD 1440p 165Hz FreeSync Antena WiFi Integrada",
+      "precio": 598149,
+      "imagen": "/img/e2dc91e20505d104.webp"
+    },
+    {
+      "nombre": "Monitor Gamer Acer Nitro XV275U F3 27 QHD 1440p IPS QD-MiniLED 320Hz 0.5ms HDR1000 FreeSync Premium G-SYNC",
+      "precio": 661927,
+      "imagen": "/img/004a86eeaf529bda.webp"
+    },
+    {
+      "nombre": "Monitor Gamer Acer Nitro XV273K V3 27 4K UHD IPS 160Hz 0.5ms AMD Freesync Premium Speakers",
+      "precio": 663210,
+      "imagen": "/img/890568c6ecee9957.webp"
+    },
+    {
+      "nombre": "Monitor Gamer Samsung Odyssey G6 G65B 27 QHD 1440p VA 240Hz 1ms AMD FreeSync Premium Pro Curvo 1000R",
+      "precio": 687590,
+      "imagen": "/img/8db628752f8087a3.webp"
+    },
+    {
+      "nombre": "Monitor Gamer Acer Nitro ED340CUR 34 WQHD 1440p VA 200Hz 1ms Freesync",
+      "precio": 691155,
+      "imagen": "/img/137569e3c692ec84.webp"
+    },
+    {
+      "nombre": "Monitor Gamer Samsung Odyssey G5 G50SF 27 QD-OLED QHD 1440p 180Hz 0.03ms G-SYNC FreeSync Premium",
+      "precio": 764701,
+      "imagen": "/img/e0fba5ef2c39da00.webp"
+    },
+    {
+      "nombre": "Monitor Gamer Lenovo Legion 27Q-10 OLED 26.5 QHD QD-OLED 240Hz FreeSync Premium",
+      "precio": 854741,
+      "imagen": "/img/003ce73391c51319.webp"
+    },
+    {
+      "nombre": "Monitor Gamer Acer Predator X27U W1 26.5 QHD 1440p QD-OLED 240Hz 0.03ms HDR10 AMD FreeSync Premium",
+      "precio": 887490,
+      "imagen": "/img/4fc797591b0af636.webp"
+    },
+    {
+      "nombre": "Monitor Gamer Lenovo Legion Pro 27Q-10 26.5 QHD QD-OLED 280Hz FreeSync Premium Pro",
+      "precio": 996345,
+      "imagen": "/img/81824f092cf98911.webp"
+    },
+    {
+      "nombre": "Monitor ASUS ProArt Display PA329CV-J 32 UHD 4K IPS 60Hz 100% sRGB Rec.709 ΔE2",
+      "precio": 1292537,
+      "imagen": "/img/001bd6559e9b58f9.webp"
+    },
+    {
+      "nombre": "Monitor Gamer Samsung Odyssey G8 G81SF 27 UHD 4K QD-OLED 240Hz 0,03ms G-SYNC AMD FreeSync Premium Pro",
+      "precio": 1897292,
+      "imagen": "/img/b0c24854203b9471.webp"
+    },
+    {
+      "nombre": "Monitor Gamer Samsung Odyssey G9 G91F 49 Dual QHD 1440p VA 144Hz 1ms 329 AMD FreeSync Premium Pro",
+      "precio": 2005100,
+      "imagen": "/img/d9b0b78895e0b6ad.webp"
+    },
+    {
+      "nombre": "Monitor Gamer Acer Predator X32 X 31.5 Curvo 1700R 4K UHD QD-OLED 240Hz 0.03ms DisplayHDR True Black 400 FreeSync Premium G-SYNC",
+      "precio": 2205497,
+      "imagen": "/img/598ca4c527e2c10c.webp"
+    },
+    {
+      "nombre": "Monitor Gamer Gigabyte MO34WQC2 34 Curvo 1800R WQHD QD-OLED 240Hz 0.03ms FreeSync Premium Pro KVM",
+      "precio": 2390150,
+      "imagen": "/img/f74aa7a58beb5025.webp"
+    },
+    {
+      "nombre": "Monitor Gamer Samsung Odyssey 3D Glasses-Free G9 G90XF 27 UHD 4K Fast IPS 165Hz 1ms G-SYNC AMD FreeSync Premium",
+      "precio": 2696550,
+      "imagen": "/img/f58055cb70b4a6a6.webp"
+    },
+    {
+      "nombre": "Monitor Gamer ASUS ROG Swift OLED PG32UCDP-J 32 4K UHD 240Hz y Full HD 480Hz AMD FreeSync Premium Pro G-SYNC Compatible",
+      "precio": 2805160,
+      "imagen": "/img/7fcf739280293c39.webp"
+    },
+    {
+      "nombre": "Mouse Logitech M90 Black USB",
+      "precio": 5750,
+      "imagen": "/img/b671832aadfb36d0.webp"
+    },
+    {
+      "nombre": "Cooler Fan ID-Cooling FL-12025 White",
+      "precio": 7350,
+      "imagen": "/img/25e0429656b149f9.webp"
+    },
+    {
+      "nombre": "Mouse Pad XYZ White L 450x400mm",
+      "precio": 8390,
+      "imagen": "/img/03659ff719408a59.webp"
+    },
+    {
+      "nombre": "Cooler Fan DeepCool RF120 FS 120mm Fixed RGB Black",
+      "precio": 9170,
+      "imagen": "/img/e01f7b97039cfe9b.webp"
+    },
+    {
+      "nombre": "Mouse Logitech M170 Wireless Blue Black",
+      "precio": 11400,
+      "imagen": "/img/588d1d2ad3c917ed.webp"
+    },
+    {
+      "nombre": "Cooler Fan ID-Cooling TF-12025-PRO WHITE",
+      "precio": 11600,
+      "imagen": "/img/00a29a8f046f1cab.webp"
+    },
+    {
+      "nombre": "Cooler Fan ID-Cooling 120mm TF-12025-PRO Black",
+      "precio": 12540,
+      "imagen": "/img/8d48a4145b19c0ba.webp"
+    },
+    {
+      "nombre": "Mouse Logitech Wireless M190 Charcoal",
+      "precio": 13950,
+      "imagen": "/img/758777af2f572a76.webp"
+    },
+    {
+      "nombre": "Mouse Logitech Wireless M190 Blue",
+      "precio": 14150,
+      "imagen": "/img/14a98ffc34bb6aab.webp"
+    },
+    {
+      "nombre": "Mouse Pad Logitech Studio Graphite 200x230mm",
+      "precio": 14600,
+      "imagen": "/img/5255329d5ff971a1.webp"
+    },
+    {
+      "nombre": "Mouse Logitech M196 inalámbrico Bluetooth Negro",
+      "precio": 15150,
+      "imagen": "/img/87355e7cea00355e.webp"
+    },
+    {
+      "nombre": "Mouse Logitech M280 Wireless Red",
+      "precio": 16450,
+      "imagen": "/img/a057fa3d1929e3e0.webp"
+    },
+    {
+      "nombre": "Mouse Logitech M280 Wireless Black",
+      "precio": 16650,
+      "imagen": "/img/4a492f719baee3f4.webp"
+    },
+    {
+      "nombre": "Cooler Fan ID-Cooling TF-12025-PRO ARGB",
+      "precio": 16700,
+      "imagen": "/img/f30d2a301ccfb1fc.webp"
+    },
+    {
+      "nombre": "Cooler Fan ID-Cooling TF-12025-PRO ARGB WHITE",
+      "precio": 16700,
+      "imagen": "/img/1ac7b6bb3547d7be.webp"
+    },
+    {
+      "nombre": "Mouse Pad Razer Gigantus V2 Medium 360x275mm",
+      "precio": 20990,
+      "imagen": "/img/2f34ff870fd103e4.webp"
+    },
+    {
+      "nombre": "Mouse Redragon Centrophorus M601 RGB",
+      "precio": 21800,
+      "imagen": "/img/a93215e8077d346d.webp"
+    },
+    {
+      "nombre": "Mouse Pad SteelSeries QcK Heavy Medium 320x270",
+      "precio": 28100,
+      "imagen": "/img/ce96ebf70d2b8d72.webp"
+    },
+    {
+      "nombre": "Mouse Pad Razer Gigantus V2 Large 450x400mm",
+      "precio": 29300,
+      "imagen": "/img/9ec129ba527692f8.webp"
+    },
+    {
+      "nombre": "Mouse Logitech G203 Lightsync RGB Black",
+      "precio": 29400,
+      "imagen": "/img/3d95b7221dc39867.webp"
+    },
+    {
+      "nombre": "Mouse Logitech G203 Lightsync RGB White",
+      "precio": 29400,
+      "imagen": "/img/2f415320d827bcdb.webp"
+    },
+    {
+      "nombre": "Cooler FAN Be Quiet! LIGHT WINGS LX 120mm ARGB PWM High-speed",
+      "precio": 29600,
+      "imagen": "/img/8277d830344b94c7.webp"
+    },
+    {
+      "nombre": "Mouse Razer DeathAdder Essential Ergonomic Black",
+      "precio": 29900,
+      "imagen": "/img/7fac7869fe53c54a.webp"
+    },
+    {
+      "nombre": "Mouse Razer DeathAdder Essential Ergonomic White",
+      "precio": 29900,
+      "imagen": "/img/ff23f5af0f3c2817.webp"
+    },
+    {
+      "nombre": "Mouse Pad Corsair MM300 PRO Premium Medium 360x300mm",
+      "precio": 33550,
+      "imagen": "/img/7cb72514ce619731.webp"
+    },
+    {
+      "nombre": "Cooler FAN Be Quiet! LIGHT WINGS LX 140mm ARGB PWM",
+      "precio": 34900,
+      "imagen": "/img/5e8e9b17d896d5e4.webp"
+    },
+    {
+      "nombre": "Cooler FAN Be Quiet! LIGHT WINGS 120mm ARGB PWM High-speed",
+      "precio": 39650,
+      "imagen": "/img/cbe6d50dbd48a7b4.webp"
+    },
+    {
+      "nombre": "Mouse Logitech G305 Wireless 2.4Ghz Lightspeed Hero Black 99g 250Hs",
+      "precio": 39990,
+      "imagen": "/img/d3613b5182fc70bb.webp"
+    },
+    {
+      "nombre": "Mouse Logitech G305 Wireless 2.4Ghz Lightspeed Hero White 99g 250Hs",
+      "precio": 39990,
+      "imagen": "/img/113c1aa8d0025261.webp"
+    },
+    {
+      "nombre": "Mouse pad SteelSeries QcK Heavy Large 400x450mm",
+      "precio": 40100,
+      "imagen": "/img/f4f55d38ea637936.webp"
+    },
+    {
+      "nombre": "Cooler Fan DeepCool FL12R White 120mm ARGB",
+      "precio": 42200,
+      "imagen": "/img/145bde544ac7e6db.webp"
+    },
+    {
+      "nombre": "Mouse HyperX Pulsefire Fuse Wireless 2.4Ghz Bluetooth RGB 75gr 85Hs",
+      "precio": 45136,
+      "imagen": "/img/973bc70640af00ff.webp"
+    },
+    {
+      "nombre": "Mouse Pad Corsair MM200 PRO Premium 450x400mm",
+      "precio": 45450,
+      "imagen": "/img/930a134c7b1b8707.webp"
+    },
+    {
+      "nombre": "Mouse Pad SteelSeries QcK XXL 900x400mm",
+      "precio": 46150,
+      "imagen": "/img/647ccc51cc36b40e.webp"
+    },
+    {
+      "nombre": "Teclado Mecanico Redragon Kumara K552 Rainbow White Outemu RED ESP",
+      "precio": 46150,
+      "imagen": "/img/c69616c1eedccede.webp"
+    },
+    {
+      "nombre": "Teclado Mecanico Redragon Kumara K552 Rainbow Outemu Red ESP",
+      "precio": 49990,
+      "imagen": "/img/986f627d6ce5e499.webp"
+    },
+    {
+      "nombre": "Mouse pad Logitech Aurora Collection Green 400x460mm",
+      "precio": 51750,
+      "imagen": "/img/a884c2e3ad7d8839.webp"
+    },
+    {
+      "nombre": "Teclado HyperX Alloy CORE RGB LA",
+      "precio": 52300,
+      "imagen": "/img/b4d3ab6bf75b600c.webp"
+    },
+    {
+      "nombre": "Teclado Mecanico Redragon Kumara K552 RGB White Outemu Red ESP",
+      "precio": 52300,
+      "imagen": "/img/0a71c1edaf27711c.webp"
+    },
+    {
+      "nombre": "Mouse Redragon King PRO M916 1K Wireless 2.4Ghz Bluetooth Black USB-C 50g",
+      "precio": 52500,
+      "imagen": "/img/bb3343c7f07b0d2e.webp"
+    },
+    {
+      "nombre": "Mouse Pad SteelSeries QcK Heavy XXL 900x400mm",
+      "precio": 52990,
+      "imagen": "/img/d7c3d84a8855e232.webp"
+    },
+    {
+      "nombre": "Mouse Razer Cobra LightWeight Black RGB Chroma 58gr",
+      "precio": 53150,
+      "imagen": "/img/299d5da5a3ec14d9.webp"
+    },
+    {
+      "nombre": "Teclado Mecanico Redragon Kumara K552 RGB Outemu Red ESP",
+      "precio": 54990,
+      "imagen": "/img/0101094072e3bc2a.webp"
+    },
+    {
+      "nombre": "Mouse SteelSeries Rival 3 Gen 2 Lightweight Sensor TrueMove Core RGB",
+      "precio": 55150,
+      "imagen": "/img/29cb9a0b7158a003.webp"
+    },
+    {
+      "nombre": "Mouse Hyperx Pulsefire Haste 2 Black RGB",
+      "precio": 56550,
+      "imagen": "/img/8576af111e566e15.webp"
+    },
+    {
+      "nombre": "Mouse Pad QcK Prism Cloth Medium 320x270mm",
+      "precio": 58758,
+      "imagen": "/img/7d150311a178ea55.webp"
+    },
+    {
+      "nombre": "Teclado Mecanico Redragon Fizz Pro K616 Wireless 2.4Ghz Bluetooth 5.0 RGB 60% Whitegray",
+      "precio": 59890,
+      "imagen": "/img/a3903b9c89c710a4.webp"
+    },
+    {
+      "nombre": "Teclado Mecanico Redragon Fizz Pro K616 Wireless 2.4Ghz Bluetooth 5.0 RGB 60% Black",
+      "precio": 59990,
+      "imagen": "/img/b60d2cb401696664.webp"
+    },
+    {
+      "nombre": "Teclado Mecanico Redragon Fizz Pro K616 Wireless Bluetooth 5.0 RGB 60% WhitePink",
+      "precio": 59990,
+      "imagen": "/img/dfd7e374c2e522d7.webp"
+    },
+    {
+      "nombre": "Teclado Logitech G213 Prodigy RGB Lightsync",
+      "precio": 63200,
+      "imagen": "/img/719015be2a78b3fc.webp"
+    },
+    {
+      "nombre": "Mouse Logitech Wireless MX Anywhere 3s Rose 8k DPI Bateria de 70 dias",
+      "precio": 63605,
+      "imagen": "/img/1d55223f53922eea.webp"
+    },
+    {
+      "nombre": "Teclado Mecanico Redragon Horus K632 Mini RGB Black Switch Red",
+      "precio": 64600,
+      "imagen": "/img/64c39cbf77471733.webp"
+    },
+    {
+      "nombre": "Mouse Pad SteelSeries QcK Heavy XXL White 900x400mm",
+      "precio": 65200,
+      "imagen": "/img/1b328a8556c170c6.webp"
+    },
+    {
+      "nombre": "Mouse Pad Logitech G840 XL Black 900x400mm",
+      "precio": 65650,
+      "imagen": "/img/5fb02c21f4e92b0f.webp"
+    },
+    {
+      "nombre": "Mouse Cougar Surpassion RX Wireless 2.4Ghz Black RGB PMW 3330 20Hs",
+      "precio": 66990,
+      "imagen": "/img/38ddcc5c1ebb5406.webp"
+    },
+    {
+      "nombre": "Mouse Pad SteelSeries QcK PRO L Balance 490x420mm",
+      "precio": 67200,
+      "imagen": "/img/fb10efd9d5294dc4.webp"
+    },
+    {
+      "nombre": "Teclado Membrana Corsair K55 Core RGB ICUE ESP",
+      "precio": 67200,
+      "imagen": "/img/c58940b71f5b82a7.webp"
+    },
+    {
+      "nombre": "Mouse Redragon King PRO M916 4K Wireless 2.4Ghz Bluetooth Black USB-C 50g",
+      "precio": 67650,
+      "imagen": "/img/dd3584e78efce1aa.webp"
+    },
+    {
+      "nombre": "Teclado SteelSeries Apex 3 TKL Switch Whisper-Quiet IP32 Water Resistant White RGB",
+      "precio": 67750,
+      "imagen": "/img/ef4e2ae566d1fbbd.webp"
+    },
+    {
+      "nombre": "Mouse Corsair M55 Core SlipStream Wireless 2.4Ghz Bluetooth 1ms Black 24K 35g 185Hs",
+      "precio": 70150,
+      "imagen": "/img/d2bc430f65715d76.webp"
+    },
+    {
+      "nombre": "Mouse Logitech G502 Gaming High Performance LightSync Hero 25K 121g RGB",
+      "precio": 72300,
+      "imagen": "/img/22f037b0f38dc28d.webp"
+    },
+    {
+      "nombre": "Teclado SteelSeries Apex 3 TKL Switch Whisper-Quiet IP32 Water Resistant Black RGB",
+      "precio": 75150,
+      "imagen": "/img/982f3285e4a9ed76.webp"
+    },
+    {
+      "nombre": "Mouse SteelSeries Rival 3 Gen 2 Wireless 2.4Ghz Bluetooth Lightweight Sensor TrueMove Air RGB 200Hs",
+      "precio": 75500,
+      "imagen": "/img/c7163d959c4ad649.webp"
+    },
+    {
+      "nombre": "Mouse SteelSeries Rival 3 Gen 2 Wireless 2.4Ghz Bluetooth Lightweight Sensor TrueMove Air RGB 200Hs White",
+      "precio": 75500,
+      "imagen": "/img/36baf87e694682f3.webp"
+    },
+    {
+      "nombre": "Mouse Corsair M75 Black RGB 26K 74g",
+      "precio": 75743,
+      "imagen": "/img/9658348ace08a817.webp"
+    },
+    {
+      "nombre": "Teclado Mecanico Redragon Horus K622 RGB TKL Low Profile Switch Red",
+      "precio": 77250,
+      "imagen": "/img/730650bdda863abf.webp"
+    },
+    {
+      "nombre": "Cooler FAN Be Quiet! LIGHT WINGS LX 120mm White ARGB PWM High-speed KIT X3",
+      "precio": 81350,
+      "imagen": "/img/c2bc9130d0352078.webp"
+    },
+    {
+      "nombre": "Mouse Pad SteelSeries QcK PRO XL Balance 900x400mm",
+      "precio": 82250,
+      "imagen": "/img/cb40786773f87a6d.webp"
+    },
+    {
+      "nombre": "Mouse Pad SteelSeries QcK PRO XL Control 900x400mm",
+      "precio": 82250,
+      "imagen": "/img/79a3973534dd6ead.webp"
+    },
+    {
+      "nombre": "Auriculares Razer BLACKSHARK V2 X Green Black PCPS5XBOX",
+      "precio": 84990,
+      "imagen": "/img/3739065546f71cb3.webp"
+    },
+    {
+      "nombre": "Auriculares Razer BLACKSHARK V2 X White Black 7.1 PCPS5XBOX",
+      "precio": 84990,
+      "imagen": "/img/4c80b93433f05236.webp"
+    },
+    {
+      "nombre": "Teclado Mecanico Redragon Horus K619W White RGB Low Profile Switch Red",
+      "precio": 86850,
+      "imagen": "/img/3379d964b65d8bf9.webp"
+    },
+    {
+      "nombre": "Auriculares HyperX Cloud Stinger 2 White",
+      "precio": 90762,
+      "imagen": "/img/bade6882ea0e6386.webp"
+    },
+    {
+      "nombre": "Auriculares HyperX Cloud Stinger 2 Black",
+      "precio": 90793,
+      "imagen": "/img/45e4b23c9d67f0e9.webp"
+    },
+    {
+      "nombre": "Teclado Mecanico Redragon Horus K621 RGB TKL Low Profile Switch Red Wireless",
+      "precio": 90900,
+      "imagen": "/img/481361951040852b.webp"
+    },
+    {
+      "nombre": "Mouse Glorious Model I V2 Black 26K DPI RGB",
+      "precio": 91800,
+      "imagen": "/img/ac23817b4f975482.webp"
+    },
+    {
+      "nombre": "Mouse Glorious Model O 2 Mini Matte Black RGB 26K DPI",
+      "precio": 91800,
+      "imagen": "/img/fe1838567514e945.webp"
+    },
+    {
+      "nombre": "Mouse Glorious Model O 2 Mini Matte White RGB 26K DPI",
+      "precio": 91800,
+      "imagen": "/img/b2089deef940888f.webp"
+    },
+    {
+      "nombre": "Auriculares Logitech G335 Black PCXBOXPS",
+      "precio": 91900,
+      "imagen": "/img/64abf25d9ceb3dcf.webp"
+    },
+    {
+      "nombre": "Auriculares Logitech G335 White PCXBOXPS",
+      "precio": 91900,
+      "imagen": "/img/4ca4866393963ebf.webp"
+    },
+    {
+      "nombre": "Cooler FAN Be Quiet! LIGHT WINGS LX 120mm ARGB PWM High-speed KIT X3",
+      "precio": 93750,
+      "imagen": "/img/ee764a63aaa203ca.webp"
+    },
+    {
+      "nombre": "Mouse Razer Basilisk V3 Ergonomic Black Sensor Focus 26K DPI RGB",
+      "precio": 94100,
+      "imagen": "/img/53ab5ffbf3d06677.webp"
+    },
+    {
+      "nombre": "Auriculares Redragon Zeus X H510 RGB Surround 7.1 Black",
+      "precio": 94200,
+      "imagen": "/img/2394853e5c8a345d.webp"
+    },
+    {
+      "nombre": "Auriculares Redragon Zeus X H510W RGB Surround 7.1 White",
+      "precio": 94200,
+      "imagen": "/img/186ffa3c5669cf40.webp"
+    },
+    {
+      "nombre": "Teclado Logitech MX Keys Mini Rose Wireless Retroluminado",
+      "precio": 97961,
+      "imagen": "/img/c7807944618df034.webp"
+    },
+    {
+      "nombre": "Teclado Razer Ornata V3 Low Profile RGB SP",
+      "precio": 98550,
+      "imagen": "/img/41117fe423af67b2.webp"
+    },
+    {
+      "nombre": "Mouse Razer Viper V3 HyperSpeed Wireless 2.4Ghz Esports Focus PRO Black 280Hs",
+      "precio": 99300,
+      "imagen": "/img/82b937039011ba12.webp"
+    },
+    {
+      "nombre": "Mouse Razer Basilisk V3 X HyperSpeed Wireless 2.4Ghz Bluetooth Ergonomic Black Chroma RGB 285Hs",
+      "precio": 99990,
+      "imagen": "/img/bb53e1407e5f8fb6.webp"
+    },
+    {
+      "nombre": "Auriculares HyperX Cloud Stinger Core Wireless 2.4Ghz White PCPS 17Hs",
+      "precio": 100350,
+      "imagen": "/img/db15e846b4f31b88.webp"
+    },
+    {
+      "nombre": "Mouse Corsair M55 Nightsword PRO RGB 18.000 DPI Black 119g 141g con pesas",
+      "precio": 100950,
+      "imagen": "/img/d9323d028b97ae3f.webp"
+    },
+    {
+      "nombre": "Teclado Mecanico Redragon K648 Olaf Swtich Red Lineal RGB USB-C 90%",
+      "precio": 102450,
+      "imagen": "/img/653f39879b205ba1.webp"
+    },
+    {
+      "nombre": "Teclado Mecanico HyperX Alloy Origins 60% Switch Linear RED RGB ENG",
+      "precio": 106296,
+      "imagen": "/img/3064723d543f3e04.webp"
+    },
+    {
+      "nombre": "Teclado Mecanico HyperX Alloy Origins Core RGB Switch Red US",
+      "precio": 108303,
+      "imagen": "/img/205289c637520861.webp"
+    },
+    {
+      "nombre": "Cooler FAN Be Quiet! LIGHT WINGS 120mm White ARGB PWM High-speed KIT X3",
+      "precio": 109850,
+      "imagen": "/img/1c62cfe7ff96801e.webp"
+    },
+    {
+      "nombre": "Teclado Mecanico Corsair K65 MINI Swtich Cherry MX Speed Black RGB ICUE 60% USB-C",
+      "precio": 109920,
+      "imagen": "/img/ef79706cb9a5ff5f.webp"
+    },
+    {
+      "nombre": "Teclado Mecanico Corsair K70 PRO MINI SlipStream Wireless 2.4Ghz Bluetooth 1ms 8000hz Switch Cherry MX RGB 200Hs PCMac",
+      "precio": 110349,
+      "imagen": "/img/9a8665adfa6f3478.webp"
+    },
+    {
+      "nombre": "Mouse Glorious Model D Wireless 2.4Ghz Bluetooth 5.2 Matte Black 68gr 110hs",
+      "precio": 113490,
+      "imagen": "/img/8de6eb70d6562a0d.webp"
+    },
+    {
+      "nombre": "Mouse Glorious Model D Wireless 2.4Ghz Bluetooth 5.2 Matte White 68gr 110hs",
+      "precio": 113490,
+      "imagen": "/img/4f76551c9ab67b17.webp"
+    },
+    {
+      "nombre": "Auriculares SteelSeries Arctis Nova 1P Ultra Lightweight Black Wired 3.5 PCPS5",
+      "precio": 116400,
+      "imagen": "/img/dcabf14e7903d58c.webp"
+    },
+    {
+      "nombre": "Auriculares SteelSeries Arctis Nova 1X Ultra Lightweight Black Wired 3.5 PCXBOX",
+      "precio": 116650,
+      "imagen": "/img/5eb4f45cfc651968.webp"
+    },
+    {
+      "nombre": "Mouse Pad Corsair MM700 RGB Extended XL 930x400x4mm",
+      "precio": 117900,
+      "imagen": "/img/7ca874a29227a727.webp"
+    },
+    {
+      "nombre": "Mouse Corsair M75 SlipStream Wireless 2.4Ghz Bluetooth 1ms Ultra Lightweight White 26K 105Hs RGB",
+      "precio": 123990,
+      "imagen": "/img/9c84f8b79fb5988b.webp"
+    },
+    {
+      "nombre": "Auriculares Redragon Zeus H510 PRO Wireless 2.4Ghz Bluetooth 5.2 RGB Surround 7.1 White",
+      "precio": 126150,
+      "imagen": "/img/8ed35abf9b802248.webp"
+    },
+    {
+      "nombre": "Mouse Logitech G502 Wireless 2.4Ghz LightSpeed LightSync Hero 25K 114g RGB 60Hs",
+      "precio": 127650,
+      "imagen": "/img/e19a19d1d4400326.webp"
+    },
+    {
+      "nombre": "Mouse Logitech G PRO X Superlight 2 SE LightSpeed Hero 2 Black 44k 60gr 88Hs",
+      "precio": 132990,
+      "imagen": "/img/44233cf6844ee855.webp"
+    },
+    {
+      "nombre": "Mouse Logitech G PRO X Superlight 2 SE LightSpeed Hero 2 White 44k 60gr 88Hs",
+      "precio": 132990,
+      "imagen": "/img/37b34b8f9ea80547.webp"
+    },
+    {
+      "nombre": "Mouse Logitech G903 Wireless 2.4Ghz Lightspeed 1ms Hero 25K 110g 24Hs",
+      "precio": 134300,
+      "imagen": "/img/4a7c2ad27d5b7c95.webp"
+    },
+    {
+      "nombre": "Teclado Mecanico SteelSeries Apex 5 OLED Smart Display Switch Hybrid Blue RGB",
+      "precio": 135500,
+      "imagen": "/img/95cc296f23f63a27.webp"
+    },
+    {
+      "nombre": "Teclado Mecanico Corsair K70 Core Swtich MLX Red Full Size RGB ICUE USB-C",
+      "precio": 137200,
+      "imagen": "/img/bca10aec1ae2e94b.webp"
+    },
+    {
+      "nombre": "Mouse Glorious Model O 2 Mini Wireless 2.4ghz Bluetooth Matte Black 26K DPI 49gr RGB",
+      "precio": 140850,
+      "imagen": "/img/7c9937e2b281431e.webp"
+    },
+    {
+      "nombre": "Mouse Glorious Model O 2 Mini Wireless 2.4ghz Bluetooth Matte White 26K DPI 49gr RGB",
+      "precio": 140850,
+      "imagen": "/img/c47137c48221d401.webp"
+    },
+    {
+      "nombre": "Mouse Corsair M75 Launch Edition SlipStream Wireless 2.4Ghz Bluetooth Yellow RGB 26K 89g 105Hs + Mouse pad Corsar XL Launch Edition 900x400mm",
+      "precio": 141392,
+      "imagen": "/img/0248a0e60f9a34a0.webp"
+    },
+    {
+      "nombre": "Mouse SteelSeries Aerox 3 Gen2 Wireless 2.4Ghz Bluetooth Polling 4K Sensor Truemove 26K",
+      "precio": 141600,
+      "imagen": "/img/d49a73f324744f48.webp"
+    },
+    {
+      "nombre": "Mouse SteelSeries Aerox 3 Gen2 Wireless 2.4Ghz Bluetooth Polling 4K Sensor Truemove 26K White",
+      "precio": 141600,
+      "imagen": "/img/250aaa515e78e1e1.webp"
+    },
+    {
+      "nombre": "Mouse Glorious Model O 2 Wireless 2.4Ghz Bluetooth 5.2 Matte Black 26K DPI RGB 68gr 110Hs",
+      "precio": 142065,
+      "imagen": "/img/4a2ba187ce3229d3.webp"
+    },
+    {
+      "nombre": "Mouse Glorious Mode I 2 Wireless 2.4Ghz Bluetooth 5.2 Mate Black 75gr 110hs",
+      "precio": 142065,
+      "imagen": "/img/f4e83ccb6b64d5a2.webp"
+    },
+    {
+      "nombre": "Mouse Glorious Mode I 2 Wireless 2.4Ghz Bluetooth 5.2 Mate White 75gr 110hs",
+      "precio": 142065,
+      "imagen": "/img/c14f837395a252cc.webp"
+    },
+    {
+      "nombre": "Mouse Glorious Model D 2 Wireless 2.4Ghz Bluetooth 5.2 Matte Black RGB 26K DPI 66gr 110Hs",
+      "precio": 142065,
+      "imagen": "/img/6765d616e030ade7.webp"
+    },
+    {
+      "nombre": "Mouse Glorious Model D 2 Wireless 2.4Ghz Bluetooth 5.2 Matte White RGB 26K DPI 66gr 110Hs",
+      "precio": 142065,
+      "imagen": "/img/62a8626203dfefbc.webp"
+    },
+    {
+      "nombre": "Teclado OptoMecanico Razer Huntsman V3 X RGB TKL",
+      "precio": 147450,
+      "imagen": "/img/ed04df27b723fabf.webp"
+    },
+    {
+      "nombre": "Auriculares Hyperx Cloud Stinger 2 Wireless 2.4Ghz DTS X Sound Black 20Hs",
+      "precio": 150464,
+      "imagen": "/img/ae7c17e7d754026b.webp"
+    },
+    {
+      "nombre": "Mouse Razer Cobra PRO HyperSpeed Wireless 2.4Ghz Bluetooth LightWight RGB White 100Hs",
+      "precio": 152497,
+      "imagen": "/img/2d01f806cca551a9.webp"
+    },
+    {
+      "nombre": "Mouse Logitech G PRO 2 Wireless 2.4Ghz Lightspeed Hero 2 44K Pink 80g 60hs",
+      "precio": 154700,
+      "imagen": "/img/8c70e9b27fd0f362.webp"
+    },
+    {
+      "nombre": "Teclado Mecanico HyperX Alloy Rise RGB NGENUITY Switch Linear RED ESP USB",
+      "precio": 163530,
+      "imagen": "/img/a8b48a48348dc7d6.webp"
+    },
+    {
+      "nombre": "Teclado Mecanico Corsair K70 Core TKL Wireless 2.4Ghz SlipStream Bluetooth Switch MLX RED V2 RGB 890Hs",
+      "precio": 174320,
+      "imagen": "/img/670f20c270826d3c.webp"
+    },
+    {
+      "nombre": "Mouse Pad Logitech G POWERPLAY 2 Carga Inalambrica 344x340mm",
+      "precio": 176162,
+      "imagen": "/img/5426323fba690f5f.webp"
+    },
+    {
+      "nombre": "Mouse Logitech MX Master 4 Wireless Bluetooth White Táctil Haptico PCMAC",
+      "precio": 178750,
+      "imagen": "/img/c74ec18321aa42c3.webp"
+    },
+    {
+      "nombre": "Mouse Logitech G PRO X Superlight 2c Lightspeed Hero 2 8000Hz White 44K 51g 95Hs",
+      "precio": 178990,
+      "imagen": "/img/b0f22cb7af43d381.webp"
+    },
+    {
+      "nombre": "Mouse Logitech MX Master 4 Wireless Bluetooth Black Táctil Haptico PCMAC",
+      "precio": 179750,
+      "imagen": "/img/725311f5b8a181fa.webp"
+    },
+    {
+      "nombre": "Mouse Logitech G PRO X Superlight 2c Lightspeed Hero 2 8000Hz Black 44K 51g 95Hs",
+      "precio": 179990,
+      "imagen": "/img/098cb213d6bc15d0.webp"
+    },
+    {
+      "nombre": "Teclado Mecanico Logitech Aurora G715 Wireless Lightspeed RGB Switch Tactile GX White",
+      "precio": 182050,
+      "imagen": "/img/34d2a269cf35eaf1.webp"
+    },
+    {
+      "nombre": "Mouse Glorious Model O 2 PRO Wireless 2.4Ghz LightWeight 8000Hz Black 59gr 80Hs",
+      "precio": 184500,
+      "imagen": "/img/2e67e21a11c69a48.webp"
+    },
+    {
+      "nombre": "Mouse Glorious Model O 2 PRO Wireless 2.4Ghz LightWeight White 8000Hz 59gr 80Hs",
+      "precio": 184500,
+      "imagen": "/img/cfb0b9d9c07444ae.webp"
+    },
+    {
+      "nombre": "Mouse Glorious Model D 2 PRO Wireless 2.4Ghz LightWeight Black 8000hz 59gr 80Hs",
+      "precio": 184500,
+      "imagen": "/img/c530d3d542571f63.webp"
+    },
+    {
+      "nombre": "Mouse Glorious Model D 2 PRO Wireless 2.4Ghz LightWeight White 8000hz 59gr 80Hs",
+      "precio": 184500,
+      "imagen": "/img/8b446a7dab83cd75.webp"
+    },
+    {
+      "nombre": "Teclado Mecanico SteelSeries Apex 7 OLED Smart Display Switch SteelSeries QX2 RED RGB",
+      "precio": 193150,
+      "imagen": "/img/7153f5d675599576.webp"
+    },
+    {
+      "nombre": "Mouse Razer Viper V2 PRO Wireless 2.4Ghz Multi-Dispositivo Black Sensor Focus 30K 58g",
+      "precio": 194990,
+      "imagen": "/img/e641b64dd0eae69c.webp"
+    },
+    {
+      "nombre": "Auriculares JBL QUANTUM TWS Wireless Bluetooth 2.4GHz 5.2 ANC Black 16Hs",
+      "precio": 200976,
+      "imagen": "/img/9466c6e0492d4196.webp"
+    },
+    {
+      "nombre": "Mouse Logitech G PRO X Superlight 2 Lightspeed Hero 2 8000Hz Black 44K 60g 95Hs",
+      "precio": 204990,
+      "imagen": "/img/9c8909f76b29d0f8.webp"
+    },
+    {
+      "nombre": "Mouse Logitech G PRO X Superlight 2 Lightspeed Hero 2 8000Hz White 44K 60g 95Hs",
+      "precio": 204990,
+      "imagen": "/img/102ff819b51a6057.webp"
+    },
+    {
+      "nombre": "Teclado Logitech MX Mechanical Inalámbrico Bluetooth Mini",
+      "precio": 209050,
+      "imagen": "/img/7bdeeefff768cf96.webp"
+    },
+    {
+      "nombre": "Mouse Pad Corsair MM700 Extended 3XL 1220x620mm RGB",
+      "precio": 210400,
+      "imagen": "/img/f06319882195e3d8.webp"
+    },
+    {
+      "nombre": "Mouse Razer Basilisk V3 PRO HyperSpeed Ergonomic Wireless 2.4Ghz White 35K DPI RGB 140hs",
+      "precio": 215900,
+      "imagen": "/img/23c56948debd2c19.webp"
+    },
+    {
+      "nombre": "Auriculares Logitech G535 Wireless Lightspeed RGB Black PCPS4PS5",
+      "precio": 216100,
+      "imagen": "/img/cdb763abed79aaf0.webp"
+    },
+    {
+      "nombre": "Mouse Razer Viper V3 PRO HyperSpeed Wireless 2.4Ghz HyperPolling 8000Hz White 54gr 95Hs",
+      "precio": 217950,
+      "imagen": "/img/973ebe516c97b095.webp"
+    },
+    {
+      "nombre": "Teclado Mecanico Logitech G915X Wireless 2.4Ghz Bluetooth Tri-Mode Lightspeed TKL Black RGB",
+      "precio": 219990,
+      "imagen": "/img/691341474fc66d55.webp"
+    },
+    {
+      "nombre": "Teclado Mecanico Logitech G915X Wireless 2.4Ghz Bluetooth Tri-Mode Lightspeed TKL White RGB",
+      "precio": 219990,
+      "imagen": "/img/88a4620658ed2a11.webp"
+    },
+    {
+      "nombre": "Teclado OptoMecanico SteelSeries Apex 9 TKL Switch Linear OptiPoint Optical RGB",
+      "precio": 220050,
+      "imagen": "/img/32fb61a45f5310d5.webp"
+    },
+    {
+      "nombre": "Mouse Corsair Nightsabre SlipStream Wireless 2.4Ghz Bluetooth 1ms RGB 26K 100Hs",
+      "precio": 223650,
+      "imagen": "/img/80b8e69bbc9273db.webp"
+    },
+    {
+      "nombre": "Teclado Mecanico Razer BlackWidow V4 Switch Green 8000Hz RGB Chroma Black USB-C",
+      "precio": 234990,
+      "imagen": "/img/f4dc911076dfc680.webp"
+    },
+    {
+      "nombre": "Mouse Razer DeathAdder V4 PRO Wireless 2.4Ghz HyperPolling 8000Hz 85gr White 150hs",
+      "precio": 241800,
+      "imagen": "/img/1b90d74d6967ed53.webp"
+    },
+    {
+      "nombre": "Teclado Mecanico Razer BlackWidow V4 75% 3Gen Tactile Orange Switch 8000Hz Black RGB Chroma",
+      "precio": 243990,
+      "imagen": "/img/d6f9825f20b5ea41.webp"
+    },
+    {
+      "nombre": "Teclado Mecanico Razer BlackWidow V4 75% 3Gen Tactile Orange Switch 8000Hz White RGB Chroma",
+      "precio": 243990,
+      "imagen": "/img/fb95d7836a21896e.webp"
+    },
+    {
+      "nombre": "Teclado Mecanico Razer BlackWidow V4 Switch Yellow RGB Black USB-C",
+      "precio": 244550,
+      "imagen": "/img/829ecc259acc0a00.webp"
+    },
+    {
+      "nombre": "Teclado Mecanico Corsair K65 PLUS 75% Wireless 2.4Ghz Bluetooth 1ms Switch MLX Red RGB 266Hs",
+      "precio": 245200,
+      "imagen": "/img/646b99a2e4cea01b.webp"
+    },
+    {
+      "nombre": "Mouse Razer DeathAdder V4 PRO Wireless 2.4Ghz HyperPolling 8000Hz Sensor Focus Gen3 Black USB-C 56gr 150Hs",
+      "precio": 245800,
+      "imagen": "/img/b53bcf90694d0cb5.webp"
+    },
+    {
+      "nombre": "Teclado OptoAnalogico Razer Huntsman V3 PRO Mini 60% Black Switches Gen2 USB-C",
+      "precio": 257850,
+      "imagen": "/img/8794d0a038ef50c4.webp"
+    },
+    {
+      "nombre": "Mouse Logitech PRO X2 SUPERSTRIKE Wireless LightSpeed 2.4Ghz Hero 2 44k 8000Hz Respuesta Háptica 90Hs",
+      "precio": 262550,
+      "imagen": "/img/ed068062273e6816.webp"
+    },
+    {
+      "nombre": "Auriculares SteelSeries Arctis Nova 5X Wireless 2.4Ghz Bluetooth ClearCast 2.X Black 60Hs XBOXPCMACSwitch",
+      "precio": 275990,
+      "imagen": "/img/f49d1f23a162cb81.webp"
+    },
+    {
+      "nombre": "Teclado Mecanico Logitech PRO X TKL Wireless Lightspeed 1ms Magenta RGB Switch GX 50Hs",
+      "precio": 288800,
+      "imagen": "/img/20619ad6977f3837.webp"
+    },
+    {
+      "nombre": "Teclado Mecanico Logitech PRO X TKL Wireless Lightspeed 1ms White RGB Switch GX 50Hs",
+      "precio": 288800,
+      "imagen": "/img/7232e42c6c0cd17e.webp"
+    },
+    {
+      "nombre": "Auriculares Corsair Virtuoso PRO Carbon PCPS4PS5XBOX",
+      "precio": 301800,
+      "imagen": "/img/57580ba9400d8bd7.webp"
+    },
+    {
+      "nombre": "Auriculares Corsair Virtuoso PRO White PCPS4PS5XBOX",
+      "precio": 303200,
+      "imagen": "/img/f3bdc3785ea42d82.webp"
+    },
+    {
+      "nombre": "Teclado Mecanico Corsair K100 AIR Wireless Ultra Low Profile Swtich Cherry MX Ultra RGB",
+      "precio": 307987,
+      "imagen": "/img/861fc60aac05b4d3.webp"
+    },
+    {
+      "nombre": "Teclado Mecanico Corsair K70 PRO TKL 8K Hyper Polling Hall Effect Black RGB",
+      "precio": 320200,
+      "imagen": "/img/e814b3b85ecd2431.webp"
+    },
+    {
+      "nombre": "Teclado Hypermagnetico SteelSeries Apex PRO Mini Wireless 2.4Ghz Bluetooth Switch Omnipoint 2.0 Hall Effect RGB 30Hs",
+      "precio": 358500,
+      "imagen": "/img/bc551a419c59c786.webp"
+    },
+    {
+      "nombre": "Teclado Hipermagnético Steel Series Apex PRO Gen3 Black RGB Omnipoint 3.0 Hall Effect",
+      "precio": 371400,
+      "imagen": "/img/6e3004f07a2b9b8c.webp"
+    },
+    {
+      "nombre": "Auriculares Corsair HS80 MAX Wireless 2.4Ghz Bluetooth Dolby Atmos Steel Gray 65Hs PCPSMAC",
+      "precio": 386000,
+      "imagen": "/img/bad3c85e98093905.webp"
+    },
+    {
+      "nombre": "Auriculares Corsair HS80 MAX Wireless 2.4Ghz Bluetooth Dolby Atmos White 65Hs PCPSMAC",
+      "precio": 386000,
+      "imagen": "/img/ec15c471164776ee.webp"
+    },
+    {
+      "nombre": "Teclado Mecanico Corsair VANGUARD AIR 99 Wireless SlipStream Bluetooth 8000Hz Hyper Polling Switch OPX Pantalla LCD RGB ICUE",
+      "precio": 386300,
+      "imagen": "/img/bf215546f679e3c7.webp"
+    },
+    {
+      "nombre": "Auriculares Razer BLACKSHARK V2 PRO Wireless 2.4Ghz Bluetooth 5.2 70Hs USB-C Black PCPS4PS5 Licensed",
+      "precio": 397900,
+      "imagen": "/img/c1eb4792ac3cd43a.webp"
+    },
+    {
+      "nombre": "Auriculares Razer BLACKSHARK V2 PRO Wireless 2.4Ghz Bluetooth 5.2 70Hs USB-C White PCPS4PS5 Licensed",
+      "precio": 397900,
+      "imagen": "/img/f8a20577a2163fad.webp"
+    },
+    {
+      "nombre": "Auriculares SteelSeries Arctis Nova PRO Hi-Res Certified GameDAC Gen 2 Black PCXBOXMACSwitch",
+      "precio": 482742,
+      "imagen": "/img/a903e9fba0723794.webp"
+    },
+    {
+      "nombre": "Auriculares Corsair Virtuoso MAX Wireless 2.4Ghz Bluetooth Premium Dolby Atmos Black USB-C 60Hs PCPSNINTENDOMAC",
+      "precio": 581680,
+      "imagen": "/img/fa83ece60dd6ffde.webp"
+    },
+    {
+      "nombre": "Auriculares Corsair Virtuoso MAX Wireless 2.4Ghz Bluetooth Premium Dolby Atmos White USB-C 60Hs PCPSNINTENDOMAC",
+      "precio": 581680,
+      "imagen": "/img/11c3aecfe7f32b95.webp"
+    },
+    {
+      "nombre": "Auriculares Logitech Astro A50 Wireless Bluetooth Lighstpeed Black PCPS5SWITCH HDMI 2.1 GEN 5",
+      "precio": 642100,
+      "imagen": "/img/a79c13c98fb8c7d7.webp"
+    },
+    {
+      "nombre": "Auriculares JBL QUANTUM 950 Wireless 2.4Ghz Bluetooth 5.3 Dual Connect USB-C RGB 30Hs + Base Multifuncion",
+      "precio": 654850,
+      "imagen": "/img/d6180fc35c303058.webp"
+    },
+    {
+      "nombre": "Auriculares Logitech Astro A50X Wireless Lightspeed 2.4Ghz Bluetooth Black PCPS5XBOX HDMI 2.1 24HS",
+      "precio": 787550,
+      "imagen": "/img/ec75ce8e393f0eac.webp"
+    },
+    {
+      "nombre": "Auriculares Logitech Astro A50X Wireless Lightspeed 2.4Ghz Bluetooth White PCPS5XBOX HDMI 2.1 24HS",
+      "precio": 787550,
+      "imagen": "/img/cab12dae89ebe10f.webp"
+    }
+  ]
+}

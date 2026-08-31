@@ -1,0 +1,463 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { Minus, Plus, Search, ShoppingCart, Trash2, X } from "lucide-react";
+import { calculateNationalPrice } from "@/lib/utils";
+import {
+  catalogProductImage,
+  componentCatalogLabels,
+  loadComponentCatalog,
+  type ComponentCatalogKey,
+} from "@/lib/pc-catalog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { PageHero } from "@/components/site/PageHero";
+import { waLink } from "@/components/site/site-config";
+import { cn } from "@/lib/utils";
+
+interface Producto {
+  id: string;
+  nombre: string;
+  categoria: string;
+  imagen: string;
+  precio: number;
+  stock: number;
+}
+interface CartItem extends Producto {
+  cantidad: number;
+}
+
+const CART_KEY = "servitec-tienda-carrito";
+const money = (n: number) => `$${Number(n || 0).toLocaleString("es-AR")}`;
+
+const loadCart = (): CartItem[] => {
+  if (typeof window === "undefined") return [];
+  try {
+    return JSON.parse(window.localStorage.getItem(CART_KEY) || "[]") as CartItem[];
+  } catch {
+    return [];
+  }
+};
+
+export function TiendaClient() {
+  const searchParams = useSearchParams();
+  const tipo = searchParams.get("tipo") === "componentes" ? "componentes" : "accesorios";
+
+  const [productos, setProductos] = useState<Producto[]>([]);
+  const [componentes, setComponentes] = useState<Producto[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [busqueda, setBusqueda] = useState("");
+  const [orden, setOrden] = useState<"" | "asc" | "desc">("");
+  const [categoriaFiltro, setCategoriaFiltro] = useState("");
+  const [carrito, setCarrito] = useState<CartItem[]>([]);
+  const [carritoAbierto, setCarritoAbierto] = useState(false);
+
+  useEffect(() => setCarrito(loadCart()), []);
+  useEffect(() => {
+    window.localStorage.setItem(CART_KEY, JSON.stringify(carrito));
+  }, [carrito]);
+  useEffect(() => setCategoriaFiltro(""), [tipo]);
+
+  useEffect(() => {
+    let alive = true;
+    if (tipo === "componentes") {
+      setLoading(true);
+      loadComponentCatalog()
+        .then((catalog) => {
+          if (!alive) return;
+          const items = Object.entries(catalog).flatMap(([key, products]) =>
+            products.map((p, i) => ({
+              id: `${key}-${i}-${p.nombre}`,
+              nombre: p.nombre,
+              categoria: componentCatalogLabels[key as ComponentCatalogKey],
+              imagen: catalogProductImage(p),
+              precio: Number(p.precio || 0),
+              stock: 1,
+            })),
+          );
+          setComponentes(items);
+        })
+        .catch(() => alive && setComponentes([]))
+        .finally(() => alive && setLoading(false));
+      return () => {
+        alive = false;
+      };
+    }
+
+    setLoading(true);
+    fetch("/api/productos")
+      .then((r) => (r.ok ? r.json() : []))
+      .then((data: Producto[]) => {
+        if (alive) setProductos(Array.isArray(data) ? data : []);
+      })
+      .catch(() => alive && setProductos([]))
+      .finally(() => alive && setLoading(false));
+    return () => {
+      alive = false;
+    };
+  }, [tipo]);
+
+  const base = tipo === "componentes" ? componentes : productos;
+
+  const categorias = useMemo(
+    () =>
+      [...new Set(base.map((p) => p.categoria || "Sin categoría"))].sort((a, b) =>
+        a.localeCompare(b, "es"),
+      ),
+    [base],
+  );
+
+  const filtrados = useMemo(() => {
+    const list = base.filter(
+      (p) =>
+        p.nombre.toLowerCase().includes(busqueda.toLowerCase()) &&
+        (!categoriaFiltro || (p.categoria || "Sin categoría") === categoriaFiltro),
+    );
+    if (orden === "asc") list.sort((a, b) => a.precio - b.precio);
+    if (orden === "desc") list.sort((a, b) => b.precio - a.precio);
+    return list;
+  }, [base, busqueda, orden, categoriaFiltro]);
+
+  const grupos = useMemo(() => {
+    const map = new Map<string, Producto[]>();
+    filtrados.forEach((p) => {
+      const arr = map.get(p.categoria) ?? [];
+      arr.push(p);
+      map.set(p.categoria, arr);
+    });
+    return [...map];
+  }, [filtrados]);
+
+  const totalArticulos = carrito.reduce((t, i) => t + i.cantidad, 0);
+  const totalCarrito = carrito.reduce((t, i) => t + i.precio * i.cantidad, 0);
+
+  const agregar = (p: Producto) =>
+    setCarrito((cur) => {
+      const found = cur.find((i) => i.id === p.id);
+      return found
+        ? cur.map((i) => (i.id === p.id ? { ...i, cantidad: i.cantidad + 1 } : i))
+        : [...cur, { ...p, cantidad: 1 }];
+    });
+
+  const cambiar = (id: string, delta: number) =>
+    setCarrito((cur) =>
+      cur.flatMap((i) => {
+        if (i.id !== id) return [i];
+        const q = i.cantidad + delta;
+        return q > 0 ? [{ ...i, cantidad: q }] : [];
+      }),
+    );
+
+  const pedir = () => {
+    const detalle = carrito
+      .map((i) => `${i.cantidad} x ${i.nombre} — ${money(i.precio * i.cantidad)}`)
+      .join("\n");
+    window.open(
+      waLink(
+        `Hola ServiTec, quiero realizar este pedido:\n${detalle}\n\nTotal: ${money(totalCarrito)}\nEnvío: consultar`,
+      ),
+      "_blank",
+      "noopener,noreferrer",
+    );
+  };
+
+  return (
+    <>
+      <PageHero
+        eyebrow="Tienda"
+        title={tipo === "componentes" ? "Componentes de PC" : "Accesorios y periféricos"}
+        description="Stock actualizado. Armá tu pedido y lo coordinamos por WhatsApp."
+      >
+        <div className="mx-auto flex w-fit rounded-xl border border-white/15 bg-white/5 p-1">
+          {[
+            ["accesorios", "Accesorios"],
+            ["componentes", "Componentes"],
+          ].map(([value, label]) => (
+            <Link
+              key={value}
+              href={`/tienda?tipo=${value}`}
+              className={cn(
+                "rounded-lg px-5 py-2 text-sm font-semibold transition",
+                tipo === value
+                  ? "bg-background text-foreground shadow-soft"
+                  : "text-sidebar-foreground/70 hover:text-white",
+              )}
+            >
+              {label}
+            </Link>
+          ))}
+        </div>
+      </PageHero>
+
+      <section className="bg-muted/40">
+      <div className="container-page py-12 lg:py-16">
+        {/* Toolbar */}
+        <div className="sticky top-16 z-20 -mx-4 mb-10 border-b bg-background/90 px-4 py-3 shadow-soft backdrop-blur sm:mx-0 sm:rounded-2xl sm:border sm:px-4">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center">
+            <div className="relative flex-1">
+              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={busqueda}
+                onChange={(e) => setBusqueda(e.target.value)}
+                placeholder="Buscar producto…"
+                className="pl-9"
+                aria-label="Buscar producto"
+              />
+            </div>
+            <Select
+              value={categoriaFiltro || "all"}
+              onValueChange={(v) => setCategoriaFiltro(v === "all" ? "" : v)}
+            >
+              <SelectTrigger className="md:w-56">
+                <SelectValue placeholder="Categoría" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas las categorías</SelectItem>
+                {categorias.map((c) => (
+                  <SelectItem key={c} value={c}>
+                    {c}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select
+              value={orden || "none"}
+              onValueChange={(v) => setOrden(v === "none" ? "" : (v as "asc" | "desc"))}
+            >
+              <SelectTrigger className="md:w-48">
+                <SelectValue placeholder="Ordenar" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">Orden por defecto</SelectItem>
+                <SelectItem value="asc">Precio: menor a mayor</SelectItem>
+                <SelectItem value="desc">Precio: mayor a menor</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button
+              onClick={() => setCarritoAbierto(true)}
+              className="relative gap-2"
+              aria-label={`Abrir carrito, ${totalArticulos} artículos`}
+            >
+              <ShoppingCart className="size-4" /> Carrito
+              {totalArticulos > 0 && (
+                <span className="grid min-w-5 place-items-center rounded-full bg-secondary px-1.5 text-xs font-bold text-secondary-foreground">
+                  {totalArticulos}
+                </span>
+              )}
+            </Button>
+          </div>
+        </div>
+
+        {loading && (
+          <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="h-72 animate-pulse rounded-2xl border bg-muted" />
+            ))}
+          </div>
+        )}
+
+        {!loading && grupos.length === 0 && (
+          <p className="py-16 text-center text-muted-foreground">
+            No encontramos productos con esos filtros.
+          </p>
+        )}
+
+        {!loading &&
+          grupos.map(([categoria, items]) => (
+            <div key={categoria} className="mb-14">
+              <h2 className="mb-6 inline-flex rounded-full border bg-muted px-4 py-1.5 text-sm font-bold">
+                {categoria}
+              </h2>
+              <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4">
+                {items.map((p) => {
+                  const agotado = tipo === "accesorios" && p.stock === 0;
+                  return (
+                    <article
+                      key={p.id}
+                      className="group flex flex-col overflow-hidden rounded-2xl border bg-card shadow-soft transition-all hover:-translate-y-1 hover:shadow-soft-lg"
+                    >
+                      <div className="grid aspect-square place-items-center bg-white p-4">
+                        {p.imagen ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={p.imagen}
+                            alt={p.nombre}
+                            loading="lazy"
+                            className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-105"
+                          />
+                        ) : (
+                          <ShoppingCart className="size-8 text-muted-foreground/40" />
+                        )}
+                      </div>
+                      <div className="flex flex-1 flex-col gap-2 p-4">
+                        <h3 className="line-clamp-2 min-h-[2.5rem] text-sm font-semibold">
+                          {p.nombre}
+                        </h3>
+                        {agotado ? (
+                          <p className="text-sm font-bold uppercase tracking-wide text-destructive">
+                            Sin stock
+                          </p>
+                        ) : (
+                          <div>
+                            <p className="text-lg font-bold text-primary">
+                              {money(p.precio)}
+                            </p>
+                            <p className="text-[11px] text-muted-foreground">
+                              Sin imp. nac. {money(calculateNationalPrice(p.precio))}
+                            </p>
+                          </div>
+                        )}
+                        <Button
+                          onClick={() => agregar(p)}
+                          disabled={agotado}
+                          size="sm"
+                          className="mt-auto w-full gap-2"
+                        >
+                          <Plus className="size-3.5" /> Agregar
+                        </Button>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+      </div>
+      </section>
+
+      {carritoAbierto && (
+        <CartDrawer
+          items={carrito}
+          total={totalCarrito}
+          onClose={() => setCarritoAbierto(false)}
+          onChange={cambiar}
+          onCheckout={pedir}
+        />
+      )}
+    </>
+  );
+}
+
+function CartDrawer({
+  items,
+  total,
+  onClose,
+  onChange,
+  onCheckout,
+}: {
+  items: CartItem[];
+  total: number;
+  onClose: () => void;
+  onChange: (id: string, delta: number) => void;
+  onCheckout: () => void;
+}) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex justify-end bg-foreground/40 backdrop-blur-sm"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Carrito de compras"
+      onClick={onClose}
+    >
+      <div
+        className="flex h-full w-full max-w-md flex-col bg-background shadow-soft-lg"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between border-b p-5">
+          <div>
+            <p className="eyebrow">Tu selección</p>
+            <h2 className="font-display text-xl font-bold">Carrito</h2>
+          </div>
+          <Button variant="ghost" size="icon" onClick={onClose} aria-label="Cerrar">
+            <X className="size-5" />
+          </Button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-5">
+          {items.length === 0 ? (
+            <p className="py-16 text-center text-sm text-muted-foreground">
+              Tu carrito está vacío.
+            </p>
+          ) : (
+            <ul className="space-y-3">
+              {items.map((item) => (
+                <li key={item.id} className="flex gap-3 rounded-xl border p-3">
+                  <div className="grid size-16 shrink-0 place-items-center rounded-lg bg-white p-1.5">
+                    {item.imagen ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={item.imagen}
+                        alt=""
+                        className="h-full w-full object-contain"
+                      />
+                    ) : null}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold">{item.nombre}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {money(item.precio)} c/u
+                    </p>
+                    <p className="text-sm font-bold text-primary">
+                      {money(item.precio * item.cantidad)}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-1.5 self-center">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="size-7"
+                      onClick={() => onChange(item.id, -1)}
+                      aria-label="Quitar una unidad"
+                    >
+                      {item.cantidad === 1 ? (
+                        <Trash2 className="size-3.5" />
+                      ) : (
+                        <Minus className="size-3.5" />
+                      )}
+                    </Button>
+                    <span className="w-5 text-center text-sm font-bold">
+                      {item.cantidad}
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="size-7"
+                      onClick={() => onChange(item.id, 1)}
+                      aria-label="Agregar una unidad"
+                    >
+                      <Plus className="size-3.5" />
+                    </Button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        <div className="border-t p-5">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-muted-foreground">Total</span>
+            <strong className="font-display text-2xl font-bold">{money(total)}</strong>
+          </div>
+          <p className="mt-1 text-xs text-muted-foreground">Envío: a coordinar</p>
+          <Button
+            onClick={onCheckout}
+            disabled={items.length === 0}
+            className="mt-4 w-full gap-2 bg-whatsapp text-whatsapp-foreground hover:bg-whatsapp/90"
+          >
+            <ShoppingCart className="size-4" /> Iniciar pedido por WhatsApp
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
