@@ -92,16 +92,33 @@
 @layer base {
   * {
     @apply border-border;
+    box-sizing: border-box;
   }
 
   html {
     scroll-behavior: smooth;
     -webkit-text-size-adjust: 100%;
+    overflow-x: clip;
   }
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
     text-rendering: optimizeLegibility;
+    overflow-x: clip;
+  }
+
+  img,
+  svg {
+    display: block;
+    max-width: 100%;
+  }
+
+  a,
+  button,
+  input,
+  select,
+  textarea {
+    max-width: 100%;
   }
 
   h1, h2, h3, h4, h5, h6 {

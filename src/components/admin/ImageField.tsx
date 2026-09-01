@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { ImagePlus, Loader2, Trash2, X } from "lucide-react";
+import { ImagePlus, Loader2, Plus, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { uploadImage } from "./lib";
 
@@ -80,12 +80,19 @@ export function ImageField({
           type="button"
           onClick={() => inputRef.current?.click()}
           disabled={busy}
-          className="grid size-20 place-items-center rounded-lg border border-dashed text-muted-foreground transition-colors hover:border-primary hover:text-primary disabled:opacity-50"
+          className="group grid size-20 place-items-center rounded-xl border border-dashed border-slate-300 bg-slate-50 text-muted-foreground transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary disabled:opacity-50"
+          aria-label="Agregar imagen"
         >
           {busy ? (
             <Loader2 className="size-5 animate-spin" />
           ) : (
-            <ImagePlus className="size-5" />
+            <span className="flex flex-col items-center gap-0.5">
+              <span className="relative">
+                <ImagePlus className="size-6" />
+                <Plus className="absolute -bottom-1 -right-2 size-3.5 rounded-full bg-primary text-white" />
+              </span>
+              <span className="text-[10px] font-semibold">Agregar</span>
+            </span>
           )}
         </button>
       </div>

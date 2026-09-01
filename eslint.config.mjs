@@ -1,7 +1,7 @@
 import next from "eslint-config-next";
 
 /** @type {import('eslint').Linter.Config[]} */
-export default [
+const eslintConfig = [
   {
     ignores: [
       "legacy/**",
@@ -13,3 +13,5 @@ export default [
   },
   ...next,
 ];
+
+export default eslintConfig;

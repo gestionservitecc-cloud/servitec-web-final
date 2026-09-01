@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -25,8 +25,7 @@ export function ProductoDialog({
   onSave: (p: Producto) => void;
   onClose: () => void;
 }) {
-  const [draft, setDraft] = useState<Producto>({ ...producto });
-  useEffect(() => setDraft({ ...producto }), [producto]);
+  const [draft, setDraft] = useState<Producto>(() => ({ ...producto }));
   const set = <K extends keyof Producto>(k: K, v: Producto[K]) =>
     setDraft((d) => ({ ...d, [k]: v }));
 

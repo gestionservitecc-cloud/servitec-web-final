@@ -44,14 +44,14 @@ export function PageHero({
       />
       <motion.div
         aria-hidden
-        className="pointer-events-none absolute -left-32 top-0 h-72 w-72 rounded-full bg-primary/25 blur-3xl"
-        animate={reduce ? undefined : { x: [0, 24, 0], y: [0, -16, 0] }}
+        className="pointer-events-none absolute -left-12 top-0 h-40 w-40 rounded-full bg-primary/25 blur-3xl sm:-left-32 sm:h-72 sm:w-72"
+        animate={reduce ? undefined : { x: [0, 18, 0], y: [0, -12, 0] }}
         transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
       />
       <motion.div
         aria-hidden
-        className="pointer-events-none absolute -right-24 bottom-0 h-72 w-72 rounded-full bg-secondary/20 blur-3xl"
-        animate={reduce ? undefined : { x: [0, -20, 0], y: [0, 18, 0] }}
+        className="pointer-events-none absolute -right-10 bottom-0 h-40 w-40 rounded-full bg-secondary/20 blur-3xl sm:-right-24 sm:h-72 sm:w-72"
+        animate={reduce ? undefined : { x: [0, -16, 0], y: [0, 12, 0] }}
         transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
       />
       <div

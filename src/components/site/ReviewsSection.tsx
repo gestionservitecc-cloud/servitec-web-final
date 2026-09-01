@@ -1,18 +1,19 @@
 "use client";
 
-import { Star } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ChevronLeft, ChevronRight, Star } from "lucide-react";
 import { CONTACT } from "./site-config";
 import { reviews } from "@/content/reviews";
 
-function ReviewCard({ name, text }: { name: string; text: string }) {
+function ReviewCard({ name, rating, text }: { name: string; rating: number; text: string }) {
   return (
-    <figure className="flex w-[300px] shrink-0 flex-col gap-3 rounded-2xl border bg-card p-6 shadow-soft sm:w-[360px]">
+    <figure className="mx-auto flex min-h-[250px] w-full max-w-2xl flex-col gap-4 rounded-2xl border bg-card p-6 text-left shadow-soft sm:min-h-[230px] sm:p-8">
       <div className="flex gap-0.5 text-amber-400">
-        {Array.from({ length: 5 }).map((_, i) => (
-          <Star key={i} className="size-4 fill-current" />
+        {Array.from({ length: rating }).map((_, i) => (
+          <Star key={i} className="size-4 fill-current" aria-hidden="true" />
         ))}
       </div>
-      <blockquote className="line-clamp-6 text-sm leading-relaxed text-muted-foreground">
+      <blockquote className="text-sm leading-relaxed text-muted-foreground sm:text-base">
         “{text}”
       </blockquote>
       <figcaption className="mt-auto text-sm font-semibold">{name}</figcaption>
@@ -21,7 +22,21 @@ function ReviewCard({ name, text }: { name: string; text: string }) {
 }
 
 export function ReviewsSection() {
-  const loop = [...reviews, ...reviews];
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [paused, setPaused] = useState(false);
+
+  useEffect(() => {
+    if (paused) return;
+    const timer = window.setInterval(() => {
+      setActiveIndex((current) => (current + 1) % reviews.length);
+    }, 5500);
+    return () => window.clearInterval(timer);
+  }, [paused]);
+
+  const goTo = (index: number) => {
+    setActiveIndex((index + reviews.length) % reviews.length);
+  };
+
   return (
     <section className="overflow-hidden border-y bg-muted/40 py-16 sm:py-20">
       <div className="container-page text-center">
@@ -35,17 +50,63 @@ export function ReviewsSection() {
       </div>
 
       <div
-        className="group relative mt-10 flex overflow-hidden"
-        style={{
-          maskImage:
-            "linear-gradient(to right, transparent, black 6%, black 94%, transparent)",
-        }}
+        className="relative mx-auto mt-10 max-w-4xl px-12 sm:px-16"
+        onMouseEnter={() => setPaused(true)}
+        onMouseLeave={() => setPaused(false)}
+        onFocus={() => setPaused(true)}
+        onBlur={() => setPaused(false)}
+        aria-roledescription="carrusel"
+        aria-label="Opiniones de clientes"
       >
-        <div className="flex shrink-0 animate-marquee gap-5 pl-5 group-hover:[animation-play-state:paused] motion-reduce:animate-none">
-          {loop.map((r, i) => (
-            <ReviewCard key={`${r.name}-${i}`} name={r.name} text={r.text} />
-          ))}
+        <button
+          type="button"
+          onClick={() => goTo(activeIndex - 1)}
+          className="absolute left-0 top-1/2 z-10 grid size-9 -translate-y-1/2 place-items-center rounded-full border bg-background text-foreground shadow-soft transition hover:bg-muted"
+          aria-label="Opinión anterior"
+        >
+          <ChevronLeft className="size-5" />
+        </button>
+
+        <div
+          className="overflow-hidden"
+          style={{
+            maskImage:
+              "linear-gradient(to right, transparent, black 5%, black 95%, transparent)",
+          }}
+        >
+          <div
+            className="flex transition-transform duration-700 ease-out motion-reduce:transition-none"
+            style={{ transform: `translateX(-${activeIndex * 100}%)` }}
+          >
+            {reviews.map((review) => (
+              <div key={review.name} className="w-full shrink-0 px-1">
+                <ReviewCard {...review} />
+              </div>
+            ))}
+          </div>
         </div>
+
+        <button
+          type="button"
+          onClick={() => goTo(activeIndex + 1)}
+          className="absolute right-0 top-1/2 z-10 grid size-9 -translate-y-1/2 place-items-center rounded-full border bg-background text-foreground shadow-soft transition hover:bg-muted"
+          aria-label="Opinión siguiente"
+        >
+          <ChevronRight className="size-5" />
+        </button>
+      </div>
+
+      <div className="mt-6 flex justify-center gap-2" aria-label="Seleccionar opinión">
+        {reviews.map((review, index) => (
+          <button
+            key={review.name}
+            type="button"
+            onClick={() => goTo(index)}
+            className={`h-2 rounded-full transition-all ${activeIndex === index ? "w-6 bg-primary" : "w-2 bg-border hover:bg-muted-foreground"}`}
+            aria-label={`Ver opinión de ${review.name}`}
+            aria-current={activeIndex === index ? "true" : undefined}
+          />
+        ))}
       </div>
 
       <div className="mt-10 text-center">

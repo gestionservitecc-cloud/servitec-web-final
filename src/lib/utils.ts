@@ -95,3 +95,43 @@ export function isAccessoryCategoryValue(value?: string): boolean {
     "WEBCAM"
   ].includes(normalized);
 }
+
+export function normalizeImportedCategory(value?: string): string {
+  const normalized = String(value ?? "").trim();
+  if (!normalized) return "ARTICULO";
+
+  const upper = normalized.toUpperCase();
+  const aliases: Record<string, string> = {
+    ACCESORIO: "ACCESORIOS",
+    ACCESORIOS: "ACCESORIOS",
+    ARTICULO: "ACCESORIOS",
+    ARTICULOS: "ACCESORIOS",
+    CARGADOR: "ACCESORIOS",
+    CARGADORES: "ACCESORIOS",
+    PERIFERICO: "ACCESORIOS",
+    PERIFERICOS: "ACCESORIOS",
+    TECLADO: "ACCESORIOS",
+    TECLADOS: "ACCESORIOS",
+    MOUSE: "ACCESORIOS",
+    MOUSES: "ACCESORIOS",
+    MONITOR: "ACCESORIOS",
+    MONITORES: "ACCESORIOS",
+    PARLANTE: "ACCESORIOS",
+    PARLANTES: "ACCESORIOS",
+    AURICULAR: "ACCESORIOS",
+    AURICULARES: "ACCESORIOS",
+    NOTEBOOK: "NOTEBOOK",
+    NOTEBOOKS: "NOTEBOOK",
+    TABLET: "TABLET",
+    TABLETS: "TABLET",
+    PC: "PC-ARMADA",
+    "PC ARMADA": "PC-ARMADA",
+    "PC-ARMADA": "PC-ARMADA",
+    CELULAR: "CELULAR",
+    CELULARES: "CELULAR",
+    TV: "TV",
+    TVS: "TV",
+  };
+
+  return aliases[upper] || upper;
+}

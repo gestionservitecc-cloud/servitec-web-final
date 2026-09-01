@@ -4,6 +4,7 @@ import {
   isAccessoryCategoryValue,
   isPcArmadaCategoryValue,
   normalizeCsvProductName,
+  normalizeImportedCategory,
   normalizeStockCategoryValue,
   shouldIgnoreCsvProduct,
 } from "./utils";
@@ -39,6 +40,12 @@ describe("stock category normalization", () => {
     expect(normalizeStockCategoryValue("pc armadas")).toBe("pc-armada");
     expect(isPcArmadaCategoryValue("pc")).toBe(true);
     expect(isPcArmadaCategoryValue("pc-armada")).toBe(true);
+  });
+
+  it("normaliza categorias importadas desde CSV de otras apps", () => {
+    expect(normalizeImportedCategory("accesorios")).toBe("ACCESORIOS");
+    expect(normalizeImportedCategory("Cargadores")).toBe("ACCESORIOS");
+    expect(normalizeImportedCategory("pc armada")).toBe("PC-ARMADA");
   });
 });
 

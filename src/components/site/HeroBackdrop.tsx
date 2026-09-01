@@ -8,18 +8,18 @@ export function HeroBackdrop() {
 
   const orbs = [
     {
-      className: "-left-32 top-4 h-72 w-72 bg-primary/30",
-      anim: { x: [0, 30, 0], y: [0, -20, 0] },
+      className: "-left-20 top-4 h-52 w-52 bg-primary/30 sm:-left-32 sm:h-72 sm:w-72",
+      anim: { x: [0, 20, 0], y: [0, -16, 0] },
       duration: 14,
     },
     {
-      className: "right-[-6rem] top-24 h-64 w-64 bg-secondary/25",
-      anim: { x: [0, -24, 0], y: [0, 24, 0] },
+      className: "right-[-3rem] top-20 h-48 w-48 bg-secondary/25 sm:right-[-6rem] sm:top-24 sm:h-64 sm:w-64",
+      anim: { x: [0, -18, 0], y: [0, 16, 0] },
       duration: 18,
     },
     {
-      className: "left-1/3 bottom-[-4rem] h-56 w-56 bg-primary/20",
-      anim: { x: [0, 18, 0], y: [0, 12, 0] },
+      className: "left-1/3 bottom-[-3rem] h-44 w-44 bg-primary/20 sm:bottom-[-4rem] sm:h-56 sm:w-56",
+      anim: { x: [0, 12, 0], y: [0, 8, 0] },
       duration: 16,
     },
   ];

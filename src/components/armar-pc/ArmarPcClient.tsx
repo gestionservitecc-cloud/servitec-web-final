@@ -5,13 +5,14 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   catalogProductImage,
-  getCatalog,
+  loadComponentCatalog,
   matchesMonitorProduct,
   matchesProductKeywords,
   matchesSpeakerProduct,
   type CatalogProduct,
 } from "@/lib/pc-catalog";
 import { calculateNationalPrice } from "@/lib/utils";
+import { getAssetUrl } from "@/lib/asset-url";
 import type { Equipo } from "@/lib/types";
 import {
   ArrowLeft,
@@ -147,7 +148,7 @@ const presetBenefits = [
   "Paquete Office activado",
 ];
 
-const resolveImageUrl = (path: string) => path || "";
+const resolveImageUrl = (path: string) => getAssetUrl(path);
 
 const formatPrice = (price?: number) =>
   price === undefined || !Number.isFinite(Number(price))
@@ -434,7 +435,7 @@ const ArmarPc = () => {
 
   useEffect(() => {
     const loadCatalog = async () => {
-      const productMap = getCatalog() as Record<string, CatalogProduct[]>;
+      const productMap = await loadComponentCatalog() as unknown as Record<string, CatalogProduct[]>;
       const loadedGroups = groups.map((group) => ({
         ...group,
         options: productMap[group.key]
@@ -588,7 +589,7 @@ const ArmarPc = () => {
       <div className="pointer-events-none absolute left-[39%] top-1/2 hidden h-[900px] w-[900px] -translate-y-1/2 rounded-full border border-dashed border-red-200/60 xl:block" />
       <div className="pointer-events-none absolute left-[35%] top-1/2 hidden h-[650px] w-[650px] -translate-y-1/2 rounded-full border border-red-100 xl:block" />
       <div className="relative z-10 mx-auto flex min-h-screen max-w-[1600px] flex-col px-5 py-5 sm:px-8 lg:px-10">
-        <header className="flex items-center justify-between border-b border-white/10 pb-4">
+        <header className="flex min-w-0 items-center justify-between gap-3 border-b border-white/10 pb-4">
           <button
             type="button"
             onClick={() => router.back()}
@@ -596,16 +597,16 @@ const ArmarPc = () => {
           >
             <ArrowLeft size={18} /> Volver
           </button>
-          <div className="flex items-center gap-3">
+          <div className="flex min-w-0 items-center gap-2 sm:gap-3">
             <img
-              src="/logo.png"
+              src={getAssetUrl("logo.png")}
               alt="ServiTec"
               className="h-10 w-10 object-contain"
             />
             <span className="hidden font-display text-lg font-bold sm:block">
               Servi<span className="text-primary">Tec</span>
             </span>
-            <span className="border-l border-white/5 pl-3 text-xs uppercase tracking-[0.2em] text-slate-890">
+            <span className="hidden truncate border-l border-white/5 pl-3 text-xs uppercase tracking-[0.2em] text-slate-400 sm:block">
               Armador de PC
             </span>
           </div>
@@ -618,7 +619,7 @@ const ArmarPc = () => {
             <span className="hidden sm:inline">Reiniciar</span>
           </button>
         </header>
-        <nav className="mx-auto mt-6 flex items-center justify-center">
+        <nav className="mx-auto mt-6 flex w-full max-w-full items-center justify-center overflow-x-auto pb-1">
           {[
             { number: 1, label: "Componentes" },
             { number: 2, label: "Accesorios" },
@@ -641,7 +642,7 @@ const ArmarPc = () => {
               </button>
               {index < 2 && (
                 <span
-                  className={`mx-3 h-px w-12 sm:w-20 ${item.number < step ? "bg-secondary" : "bg-slate-600"}`}
+                  className={`mx-2 h-px w-8 shrink-0 sm:mx-3 sm:w-20 ${item.number < step ? "bg-secondary" : "bg-slate-600"}`}
                 />
               )}
             </div>

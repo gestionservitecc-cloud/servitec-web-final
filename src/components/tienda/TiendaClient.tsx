@@ -57,23 +57,25 @@ export function TiendaClient() {
   const [loading, setLoading] = useState(true);
   const [busqueda, setBusqueda] = useState("");
   const [orden, setOrden] = useState<"" | "asc" | "desc">("");
-  const [categoriaFiltro, setCategoriaFiltro] = useState("");
-  const [carrito, setCarrito] = useState<CartItem[]>([]);
+  const [categoriaFiltro, setCategoriaFiltro] = useState({ tipo, value: "" });
+  const [carrito, setCarrito] = useState<CartItem[]>(loadCart);
   const [carritoAbierto, setCarritoAbierto] = useState(false);
+  const [blueRate, setBlueRate] = useState({ venta: 0, base: 0 });
 
-  useEffect(() => setCarrito(loadCart()), []);
   useEffect(() => {
     window.localStorage.setItem(CART_KEY, JSON.stringify(carrito));
   }, [carrito]);
-  useEffect(() => setCategoriaFiltro(""), [tipo]);
 
   useEffect(() => {
     let alive = true;
     if (tipo === "componentes") {
-      setLoading(true);
-      loadComponentCatalog()
-        .then((catalog) => {
+      Promise.all([
+        loadComponentCatalog(),
+        fetch("/api/dolar-blue").then((response) => (response.ok ? response.json() : null)),
+      ])
+        .then(([catalog, quote]) => {
           if (!alive) return;
+          if (quote?.venta && quote?.base) setBlueRate({ venta: Number(quote.venta), base: Number(quote.base) });
           const items = Object.entries(catalog).flatMap(([key, products]) =>
             products.map((p, i) => ({
               id: `${key}-${i}-${p.nombre}`,
@@ -93,7 +95,6 @@ export function TiendaClient() {
       };
     }
 
-    setLoading(true);
     fetch("/api/productos")
       .then((r) => (r.ok ? r.json() : []))
       .then((data: Producto[]) => {
@@ -106,7 +107,14 @@ export function TiendaClient() {
     };
   }, [tipo]);
 
-  const base = tipo === "componentes" ? componentes : productos;
+  const componentPriceFactor = blueRate.base > 0 ? blueRate.venta / blueRate.base : 1;
+  const base = useMemo(
+    () => tipo === "componentes"
+      ? componentes.map((product) => ({ ...product, precio: Math.round(product.precio * componentPriceFactor) }))
+      : productos,
+    [componentPriceFactor, componentes, productos, tipo],
+  );
+  const activeCategoriaFiltro = categoriaFiltro.tipo === tipo ? categoriaFiltro.value : "";
 
   const categorias = useMemo(
     () =>
@@ -120,12 +128,12 @@ export function TiendaClient() {
     const list = base.filter(
       (p) =>
         p.nombre.toLowerCase().includes(busqueda.toLowerCase()) &&
-        (!categoriaFiltro || (p.categoria || "Sin categoría") === categoriaFiltro),
+        (!activeCategoriaFiltro || (p.categoria || "Sin categoría") === activeCategoriaFiltro),
     );
     if (orden === "asc") list.sort((a, b) => a.precio - b.precio);
     if (orden === "desc") list.sort((a, b) => b.precio - a.precio);
     return list;
-  }, [base, busqueda, orden, categoriaFiltro]);
+  }, [base, busqueda, orden, activeCategoriaFiltro]);
 
   const grupos = useMemo(() => {
     const map = new Map<string, Producto[]>();
@@ -214,8 +222,8 @@ export function TiendaClient() {
               />
             </div>
             <Select
-              value={categoriaFiltro || "all"}
-              onValueChange={(v) => setCategoriaFiltro(v === "all" ? "" : v)}
+              value={activeCategoriaFiltro || "all"}
+              onValueChange={(v) => setCategoriaFiltro({ tipo, value: v === "all" ? "" : v })}
             >
               <SelectTrigger className="md:w-56">
                 <SelectValue placeholder="Categoría" />
@@ -258,7 +266,7 @@ export function TiendaClient() {
         </div>
 
         {loading && (
-          <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-5 min-[420px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
             {Array.from({ length: 8 }).map((_, i) => (
               <div key={i} className="h-72 animate-pulse rounded-2xl border bg-muted" />
             ))}
@@ -277,7 +285,7 @@ export function TiendaClient() {
               <h2 className="mb-6 inline-flex rounded-full border bg-muted px-4 py-1.5 text-sm font-bold">
                 {categoria}
               </h2>
-              <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4">
+              <div className="grid grid-cols-1 gap-5 min-[420px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
                 {items.map((p) => {
                   const agotado = tipo === "accesorios" && p.stock === 0;
                   return (

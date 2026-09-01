@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { getAssetUrl } from "@/lib/asset-url";
 
 export function Logo({
   className,
@@ -16,11 +17,15 @@ export function Logo({
     >
       <span
         className={cn(
-          "grid h-9 w-9 place-items-center rounded-xl text-sm font-bold shadow-soft transition-transform group-hover:scale-105",
-          invert ? "bg-white text-primary" : "bg-primary text-primary-foreground",
+          "grid h-9 w-9 place-items-center overflow-hidden rounded-xl shadow-soft transition-transform group-hover:scale-105",
         )}
       >
-        ST
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={getAssetUrl("logo.png")}
+          alt=""
+          className="h-full w-full object-contain"
+        />
       </span>
       <span
         className={cn(

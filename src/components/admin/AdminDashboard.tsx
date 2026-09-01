@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   ArrowDown,
@@ -16,6 +17,13 @@ import {
   Trash2,
 } from "lucide-react";
 import type { Equipo, Producto } from "@/lib/types";
+import { getAssetUrl } from "@/lib/asset-url";
+import {
+  normalizeCsvProductName,
+  normalizeImportedCategory,
+  normalizeStockCategoryValue,
+  shouldIgnoreCsvProduct,
+} from "@/lib/utils";
 import {
   CATEGORIAS_EQUIPO,
   emptyEquipo,
@@ -35,14 +43,86 @@ const catLabel = (v: string) =>
 
 type Segment = "dashboard" | "stock";
 
+type InventoryMovement = {
+  id: string;
+  tipo: "entrada" | "salida";
+  producto: string;
+  cantidad: number;
+  anterior: number;
+  nuevo: number;
+  usuario: string;
+  origen: string;
+  fecha: string;
+};
+
+type ImportSummary = {
+  creados: number;
+  actualizados: number;
+  marcadosSinStock: number;
+  omitidos: number;
+};
+
+const STORAGE_KEY_MOVEMENTS = "servitec-admin-movimientos";
+const STORAGE_KEY_USER = "servitec-admin-user";
+
+const getCurrentAdminUser = () => {
+  if (typeof window === "undefined") return "admin@servitec.com";
+  try {
+    const stored = window.localStorage.getItem(STORAGE_KEY_USER);
+    return stored || "admin@servitec.com";
+  } catch {
+    return "admin@servitec.com";
+  }
+};
+
+const readStoredMovements = (): InventoryMovement[] => {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY_MOVEMENTS);
+    return raw ? (JSON.parse(raw) as InventoryMovement[]) : [];
+  } catch {
+    return [];
+  }
+};
+
+const writeStoredMovements = (movements: InventoryMovement[]) => {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(STORAGE_KEY_MOVEMENTS, JSON.stringify(movements));
+  } catch {
+    // no-op
+  }
+};
+
+const getMovementMeta = (tipo: InventoryMovement["tipo"]) => ({
+  label: tipo === "entrada" ? "Entrada" : "Salida",
+  color: tipo === "entrada" ? "text-emerald-700" : "text-rose-700",
+});
+
 export function AdminDashboard({ persistent }: { persistent: boolean }) {
   const router = useRouter();
   const [segment, setSegment] = useState<Segment>("dashboard");
   const [equipos, setEquipos] = useState<Equipo[]>([]);
   const [productos, setProductos] = useState<Producto[]>([]);
+  const [movimientos, setMovimientos] = useState<InventoryMovement[]>(readStoredMovements);
   const [loading, setLoading] = useState(true);
   const [editEquipo, setEditEquipo] = useState<Equipo | null>(null);
   const [editProducto, setEditProducto] = useState<Producto | null>(null);
+
+  const addMovement = (movement: Omit<InventoryMovement, "id" | "fecha">) => {
+    setMovimientos((cur) => {
+      const next = [
+        {
+          ...movement,
+          id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+          fecha: new Date().toISOString(),
+        },
+        ...cur,
+      ].slice(0, 50);
+      writeStoredMovements(next);
+      return next;
+    });
+  };
 
   useEffect(() => {
     Promise.all([
@@ -76,7 +156,7 @@ export function AdminDashboard({ persistent }: { persistent: boolean }) {
         <div className="flex items-center gap-3">
           <div className="grid size-12 place-items-center rounded-xl border border-white/15 bg-white/10 p-2">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.png" alt="ServiTec" className="h-full w-full object-contain" />
+            <img src={getAssetUrl("logo.png")} alt="ServiTec" className="h-full w-full object-contain" />
           </div>
           <div>
             <p className="text-2xl font-black leading-none tracking-tight">
@@ -89,12 +169,12 @@ export function AdminDashboard({ persistent }: { persistent: boolean }) {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <a
+          <Link
             href="/"
             className="rounded-xl border border-white/15 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/20"
           >
             Ir al inicio
-          </a>
+          </Link>
           <button
             onClick={logout}
             className="rounded-xl border border-rose-300/30 bg-rose-500/80 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-500"
@@ -162,6 +242,8 @@ export function AdminDashboard({ persistent }: { persistent: boolean }) {
           setProductos={setProductos}
           persistent={persistent}
           onEdit={setEditProducto}
+          movimientos={movimientos}
+          addMovement={addMovement}
         />
       ) : (
         <StockTab
@@ -174,6 +256,7 @@ export function AdminDashboard({ persistent }: { persistent: boolean }) {
 
       {editEquipo && (
         <EquipoDialog
+          key={editEquipo.id}
           equipo={editEquipo}
           onClose={() => setEditEquipo(null)}
           onSave={(saved) => {
@@ -190,6 +273,7 @@ export function AdminDashboard({ persistent }: { persistent: boolean }) {
 
       {editProducto && (
         <ProductoDialog
+          key={editProducto.id}
           producto={editProducto}
           categorias={[...new Set(productos.map((p) => p.categoria))].sort()}
           onClose={() => setEditProducto(null)}
@@ -260,8 +344,6 @@ function useSaver<T>(data: T, save: (d: T) => Promise<unknown>) {
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
   const [baseline, setBaseline] = useState(() => JSON.stringify(data));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => setBaseline(JSON.stringify(data)), []);
   const dirty = JSON.stringify(data) !== baseline;
 
   const run = async () => {
@@ -291,14 +373,20 @@ function DashboardTab({
   setProductos,
   persistent,
   onEdit,
+  movimientos,
+  addMovement,
 }: {
   productos: Producto[];
   setProductos: React.Dispatch<React.SetStateAction<Producto[]>>;
   persistent: boolean;
   onEdit: (p: Producto) => void;
+  movimientos: InventoryMovement[];
+  addMovement: (movement: Omit<InventoryMovement, "id" | "fecha">) => void;
 }) {
   const { saving, saved, error, dirty, run } = useSaver(productos, saveProductos);
   const [filter, setFilter] = useState("");
+  const [mostrarTodosMovimientos, setMostrarTodosMovimientos] = useState(false);
+  const [visibleMovimientos, setVisibleMovimientos] = useState(5);
 
   const stockTotal = useMemo(
     () => productos.reduce((s, p) => s + (Number(p.stock) || 0), 0),
@@ -336,7 +424,138 @@ function DashboardTab({
         categorias={categorias}
         persistent={persistent}
         onAdd={(p) => setProductos((cur) => [...cur, p])}
+        onMovement={(movement) => addMovement(movement)}
       />
+
+      <BulkStockImport
+        productos={productos}
+        persistent={persistent}
+        onImport={async (next) => {
+          const map = new Map(productos.map((p) => [normalizeCsvProductName(p.nombre), p]));
+          const importedNames = new Set<string>();
+          let creados = 0;
+          let actualizados = 0;
+          let marcadosSinStock = 0;
+
+          for (const producto of next) {
+            const key = normalizeCsvProductName(producto.nombre);
+            const existing = map.get(key);
+            const anterior = Number(existing?.stock) || 0;
+            const nuevo = Number(producto.stock) || 0;
+            const merged = existing
+              ? { ...existing, ...producto, id: existing.id, imagen: existing.imagen || producto.imagen }
+              : producto;
+
+            map.set(key, merged);
+            importedNames.add(key);
+            if (existing) actualizados += 1;
+            else creados += 1;
+
+            if (anterior !== nuevo) {
+              addMovement({
+                tipo: nuevo > anterior ? "entrada" : "salida",
+                producto: producto.nombre,
+                cantidad: Math.abs(nuevo - anterior),
+                anterior,
+                nuevo,
+                usuario: getCurrentAdminUser(),
+                origen: "importacion_csv",
+              });
+            }
+          }
+
+          for (const producto of productos) {
+            const key = normalizeCsvProductName(producto.nombre);
+            if (importedNames.has(key) || shouldIgnoreCsvProduct(producto.nombre)) continue;
+            const anterior = Number(producto.stock) || 0;
+            if (anterior === 0) continue;
+            map.set(key, { ...producto, stock: 0 });
+            marcadosSinStock += 1;
+            addMovement({
+              tipo: "salida",
+              producto: producto.nombre,
+              cantidad: anterior,
+              anterior,
+              nuevo: 0,
+              usuario: getCurrentAdminUser(),
+              origen: "importacion_csv",
+            });
+          }
+
+          const finalProductos = Array.from(map.values());
+          await saveProductos(finalProductos);
+          setProductos(finalProductos);
+          return { creados, actualizados, marcadosSinStock };
+        }}
+      />
+
+      <section className={panel}>
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 className="text-lg font-semibold">Historial de movimientos</h2>
+            <p className="text-xs text-slate-500">
+              {movimientos.length === 0
+                ? "Sin movimientos recientes"
+                : `Último movimiento de ${movimientos.length} registrado(s)`}
+            </p>
+          </div>
+          {movimientos.length > 1 && (
+            <button
+              type="button"
+              onClick={() => setMostrarTodosMovimientos((prev) => !prev)}
+              className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-100"
+            >
+              {mostrarTodosMovimientos ? "Mostrar solo el último" : "Ver historial completo"}
+            </button>
+          )}
+        </div>
+
+        {movimientos.length === 0 && <p className="text-sm text-slate-500">No hay movimientos registrados.</p>}
+
+        <div className={`${mostrarTodosMovimientos ? "max-h-[380px] overflow-y-auto pr-2" : ""} space-y-3`}>
+          {(mostrarTodosMovimientos ? movimientos : movimientos.slice(0, 1)).map((movimiento) => {
+            const meta = getMovementMeta(movimiento.tipo);
+            return (
+              <div
+                key={movimiento.id}
+                className="flex flex-col gap-2 rounded-xl border border-slate-200 bg-slate-50/80 p-4 sm:flex-row sm:items-center sm:justify-between"
+              >
+                <div className="min-w-0">
+                  <p className="font-medium">
+                    <span className={meta.color}>{meta.label}</span> - {movimiento.producto}
+                  </p>
+                  <p className="text-xs text-slate-500 sm:text-sm">
+                    {movimiento.usuario} • {movimiento.origen}
+                  </p>
+                </div>
+                <div className="text-left sm:text-right">
+                  <p className="text-sm font-semibold sm:text-base">{movimiento.cantidad} unidades</p>
+                  <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">
+                    {new Date(movimiento.fecha).toLocaleString("es-AR", {
+                      day: "2-digit",
+                      month: "2-digit",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {mostrarTodosMovimientos && visibleMovimientos < movimientos.length && (
+          <div className="mt-6 flex justify-center">
+            <button
+              onClick={() => setVisibleMovimientos((prev) => prev + 5)}
+              className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-medium transition hover:bg-slate-100"
+            >
+              Cargar más movimientos
+            </button>
+          </div>
+        )}
+      </section>
 
       <section className={panel}>
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
@@ -444,10 +663,12 @@ function AddProductoForm({
   categorias,
   persistent,
   onAdd,
+  onMovement,
 }: {
   categorias: string[];
   persistent: boolean;
   onAdd: (p: Producto) => void;
+  onMovement: (movement: Omit<InventoryMovement, "id" | "fecha">) => void;
 }) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState(emptyProducto());
@@ -476,7 +697,17 @@ function AddProductoForm({
       }
       setUploading(false);
     }
-    onAdd({ ...form, id: newId(), imagen });
+    const producto = { ...form, id: newId(), imagen };
+    onAdd(producto);
+    onMovement({
+      tipo: "entrada",
+      producto: producto.nombre,
+      cantidad: Number(producto.stock) || 0,
+      anterior: 0,
+      nuevo: Number(producto.stock) || 0,
+      usuario: getCurrentAdminUser(),
+      origen: "alta_manual",
+    });
     setForm(emptyProducto());
     if (fileRef.current) fileRef.current.value = "";
     setMsg("Producto agregado. Acordate de Guardar cambios.");
@@ -558,6 +789,204 @@ function AddProductoForm({
   );
 }
 
+function BulkStockImport({
+  productos,
+  persistent,
+  onImport,
+}: {
+  productos: Producto[];
+  persistent: boolean;
+  onImport: (productos: Producto[]) => Promise<Partial<ImportSummary>>;
+}) {
+  const [archivoCsv, setArchivoCsv] = useState<File | null>(null);
+  const [importando, setImportando] = useState(false);
+  const [mensaje, setMensaje] = useState("");
+
+  const descargarPlantilla = () => {
+    const headers = ["Name", "Description", "Category", "Cost", "Price", "Quantity", "DeletedAt"];
+    const row = ["Producto de ejemplo", "", "ACCESORIOS", "10000", "15000", "5", ""];
+    const csv = `${headers.join(",")}\n${row.join(",")}\n`;
+    const blob = new Blob([`\uFEFF${csv}`], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "plantilla_stock.csv";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    setMensaje("Plantilla descargada.");
+  };
+
+  const parseCsvRows = (text: string) => {
+    const rows: string[][] = [];
+    let current = "";
+    let row: string[] = [];
+    let inQuotes = false;
+
+    for (let i = 0; i < text.length; i += 1) {
+      const char = text[i];
+      const next = text[i + 1];
+
+      if (char === '"') {
+        if (inQuotes && next === '"') {
+          current += '"';
+          i += 1;
+        } else {
+          inQuotes = !inQuotes;
+        }
+        continue;
+      }
+
+      if (char === "," && !inQuotes) {
+        row.push(current);
+        current = "";
+        continue;
+      }
+
+      if ((char === "\n" || char === "\r") && !inQuotes) {
+        if (char === "\r" && next === "\n") i += 1;
+        row.push(current);
+        if (row.some((cell) => cell.trim().length > 0)) rows.push(row);
+        row = [];
+        current = "";
+        continue;
+      }
+
+      current += char;
+    }
+
+    if (current.length > 0 || row.length > 0) {
+      row.push(current);
+      if (row.some((cell) => cell.trim().length > 0)) rows.push(row);
+    }
+
+    return rows;
+  };
+
+  const importar = async () => {
+    if (!archivoCsv) return;
+    setImportando(true);
+    setMensaje("");
+
+    try {
+      const csvText = await archivoCsv.text();
+      const rows = parseCsvRows(csvText);
+      if (rows.length < 2) {
+        throw new Error("El CSV debe tener una cabecera y al menos una fila de datos.");
+      }
+
+      const headers = rows[0].map((header) => header.replace(/^\uFEFF/, "").trim().toLowerCase());
+      const idxName = headers.indexOf("name");
+      const idxCategory = headers.indexOf("category");
+      const idxCost = headers.indexOf("cost");
+      const idxPrice = headers.indexOf("price");
+      const idxQuantity = headers.indexOf("quantity");
+      const idxDeletedAt = headers.indexOf("deletedat");
+
+      if ([idxName, idxCategory, idxCost, idxPrice, idxQuantity].some((idx) => idx < 0)) {
+        throw new Error("Faltan columnas obligatorias: Name, Category, Cost, Price o Quantity.");
+      }
+
+      const mapaPorNombre = new Map(productos.map((p) => [normalizeCsvProductName(p.nombre), p]));
+      const importados: Producto[] = [];
+      let creados = 0;
+      let actualizados = 0;
+      let omitidos = 0;
+
+      for (let i = 1; i < rows.length; i += 1) {
+        const row = rows[i];
+        const deletedAt = idxDeletedAt >= 0 ? String(row[idxDeletedAt] || "").trim() : "";
+        if (deletedAt) {
+          omitidos += 1;
+          continue;
+        }
+
+        const nombre = String(row[idxName] || "").trim();
+        const categoria = normalizeImportedCategory(String(row[idxCategory] || "").trim() || "ARTICULO");
+        const parseNumber = (value: string | undefined) => {
+          const normalized = String(value ?? "").trim().replace(",", ".");
+          return normalized ? Number(normalized) : Number.NaN;
+        };
+        const costo = parseNumber(row[idxCost]);
+        const precio = parseNumber(row[idxPrice]);
+        const stock = parseNumber(row[idxQuantity]);
+        const nombreNormalizado = normalizeCsvProductName(nombre);
+
+        if (!nombre || shouldIgnoreCsvProduct(nombre) || !Number.isFinite(costo) || !Number.isFinite(precio) || !Number.isFinite(stock)) {
+          omitidos += 1;
+          continue;
+        }
+
+        const existente = mapaPorNombre.get(nombreNormalizado);
+        const producto: Producto = {
+          id: existente?.id || newId(),
+          nombre,
+          categoria,
+          precioCosto: costo,
+          precio,
+          stock,
+          imagen: existente?.imagen || "",
+        };
+
+        importados.push(producto);
+        mapaPorNombre.set(nombreNormalizado, producto);
+      }
+
+      if (importados.length === 0) {
+        throw new Error("No se encontraron productos válidos para importar.");
+      }
+
+      const resultado = await onImport(importados);
+      setArchivoCsv(null);
+      setMensaje(
+        `Importacion completada. Creados: ${resultado.creados ?? creados}, actualizados: ${resultado.actualizados ?? actualizados}, marcados sin stock: ${resultado.marcadosSinStock ?? 0}, omitidos: ${omitidos}.`,
+      );
+    } catch (error) {
+      setMensaje(error instanceof Error ? error.message : "No se pudo importar el CSV.");
+    } finally {
+      setImportando(false);
+    }
+  };
+
+  return (
+    <section className={panel}>
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 className="text-lg font-semibold">Carga masiva de stock</h2>
+          <p className="text-xs text-slate-500">Actualiza los accesorios mediante un archivo CSV.</p>
+        </div>
+        <button
+          type="button"
+          onClick={descargarPlantilla}
+          className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+        >
+          Descargar plantilla
+        </button>
+      </div>
+
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <input
+          type="file"
+          accept=".csv,text/csv"
+          onChange={(e) => setArchivoCsv(e.target.files?.[0] || null)}
+          className="min-w-0 flex-1 text-sm"
+        />
+        <button
+          type="button"
+          onClick={importar}
+          disabled={!archivoCsv || importando || !persistent}
+          className="rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {importando ? "Importando…" : "Importar CSV"}
+        </button>
+      </div>
+
+      {mensaje && <p className="mt-3 text-xs text-slate-500">{mensaje}</p>}
+    </section>
+  );
+}
+
 /* ------------------------------ STOCK ----------------------------- */
 
 function StockTab({
@@ -586,6 +1015,22 @@ function StockTab({
       .toLowerCase()
       .includes(filter.toLowerCase()),
   );
+
+  const groupedVisible = useMemo(() => {
+    const groups = CATEGORIAS_EQUIPO.map((category) => ({
+      category,
+      items: visible.filter((e) => normalizeStockCategoryValue(e.categoria) === category.value),
+    })).filter((group) => group.items.length > 0);
+
+    if (groups.length > 0) return groups;
+
+    return [
+      {
+        category: { value: "otros", label: "Otros" },
+        items: visible,
+      },
+    ];
+  }, [visible]);
 
   const move = (id: string, dir: -1 | 1) => {
     const idx = sorted.findIndex((e) => e.id === id);
@@ -642,121 +1087,135 @@ function StockTab({
           />
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="border-b text-left text-xs uppercase text-slate-400">
-              <tr>
-                <th className="w-20 py-2 pr-3">Orden</th>
-                <th className="px-3 py-2">Equipo</th>
-                <th className="px-3 py-2">Categoría</th>
-                <th className="px-3 py-2">Precio</th>
-                <th className="px-3 py-2">Estado</th>
-                <th className="px-3 py-2"></th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
-              {visible.map((e) => (
-                <tr key={e.id} className="hover:bg-slate-50">
-                  <td className="py-2 pr-3">
-                    <div className="flex gap-1">
-                      <button
-                        onClick={() => move(e.id, -1)}
-                        className="rounded border p-1 hover:bg-slate-100"
-                        aria-label="Subir"
-                      >
-                        <ArrowUp className="size-3" />
-                      </button>
-                      <button
-                        onClick={() => move(e.id, 1)}
-                        className="rounded border p-1 hover:bg-slate-100"
-                        aria-label="Bajar"
-                      >
-                        <ArrowDown className="size-3" />
-                      </button>
-                    </div>
-                  </td>
-                  <td className="px-3 py-2">
-                    <div className="flex items-center gap-2">
-                      {e.imagenes[0] && (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={e.imagenes[0]}
-                          alt=""
-                          className="size-9 shrink-0 rounded border object-cover"
-                        />
-                      )}
-                      <span className="line-clamp-1 font-medium">
-                        {e.nombre || "—"}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-3 py-2 text-slate-500">
-                    {catLabel(e.categoria)}
-                  </td>
-                  <td className="px-3 py-2 font-semibold">
-                    {money(e.promo || e.original)}
-                  </td>
-                  <td className="px-3 py-2">
-                    <button
-                      onClick={() =>
-                        patch(e.id, {
-                          estado:
-                            e.estado === "vendido" ? "disponible" : "vendido",
-                        })
-                      }
-                      className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
-                        e.estado === "vendido"
-                          ? "bg-rose-100 text-rose-700"
-                          : "bg-emerald-100 text-emerald-700"
-                      }`}
-                    >
-                      {e.estado === "vendido" ? "Vendido" : "Disponible"}
-                    </button>
-                  </td>
-                  <td className="px-3 py-2">
-                    <div className="flex justify-end gap-1">
-                      <button
-                        onClick={() => patch(e.id, { recomendada: !e.recomendada })}
-                        className={`rounded p-1.5 hover:bg-slate-100 ${
-                          e.recomendada ? "text-amber-500" : "text-slate-400"
-                        }`}
-                        aria-label="Destacar"
-                      >
-                        <Star
-                          className="size-4"
-                          fill={e.recomendada ? "currentColor" : "none"}
-                        />
-                      </button>
-                      <button
-                        onClick={() => onEdit(e)}
-                        className="rounded p-1.5 text-slate-500 hover:bg-slate-100"
-                        aria-label="Editar"
-                      >
-                        <Pencil className="size-4" />
-                      </button>
-                      <button
-                        onClick={() => {
-                          if (confirm(`¿Eliminar "${e.nombre}"?`))
-                            setEquipos((cur) => cur.filter((x) => x.id !== e.id));
-                        }}
-                        className="rounded p-1.5 text-rose-600 hover:bg-rose-50"
-                        aria-label="Eliminar"
-                      >
-                        <Trash2 className="size-4" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-              {visible.length === 0 && (
-                <tr>
-                  <td colSpan={6} className="py-8 text-center text-slate-400">
-                    Sin resultados
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+        <div className="space-y-6">
+          {groupedVisible.map(({ category, items }) => (
+            <div key={category.value} className="rounded-2xl border border-slate-200 bg-slate-50/70">
+              <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
+                <h3 className="text-sm font-bold uppercase tracking-[0.2em] text-slate-600">
+                  {category.label}
+                </h3>
+                <span className="rounded-full bg-white px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                  {items.length}
+                </span>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="border-b text-left text-xs uppercase text-slate-400">
+                    <tr>
+                      <th className="w-20 py-2 pr-3">Orden</th>
+                      <th className="px-3 py-2">Equipo</th>
+                      <th className="px-3 py-2">Categoría</th>
+                      <th className="px-3 py-2">Precio</th>
+                      <th className="px-3 py-2">Estado</th>
+                      <th className="px-3 py-2"></th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y">
+                    {items.map((e) => (
+                      <tr key={e.id} className="hover:bg-slate-50">
+                        <td className="py-2 pr-3">
+                          <div className="flex gap-1">
+                            <button
+                              onClick={() => move(e.id, -1)}
+                              className="rounded border p-1 hover:bg-slate-100"
+                              aria-label="Subir"
+                            >
+                              <ArrowUp className="size-3" />
+                            </button>
+                            <button
+                              onClick={() => move(e.id, 1)}
+                              className="rounded border p-1 hover:bg-slate-100"
+                              aria-label="Bajar"
+                            >
+                              <ArrowDown className="size-3" />
+                            </button>
+                          </div>
+                        </td>
+                        <td className="px-3 py-2">
+                          <div className="flex items-center gap-2">
+                            {e.imagenes[0] && (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img
+                                src={e.imagenes[0]}
+                                alt=""
+                                className="size-9 shrink-0 rounded border object-cover"
+                              />
+                            )}
+                            <span className="line-clamp-1 font-medium">
+                              {e.nombre || "—"}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-3 py-2 text-slate-500">
+                          {catLabel(e.categoria)}
+                        </td>
+                        <td className="px-3 py-2 font-semibold">
+                          {money(e.promo || e.original)}
+                        </td>
+                        <td className="px-3 py-2">
+                          <button
+                            onClick={() =>
+                              patch(e.id, {
+                                estado:
+                                  e.estado === "vendido" ? "disponible" : "vendido",
+                              })
+                            }
+                            className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
+                              e.estado === "vendido"
+                                ? "bg-rose-100 text-rose-700"
+                                : "bg-emerald-100 text-emerald-700"
+                            }`}
+                          >
+                            {e.estado === "vendido" ? "Vendido" : "Disponible"}
+                          </button>
+                        </td>
+                        <td className="px-3 py-2">
+                          <div className="flex justify-end gap-1">
+                            <button
+                              onClick={() => patch(e.id, { recomendada: !e.recomendada })}
+                              className={`rounded p-1.5 hover:bg-slate-100 ${
+                                e.recomendada ? "text-amber-500" : "text-slate-400"
+                              }`}
+                              aria-label="Destacar"
+                            >
+                              <Star
+                                className="size-4"
+                                fill={e.recomendada ? "currentColor" : "none"}
+                              />
+                            </button>
+                            <button
+                              onClick={() => onEdit(e)}
+                              className="rounded p-1.5 text-slate-500 hover:bg-slate-100"
+                              aria-label="Editar"
+                            >
+                              <Pencil className="size-4" />
+                            </button>
+                            <button
+                              onClick={() => {
+                                if (confirm(`¿Eliminar "${e.nombre}"?`))
+                                  setEquipos((cur) => cur.filter((x) => x.id !== e.id));
+                              }}
+                              className="rounded p-1.5 text-rose-600 hover:bg-rose-50"
+                              aria-label="Eliminar"
+                            >
+                              <Trash2 className="size-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          ))}
+
+          {visible.length === 0 && (
+            <div className="rounded-2xl border border-dashed border-slate-300 py-8 text-center text-slate-400">
+              Sin resultados
+            </div>
+          )}
         </div>
       </section>
     </div>

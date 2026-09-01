@@ -89,7 +89,7 @@ function StockRow({
         </Link>
       </div>
 
-      <div className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {loading
           ? Array.from({ length: 4 }).map((_, i) => (
               <div key={i} className="h-64 animate-pulse rounded-2xl border bg-muted" />

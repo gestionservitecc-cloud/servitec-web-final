@@ -3,9 +3,11 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, Lock } from "lucide-react";
+import { getAssetUrl } from "@/lib/asset-url";
 
 export function AdminLogin({ configured }: { configured: boolean }) {
   const router = useRouter();
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -18,12 +20,15 @@ export function AdminLogin({ configured }: { configured: boolean }) {
       const res = await fetch("/api/admin/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password }),
+        body: JSON.stringify({ email, password }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
         setError(data.error || "No se pudo iniciar sesión.");
         return;
+      }
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem("servitec-admin-user", email || "admin@servitec.com");
       }
       router.refresh();
     } catch {
@@ -39,7 +44,7 @@ export function AdminLogin({ configured }: { configured: boolean }) {
         <div className="mb-6 flex items-center justify-center gap-3">
           <div className="grid size-11 place-items-center rounded-xl border border-white/15 bg-white/10 p-1.5">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.png" alt="ServiTec" className="h-full w-full object-contain" />
+            <img src={getAssetUrl("logo.png")} alt="ServiTec" className="h-full w-full object-contain" />
           </div>
           <p className="text-xl font-black tracking-tight">
             Servi<span className="text-primary">Tec</span>
@@ -69,6 +74,21 @@ export function AdminLogin({ configured }: { configured: boolean }) {
           ) : (
             <>
               <div className="space-y-1.5">
+                <label htmlFor="admin-email" className="text-xs text-white/60">
+                  Gmail o email
+                </label>
+                <input
+                  id="admin-email"
+                  type="email"
+                  autoComplete="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="w-full rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-primary"
+                />
+              </div>
+
+              <div className="space-y-1.5">
                 <label htmlFor="admin-password" className="text-xs text-white/60">
                   Contraseña
                 </label>
@@ -79,7 +99,6 @@ export function AdminLogin({ configured }: { configured: boolean }) {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  autoFocus
                   className="w-full rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-primary"
                 />
               </div>

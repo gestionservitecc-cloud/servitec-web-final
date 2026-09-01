@@ -53,6 +53,7 @@ export const emptyEquipo = (): Equipo => ({
   marca: "",
   modelo: "",
   detail: "",
+  notasPrivadas: "",
   condition: "Sellado",
   estado: "disponible",
   original: 0,

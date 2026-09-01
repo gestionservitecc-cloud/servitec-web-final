@@ -15,11 +15,19 @@ import {
   writeBatch,
   where
 } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
-import { db, storage, auth, functions } from "../lib/firebase";
+import { db, auth, functions } from "../lib/firebase";
 import { httpsCallable } from "firebase/functions";
+
+async function uploadImageToBlob(file: File): Promise<string> {
+  const form = new FormData();
+  form.append("file", file);
+  const response = await fetch("/api/admin/upload", { method: "POST", body: form });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.error || "No se pudo subir la imagen a Vercel Blob.");
+  return data.url as string;
+}
 import AdminLogin from "./AdminLogin";
 import { catalogProductImage, componentCatalogLabels, componentCatalogSources, loadComponentCatalog, type ComponentCatalogKey, type CatalogProduct } from "@/lib/pc-catalog";
 import { Boxes, LayoutDashboard, LoaderCircle } from "lucide-react";
@@ -737,9 +745,7 @@ const Admin = () => {
         });
       }
 
-      const storageRef = ref(storage, `productos/${Date.now()}-${imageToUpload.name}`);
-      await uploadBytes(storageRef, imageToUpload);
-      imageUrl = await getDownloadURL(storageRef);
+      imageUrl = await uploadImageToBlob(imageToUpload);
     }
 
     const batch = writeBatch(db);
@@ -830,9 +836,7 @@ const Admin = () => {
           });
         }
 
-        const storageRef = ref(storage, `productos/${Date.now()}-${imageToUpload.name}`);
-        await uploadBytes(storageRef, imageToUpload);
-        imageUrl = await getDownloadURL(storageRef);
+        imageUrl = await uploadImageToBlob(imageToUpload);
       }
 
       const batch = writeBatch(db);
@@ -885,9 +889,7 @@ const Admin = () => {
             text: "No se pudo optimizar una imagen del equipo. Se subio el archivo original."
           });
         }
-        const storageRef = ref(storage, `productos/${Date.now()}-${index}-${imageToUpload.name}`);
-        await uploadBytes(storageRef, imageToUpload);
-        return getDownloadURL(storageRef);
+        return uploadImageToBlob(imageToUpload);
         }));
 
         const estado = equipoForm.estado || "disponible";
@@ -1044,9 +1046,7 @@ const Admin = () => {
             text: "No se pudo optimizar una imagen del equipo. Se subio el archivo original."
           });
         }
-        const storageRef = ref(storage, `productos/${Date.now()}-${index}-${imageToUpload.name}`);
-        await uploadBytes(storageRef, imageToUpload);
-        return getDownloadURL(storageRef);
+        return uploadImageToBlob(imageToUpload);
       }));
     }
 

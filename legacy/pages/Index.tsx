@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import ReviewsSection from "@/components/ReviewsSection";
 import StorageImage from "@/components/StorageImage";
+import { getAssetUrl } from "@/lib/asset-url";
 import { db } from "@/lib/firebase";
 import { collection, onSnapshot } from "firebase/firestore";
 import {
@@ -28,8 +29,7 @@ interface FeaturedStockItem {
 }
 
 const resolveImage = (path?: string) => {
-  if (!path) return "";
-  return /^https?:\/\//i.test(path) ? path : `https://firebasestorage.googleapis.com/v0/b/${import.meta.env.VITE_FIREBASE_STORAGE_BUCKET ?? "servitec-web"}/o/${encodeURIComponent(path.replace(/^\//, ""))}?alt=media`;
+  return getAssetUrl(path);
 };
 
 const Index = () => {

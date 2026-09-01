@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { PageHero } from "@/components/site/PageHero";
+import { stockCategories } from "@/components/site/site-config";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
@@ -68,6 +69,14 @@ const formatPrice = (price: number) => {
 };
 
 const resolveEquipmentImage = (path: string) => path || "";
+const categoryLabels: Record<string, string> = {
+  celular: "Celulares",
+  notebook: "Notebooks",
+  tablet: "Tablets",
+  pc: "PC armada",
+  "pc-armada": "PC armada",
+  tv: "TV´s",
+};
 
 const normalizeStockCategory = (category?: string) => normalizeStockCategoryValue(category);
 const isPcArmadaCategory = (category?: string) => isPcArmadaCategoryValue(category);
@@ -119,17 +128,9 @@ export const StockClient = () => {
   const categoryFilter = searchParams.get("categoria");
   const normalizedCategoryFilter = normalizeStockCategory(categoryFilter);
 
-  const categoryLabels: Record<string, string> = {
-    celular: "Celulares",
-    notebook: "Notebooks",
-    tablet: "Tablets",
-    pc: "PC armada",
-    "pc-armada": "PC armada",
-    tv: "TV´s",
-  };
-
   useEffect(() => {
     let alive = true;
+
     fetch("/api/equipos")
       .then((r) => (r.ok ? r.json() : []))
       .then((data: Equipo[]) => {
@@ -137,13 +138,14 @@ export const StockClient = () => {
       })
       .catch(() => alive && setEquipos([]))
       .finally(() => alive && setLoading(false));
+
     return () => {
       alive = false;
     };
   }, []);
 
-  const sortedProducts = useMemo(
-    () => [...equipos]
+  const sortedProducts = useMemo(() => {
+    return [...equipos]
       .filter((equipo) => {
         if (categoryFilter && normalizeStockCategory(equipo.categoria) !== normalizedCategoryFilter) {
           return false;
@@ -152,16 +154,34 @@ export const StockClient = () => {
           return equipo.condition.toLowerCase().includes("reacondicionado");
         }
         if (filter === "nuevos") {
-          return equipo.condition.toLowerCase().includes("sellado") || equipo.condition.toLowerCase().includes("nuevo");
+          return (
+            equipo.condition.toLowerCase().includes("sellado") ||
+            equipo.condition.toLowerCase().includes("nuevo")
+          );
         }
         return true;
       })
       .sort((a, b) => {
-        const conditionOrder = (equipo: EquipoStock) => equipo.condition.toLowerCase().includes("reacondicionado") ? 1 : 0;
+        const conditionOrder = (equipo: EquipoStock) =>
+          equipo.condition.toLowerCase().includes("reacondicionado") ? 1 : 0;
         return conditionOrder(a) - conditionOrder(b) || Number(a.promo || 0) - Number(b.promo || 0);
-      }),
-    [equipos, filter, categoryFilter, normalizedCategoryFilter]
-  );
+      });
+  }, [equipos, filter, categoryFilter, normalizedCategoryFilter]);
+
+  const groupedProducts = useMemo(() => {
+    if (categoryFilter) {
+      return [{ label: categoryLabels[normalizedCategoryFilter] || "Equipos", items: sortedProducts }];
+    }
+
+    return stockCategories
+      .map((category) => ({
+        label: category.label,
+        items: sortedProducts.filter(
+          (equipo) => normalizeStockCategory(equipo.categoria) === category.value,
+        ),
+      }))
+      .filter((group) => group.items.length > 0);
+  }, [categoryFilter, normalizedCategoryFilter, sortedProducts]);
 
   return (
     <>
@@ -198,179 +218,200 @@ export const StockClient = () => {
           )}
 
           {!loading && sortedProducts.length > 0 && (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {sortedProducts.map((p, index) => {
-                const imagen = resolveEquipmentImage(p.imagen || p.image || "");
-                const imagenes = (p.imagenes?.length ? p.imagenes : p.imagen || p.image ? [p.imagen || p.image || ""] : [])
-                  .map(resolveEquipmentImage);
-                const almacenamiento = p.almacenamiento || p.storage || "-";
-                const vendido = String(p.estado || "disponible").toLowerCase() === "vendido";
-                const nombreDisplay = p.nombre || `${p.marca || ""} ${p.modelo || ""}`.trim() || "Equipo";
-                const mensaje = vendido
-                  ? `Hola, quiero consultar por ${nombreDisplay} (figura como vendido)`
-                  : `Hola, quiero consultar por ${nombreDisplay} - ${formatPrice(p.promo)} ARS`;
-
-                const isReacondicionado = p.condition.toLowerCase().includes("reacondicionado");
-                const previousIsReacondicionado = index > 0 && sortedProducts[index - 1].condition.toLowerCase().includes("reacondicionado");
-                const isPcArmada = isPcArmadaCategory(p.categoria) || Boolean(p.presetId);
-                const precioEfectivo = Number(p.promo || p.original || 0);
-                const precioNacional = calculateNationalPrice(precioEfectivo);
-                const specifications = [
-                  ["Marca", p.marca],
-                  ["Modelo", p.modelo],
-                  ["UPC / EAN", p.upc],
-                  ["Procesador", p.procesador],
-                  ["Memoria", p.ram],
-                  ["Gráficos", p.placaVideo],
-                  ["Almacenamiento", almacenamiento],
-                  ["Pantalla", p.pantalla],
-                  ["Distribución teclado", p.distribucionTeclado],
-                  ["Teclado retroiluminado", p.tecladoRetroiluminado],
-                  ["Sist. Operativo", p.sistema],
-                  ["Lector Óptico", p.lectorOptico],
-                  ["Lector de Tarjetas", p.lectorTarjetas],
-                  ["Web Cam", p.webcam],
-                  ["Usb", p.usb],
-                  ["Rj 45", p.rj45],
-                  ["Wi-fi", p.wifi],
-                  ["Bluetooth", p.bluetooth],
-                  ["Vga", p.vga],
-                  ["Hdmi", p.hdmi],
-                  ["Aur. y mic", p.audio],
-                  ["Batería", p.bateria],
-                  ["Origen", p.origen],
-                ].filter(([, value]) => value);
-                const hasSpecifications = specifications.length > 0 || Boolean(p.warranty);
+            <div className="space-y-10">
+              {groupedProducts.map((group) => {
+                const items = group.items || [];
 
                 return (
-                  <div key={p.id} className="contents">
-                    {categoryFilter && !filter && (index === 0 || isReacondicionado !== previousIsReacondicionado) && (
-                      <h2 className="col-span-full mt-4 border-b border-slate-200 pb-2 text-xl font-semibold text-slate-900 first:mt-0">
-                        {isReacondicionado ? "Reacondicionados" : "Nuevos"}
-                      </h2>
-                    )}
-                    <Card className="overflow-hidden transition hover:shadow-xl">
-                    <div className="relative aspect-square w-full overflow-hidden bg-slate-900">
-                      <ProductGallery images={imagenes} name={nombreDisplay} />
-
-                      <div className="absolute bottom-0 left-0 w-full bg-slate-950/80 p-3 backdrop-blur-sm sm:p-4">
-                        <p className="mb-2 break-words text-sm font-semibold text-white">{nombreDisplay}</p>
-                        
-                      </div>
+                  <div key={group.label} className="space-y-6">
+                    <div className="flex items-center justify-between gap-3 border-b border-slate-200 pb-2">
+                      <h2 className="text-2xl font-bold text-slate-900">{group.label}</h2>
+                      <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-600">
+                        {items.length}
+                      </span>
                     </div>
 
-                    <CardContent className="p-4 sm:p-6">
-                      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-                        <div className="w-full space-y-3">
-                          {vendido ? (
-                            <p className="text-xl font-extrabold uppercase tracking-wide text-rose-600">
-                              Vendido
-                            </p>
-                          ) : (
-                            <>
-                              <div className="flex flex-wrap items-center gap-2 text-sm sm:text-base">
-                                <p className="text-red-500 line-through decoration-red-500/80">
-                                  ${formatPrice(p.original)} ARS
-                                </p>
-                                <span className="whitespace-nowrap rounded-full border border-red-500/50 bg-red-500/5 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-red-500">
-                                  3 cuotas sin interés
-                                </span>
+                    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                      {items.map((p) => {
+                        const imagenes = (p.imagenes?.length ? p.imagenes : p.imagen || p.image ? [p.imagen || p.image || ""] : [])
+                          .map(resolveEquipmentImage);
+                        const almacenamiento = p.almacenamiento || p.storage || "-";
+                        const vendido = String(p.estado || "disponible").toLowerCase() === "vendido";
+                        const nombreDisplay = p.nombre || `${p.marca || ""} ${p.modelo || ""}`.trim() || "Equipo";
+                        const mensaje = vendido
+                          ? `Hola, quiero consultar por ${nombreDisplay} (figura como vendido)`
+                          : `Hola, quiero consultar por ${nombreDisplay} - ${formatPrice(p.promo)} ARS`;
+                        const isPcArmada = isPcArmadaCategory(p.categoria) || Boolean(p.presetId);
+                        const precioEfectivo = Number(p.promo || p.original || 0);
+                        const precioNacional = calculateNationalPrice(precioEfectivo);
+                        const specifications = [
+                          ["Marca", p.marca],
+                          ["Modelo", p.modelo],
+                          ["UPC / EAN", p.upc],
+                          ["Procesador", p.procesador],
+                          ["Memoria", p.ram],
+                          ["Gráficos", p.placaVideo],
+                          ["Almacenamiento", almacenamiento],
+                          ["Pantalla", p.pantalla],
+                          ["Distribución teclado", p.distribucionTeclado],
+                          ["Teclado retroiluminado", p.tecladoRetroiluminado],
+                          ["Sist. Operativo", p.sistema],
+                          ["Lector Óptico", p.lectorOptico],
+                          ["Lector de Tarjetas", p.lectorTarjetas],
+                          ["Web Cam", p.webcam],
+                          ["Usb", p.usb],
+                          ["Rj 45", p.rj45],
+                          ["Wi-fi", p.wifi],
+                          ["Bluetooth", p.bluetooth],
+                          ["Vga", p.vga],
+                          ["Hdmi", p.hdmi],
+                          ["Aur. y mic", p.audio],
+                          ["Batería", p.bateria],
+                          ["Origen", p.origen],
+                        ].filter(([, value]) => value);
+                        const hasSpecifications = specifications.length > 0 || Boolean(p.warranty);
+
+                        return (
+                          <Card key={p.id} className="overflow-hidden transition hover:shadow-xl">
+                            <div className="relative aspect-square w-full overflow-hidden bg-slate-900">
+                              <ProductGallery images={imagenes} name={nombreDisplay} />
+                              <div className="absolute bottom-0 left-0 w-full bg-slate-950/80 p-3 backdrop-blur-sm sm:p-4">
+                                <p className="mb-2 break-words text-sm font-semibold text-white">{nombreDisplay}</p>
                               </div>
+                            </div>
 
-                              <div className="space-y-1.5">
-                                <div className="flex items-center gap-2">
-                                  <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">
-                                    Mejor precio
-                                  </p>
-                                  <span className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-slate-500 text-[9px] font-bold text-slate-400">
-                                    i
-                                  </span>
-                                </div>
-
-                                <div className="flex flex-wrap items-center gap-2">
-                                  <p className="text-2xl font-black text-emerald-500 sm:text-3xl">
-                                    ${formatPrice(precioEfectivo)}
-                                  </p>
-                                  <span className="whitespace-nowrap rounded-full border border-emerald-500/50 bg-emerald-500/5 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-emerald-400">
-                                    Efectivo / Transferencia
-                                  </span>
-                                </div>
-
-                                <p className="text-[11px] font-medium text-slate-400">
-                                  Precio sin impuestos nac. ${formatPrice(precioNacional)}
-                                </p>
-                              </div>
-                            </>
-                          )}
-                        </div>
-
-                        <div className="flex w-full flex-col gap-2 sm:w-auto sm:min-w-[150px]">
-                          {isPcArmada && (
-                            <Dialog>
-                              <DialogTrigger className="w-full rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100">
-                                Ver componentes
-                              </DialogTrigger>
-                              <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
-                                <DialogHeader>
-                                  <DialogTitle>{nombreDisplay}</DialogTitle>
-                                </DialogHeader>
-                                {p.componentes?.length ? (
-                                  <div className="grid gap-3 border-t border-slate-200 pt-4 sm:grid-cols-2">
-                                    {p.componentes.map((component, componentIndex) => (
-                                      <div key={`${component.key}-${componentIndex}`} className="flex items-center gap-3 rounded-lg border border-slate-200 p-3">
-                                        {component.imagen && <img src={resolveEquipmentImage(component.imagen)} alt={component.nombre} className="h-16 w-16 rounded object-contain" loading="lazy" />}
-                                        <div>
-                                          <p className="text-xs font-semibold uppercase text-slate-500">{component.key === "memory" ? `x${component.cantidad || 1} ${component.label}` : component.label}</p>
-                                          <p className="font-semibold text-slate-900">{component.nombre}</p>
-                                          <p className="text-sm text-slate-600">{component.detalle}</p>
-                                        </div>
-                                      </div>
-                                    ))}
-                                  </div>
-                                ) : (
-                                  <p className="border-t border-slate-200 pt-4 text-sm text-slate-600">Componentes a confirmar.</p>
-                                )}
-                              </DialogContent>
-                            </Dialog>
-                          )}
-                          {!isPcArmada && hasSpecifications && (
-                            <Dialog>
-                              <DialogTrigger className="w-full rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100">
-                                Especificaciones
-                              </DialogTrigger>
-                              <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
-                                <DialogHeader>
-                                  <DialogTitle>{nombreDisplay}</DialogTitle>
-                                </DialogHeader>
-                                <div className="grid gap-x-8 gap-y-3 border-t border-slate-200 pt-4 sm:grid-cols-2">
-                                  {specifications.map(([label, value]) => (
-                                    <p key={label} className="text-sm text-slate-600">
-                                      <span className="font-semibold text-slate-900">{label}:</span>{" "}
-                                      {value}
+                            <CardContent className="p-4 sm:p-6">
+                              <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                                <div className="w-full space-y-3">
+                                  {vendido ? (
+                                    <p className="text-xl font-extrabold uppercase tracking-wide text-rose-600">
+                                      Vendido
                                     </p>
-                                  ))}
+                                  ) : (
+                                    <>
+                                      <div className="flex flex-wrap items-center gap-2 text-sm sm:text-base">
+                                        <p className="text-red-500">
+                                          ${formatPrice(p.original)} ARS
+                                        </p>
+                                        <span className="whitespace-nowrap rounded-full border border-red-500/50 bg-red-500/5 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-red-500">
+                                          3 cuotas sin interés
+                                        </span>
+                                      </div>
+
+                                      <div className="space-y-1.5">
+                                        <div className="flex items-center gap-2">
+                                          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">
+                                            Mejor precio
+                                          </p>
+                                          <span className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-slate-500 text-[9px] font-bold text-slate-400">
+                                            i
+                                          </span>
+                                        </div>
+
+                                        <div className="flex flex-wrap items-center gap-2">
+                                          <p className="text-2xl font-black text-emerald-500 sm:text-3xl">
+                                            ${formatPrice(precioEfectivo)}
+                                          </p>
+                                          <span className="whitespace-nowrap rounded-full border border-emerald-500/50 bg-emerald-500/5 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-emerald-400">
+                                            Efectivo / Transferencia
+                                          </span>
+                                        </div>
+
+                                        <p className="text-[11px] font-medium text-slate-400">
+                                          Precio sin impuestos nac. ${formatPrice(precioNacional)}
+                                        </p>
+                                      </div>
+                                    </>
+                                  )}
                                 </div>
-                                {p.warranty && (
-                                  <div className="mt-6 rounded-xl border-2 border-amber-400 bg-amber-50 px-5 py-4 text-center shadow-sm">
-                                    <p className="text-xs font-bold uppercase tracking-[0.2em] text-amber-700">Garantía</p>
-                                    <p className="mt-1 text-xl font-extrabold text-amber-600 sm:text-2xl">{p.warranty}</p>
-                                  </div>
-                                )}
-                              </DialogContent>
-                            </Dialog>
-                          )}
-                          <a
-                            href={`https://wa.me/5491124873190?text=${encodeURIComponent(mensaje)}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="w-full rounded-md bg-primary px-4 py-3 text-center text-sm font-medium text-secondary-foreground transition hover:bg-primary/80 sm:py-2"
-                          >
-                            Consultar
-                          </a>
-                        </div>
-                      </div>
-                    </CardContent>
-                    </Card>
+
+                                <div className="flex w-full flex-col gap-2 sm:w-auto sm:min-w-[150px]">
+                                  {isPcArmada && (
+                                    <Dialog>
+                                      <DialogTrigger className="w-full rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100">
+                                        Ver componentes
+                                      </DialogTrigger>
+                                      <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
+                                        <DialogHeader>
+                                          <DialogTitle>{nombreDisplay}</DialogTitle>
+                                        </DialogHeader>
+                                        {p.componentes?.length ? (
+                                          <div className="grid gap-3 border-t border-slate-200 pt-4 sm:grid-cols-2">
+                                            {p.componentes.map((component, componentIndex) => (
+                                              <div key={`${component.key}-${componentIndex}`} className="flex items-center gap-3 rounded-lg border border-slate-200 p-3">
+                                                {component.imagen && (
+                                                  <img
+                                                    src={resolveEquipmentImage(component.imagen)}
+                                                    alt={component.nombre}
+                                                    className="h-16 w-16 rounded object-contain"
+                                                    loading="lazy"
+                                                  />
+                                                )}
+                                                <div>
+                                                  <p className="text-xs font-semibold uppercase text-slate-500">
+                                                    {component.key === "memory" ? `x${component.cantidad || 1} ${component.label}` : component.label}
+                                                  </p>
+                                                  <p className="font-semibold text-slate-900">{component.nombre}</p>
+                                                  <p className="text-sm text-slate-600">{component.detalle}</p>
+                                                </div>
+                                              </div>
+                                            ))}
+                                          </div>
+                                        ) : (
+                                          <p className="border-t border-slate-200 pt-4 text-sm text-slate-600">
+                                            Componentes a confirmar.
+                                          </p>
+                                        )}
+                                      </DialogContent>
+                                    </Dialog>
+                                  )}
+
+                                  {!isPcArmada && hasSpecifications && (
+                                    <Dialog>
+                                      <DialogTrigger className="w-full rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100">
+                                        Especificaciones
+                                      </DialogTrigger>
+                                      <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
+                                        <DialogHeader>
+                                          <DialogTitle>{nombreDisplay}</DialogTitle>
+                                        </DialogHeader>
+                                        <div className="grid gap-x-8 gap-y-3 border-t border-slate-200 pt-4 sm:grid-cols-2">
+                                          {specifications.map(([label, value]) => (
+                                            <p key={String(label)} className="text-sm text-slate-600">
+                                              <span className="font-semibold text-slate-900">{label}:</span>{" "}
+                                              {value}
+                                            </p>
+                                          ))}
+                                        </div>
+                                        {p.warranty && (
+                                          <div className="mt-6 rounded-xl border-2 border-amber-400 bg-amber-50 px-5 py-4 text-center shadow-sm">
+                                            <p className="text-xs font-bold uppercase tracking-[0.2em] text-amber-700">
+                                              Garantía
+                                            </p>
+                                            <p className="mt-1 text-xl font-extrabold text-amber-600 sm:text-2xl">
+                                              {p.warranty}
+                                            </p>
+                                          </div>
+                                        )}
+                                      </DialogContent>
+                                    </Dialog>
+                                  )}
+
+                                  <a
+                                    href={`https://wa.me/5491124873190?text=${encodeURIComponent(mensaje)}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="w-full rounded-md bg-primary px-4 py-3 text-center text-sm font-medium text-secondary-foreground transition hover:bg-primary/80 sm:py-2"
+                                  >
+                                    Consultar
+                                  </a>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
+                    </div>
                   </div>
                 );
               })}

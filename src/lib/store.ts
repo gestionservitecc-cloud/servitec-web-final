@@ -1,8 +1,6 @@
 import "server-only";
-import { list, put } from "@vercel/blob";
+import { get, put } from "@vercel/blob";
 import type { Equipo, Producto } from "./types";
-import equiposSeed from "@/data/seed/equipos.json";
-import productosSeed from "@/data/seed/productos.json";
 
 /**
  * Data store. Uses Vercel Blob (one JSON document per collection) when
@@ -17,19 +15,16 @@ const hasBlob = () => Boolean(process.env.BLOB_READ_WRITE_TOKEN);
 type Collection = "equipos" | "productos";
 
 const seeds: Record<Collection, unknown[]> = {
-  equipos: equiposSeed as Equipo[],
-  productos: productosSeed as Producto[],
+  equipos: [],
+  productos: [],
 };
 
 async function readCollection<T>(name: Collection): Promise<T[]> {
   if (!hasBlob()) return seeds[name] as T[];
   try {
-    const { blobs } = await list({ prefix: `${PREFIX}/${name}.json` });
-    const blob = blobs.find((b) => b.pathname === `${PREFIX}/${name}.json`);
+    const blob = await get(`${PREFIX}/${name}.json`, { access: "private" });
     if (!blob) return seeds[name] as T[];
-    const res = await fetch(blob.url, { next: { revalidate: 30 } });
-    if (!res.ok) return seeds[name] as T[];
-    return (await res.json()) as T[];
+    return (await new Response(blob.stream).json()) as T[];
   } catch (err) {
     console.error(`store: falling back to seed for "${name}"`, err);
     return seeds[name] as T[];
@@ -43,7 +38,7 @@ async function writeCollection<T>(name: Collection, data: T[]): Promise<void> {
     );
   }
   await put(`${PREFIX}/${name}.json`, JSON.stringify(data, null, 2), {
-    access: "public",
+    access: "private",
     addRandomSuffix: false,
     allowOverwrite: true,
     contentType: "application/json",

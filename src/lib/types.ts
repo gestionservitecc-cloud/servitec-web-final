@@ -48,6 +48,7 @@ export interface Equipo {
   marca: string;
   modelo: string;
   detail: string;
+  notasPrivadas?: string;
   condition: string;
   estado: "disponible" | "vendido" | string;
   original: number;
