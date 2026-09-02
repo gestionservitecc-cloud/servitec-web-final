@@ -126,22 +126,37 @@ export function AdminDashboard({ persistent }: { persistent: boolean }) {
   };
 
   useEffect(() => {
-    Promise.all([
-      fetch("/api/admin/equipos").then((r) => (r.ok ? r.json() : [])),
-      fetch("/api/admin/productos").then((r) => (r.ok ? r.json() : [])),
-      fetch("/api/dolar-blue").then((r) => (r.ok ? r.json() : null)),
-    ])
-      .then(([e, p, quote]) => {
-        setEquipos(Array.isArray(e) ? e : []);
-        setProductos(Array.isArray(p) ? p : []);
-        if (quote && (Number(quote.compra) || Number(quote.venta))) {
+    let alive = true;
+    const updateBlueRate = () => {
+      fetch("/api/dolar-blue", { cache: "no-store" })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((quote) => {
+          if (!alive || !quote || (!Number(quote.compra) && !Number(quote.venta))) return;
           setBlueRate({
             compra: Number(quote.compra || 0),
             venta: Number(quote.venta || 0),
           });
-        }
+        })
+        .catch(() => undefined);
+    };
+
+    updateBlueRate();
+    const blueRateInterval = window.setInterval(updateBlueRate, 5 * 60 * 1000);
+
+    Promise.all([
+      fetch("/api/admin/equipos").then((r) => (r.ok ? r.json() : [])),
+      fetch("/api/admin/productos").then((r) => (r.ok ? r.json() : [])),
+    ])
+      .then(([e, p]) => {
+        setEquipos(Array.isArray(e) ? e : []);
+        setProductos(Array.isArray(p) ? p : []);
       })
       .finally(() => setLoading(false));
+
+    return () => {
+      alive = false;
+      window.clearInterval(blueRateInterval);
+    };
   }, []);
 
   const logout = async () => {

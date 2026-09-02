@@ -15,7 +15,7 @@ import {
   matchesProductKeywords,
   matchesSpeakerProduct,
 } from "./pc-catalog";
-import { hasCatalogPrice, resolveCatalogImagePath } from "./component-catalog";
+import { hasCatalogPrice, normalizeCatalogProduct, resolveCatalogImagePath } from "./component-catalog";
 import { buildPedidoMessage, formatPedidoNumero, getNextPedidoNumber } from "./order-data";
 
 describe("calculateNationalPrice", () => {
@@ -66,6 +66,15 @@ describe("catalog image path resolution", () => {
     expect(resolveCatalogImagePath("cooler_img/foto1.jpg", "cooling")).toBe("componentes/COOLER/cooler_img/foto1.jpg");
     expect(resolveCatalogImagePath("componentes/COOLER/cooler_img/foto1.jpg", "cooling")).toBe("componentes/COOLER/cooler_img/foto1.jpg");
     expect(resolveCatalogImagePath("foto1.jpg", "graphics")).toBe("componentes/GRAFICA/grafica_img/foto1.jpg");
+  });
+
+  it("asigna la foto numerada cuando el producto no trae imagen", () => {
+    const product = normalizeCatalogProduct(
+      { nombre: "Producto de prueba", precio: 1000, imagenes: [] },
+      "motherboard",
+      0,
+    );
+    expect(product.imagen).toBe("/api/assets/componentes/MOTHERBOARD/motherboard_img/foto1.jpg");
   });
 });
 

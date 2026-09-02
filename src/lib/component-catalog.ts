@@ -119,13 +119,18 @@ export function resolveCatalogImagePath(value: string, category: ComponentKey): 
   return `${rootFolder}/${folder}/${normalizedPath}`;
 }
 
+function defaultCatalogImagePath(category: ComponentKey, index: number): string {
+  return `${IMAGE_FOLDER_BY_KEY[category]}/foto${index + 1}.jpg`;
+}
+
 export function normalizeCatalogProduct(raw: Record<string, unknown>, category: ComponentKey, index: number): CatalogProduct {
   const name = firstString(raw.nombre, raw.name, raw.title) || `Producto ${index + 1}`;
   const brand = firstString(raw.marca, raw.brand) || deriveBrand(name);
   const model = firstString(raw.modelo, raw.model) || deriveModel(name, brand);
   const rawImages = raw.imagenes ?? raw.images ?? raw.imagen ?? raw.image;
-  const images = (Array.isArray(rawImages) ? rawImages : [rawImages])
+  const imageValues = (Array.isArray(rawImages) ? rawImages : [rawImages])
     .filter((image): image is string => typeof image === "string" && image.trim().length > 0)
+  const images = (imageValues.length > 0 ? imageValues : [defaultCatalogImagePath(category, index)])
     .map((image) => getAssetUrl(resolveCatalogImagePath(image, category)));
   const priceValue = raw.precio ?? raw.price ?? 0;
   const price = typeof priceValue === "string" ? Number(priceValue.replace(/[^0-9.,-]/g, "").replace(",", ".")) : Number(priceValue);

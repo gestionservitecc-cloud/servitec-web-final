@@ -79,19 +79,28 @@ export function TiendaClient() {
   useEffect(() => {
     let alive = true;
     if (tipo === "componentes") {
-      Promise.all([
-        loadComponentCatalog(),
-        fetch("/api/dolar-blue").then((response) => (response.ok ? response.json() : null)),
-      ])
-        .then(([catalog, quote]) => {
+      const updateBlueRate = () => {
+        fetch("/api/dolar-blue", { cache: "no-store" })
+          .then((response) => (response.ok ? response.json() : null))
+          .then((quote) => {
+            if (!alive || !quote) return;
+            if (quote.compra || quote.venta || quote.base) {
+              setBlueRate({
+                compra: Number(quote.compra || quote.base || 0),
+                venta: Number(quote.venta || 0),
+                base: Number(quote.base || quote.compra || 0),
+              });
+            }
+          })
+          .catch(() => undefined);
+      };
+
+      updateBlueRate();
+      const blueRateInterval = window.setInterval(updateBlueRate, 5 * 60 * 1000);
+
+      loadComponentCatalog()
+        .then((catalog) => {
           if (!alive) return;
-          if (quote?.compra || quote?.venta || quote?.base) {
-            setBlueRate({
-              compra: Number(quote.compra || quote.base || 0),
-              venta: Number(quote.venta || 0),
-              base: Number(quote.base || quote.compra || 0),
-            });
-          }
           const items = Object.entries(catalog).flatMap(([key, products]) =>
             products
               .filter((product) => hasCatalogPrice(product.precio))
@@ -110,6 +119,7 @@ export function TiendaClient() {
         .finally(() => alive && setLoading(false));
       return () => {
         alive = false;
+        window.clearInterval(blueRateInterval);
       };
     }
 

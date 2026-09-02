@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import "@/styles/globals.css";
 import { Providers } from "@/components/providers";
 import { getAssetUrl } from "@/lib/asset-url";
@@ -84,6 +85,7 @@ export default function RootLayout({
     >
       <body className="min-h-screen bg-background text-foreground">
         <Providers>{children}</Providers>
+        <Analytics />
       </body>
     </html>
   );
