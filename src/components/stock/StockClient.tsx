@@ -12,7 +12,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { calculateNationalPrice, isPcArmadaCategoryValue, normalizeStockCategoryValue } from "@/lib/utils";
+import { calculateInstallmentPrice, calculateNationalPrice, isPcArmadaCategoryValue, normalizeStockCategoryValue } from "@/lib/utils";
 import type { Equipo } from "@/lib/types";
 
 interface EquipoStock {
@@ -111,7 +111,7 @@ const toStockShape = (e: Equipo): EquipoStock => ({
   imagenes: e.imagenes || [],
   imagen: e.imagenes?.[0] || "",
   componentes: e.componentes,
-  original: Number(e.original || 0),
+  original: Number(e.original || calculateInstallmentPrice(Number(e.promo || e.original || 0))),
   promo: Number(e.promo || e.original || 0),
   almacenamiento: e.specs?.almacenamiento || "",
   ram: e.specs?.ram || "",
@@ -235,6 +235,7 @@ export const StockClient = () => {
                       {items.map((p) => {
                         const imagenes = (p.imagenes?.length ? p.imagenes : p.imagen || p.image ? [p.imagen || p.image || ""] : [])
                           .map(resolveEquipmentImage);
+                        const isNotebook = normalizeStockCategory(p.categoria) === "notebook";
                         const almacenamiento = p.almacenamiento || p.storage || "-";
                         const vendido = String(p.estado || "disponible").toLowerCase() === "vendido";
                         const nombreDisplay = p.nombre || `${p.marca || ""} ${p.modelo || ""}`.trim() || "Equipo";
@@ -243,6 +244,7 @@ export const StockClient = () => {
                           : `Hola, quiero consultar por ${nombreDisplay} - ${formatPrice(p.promo)} ARS`;
                         const isPcArmada = isPcArmadaCategory(p.categoria) || Boolean(p.presetId);
                         const precioEfectivo = Number(p.promo || p.original || 0);
+                        const precioLista = calculateInstallmentPrice(precioEfectivo);
                         const precioNacional = calculateNationalPrice(precioEfectivo);
                         const specifications = [
                           ["Marca", p.marca],
@@ -274,7 +276,7 @@ export const StockClient = () => {
                         return (
                           <Card key={p.id} className="overflow-hidden transition hover:shadow-xl">
                             <div className="relative aspect-square w-full overflow-hidden bg-slate-900">
-                              <ProductGallery images={imagenes} name={nombreDisplay} />
+                              <ProductGallery images={imagenes} name={nombreDisplay} showThumbnails={isNotebook} />
                               <div className="absolute bottom-0 left-0 w-full bg-slate-950/80 p-3 backdrop-blur-sm sm:p-4">
                                 <p className="mb-2 break-words text-sm font-semibold text-white">{nombreDisplay}</p>
                               </div>
@@ -291,10 +293,10 @@ export const StockClient = () => {
                                     <>
                                       <div className="flex flex-wrap items-center gap-2 text-sm sm:text-base">
                                         <p className="text-red-500">
-                                          ${formatPrice(p.original)} ARS
+                                          ${formatPrice(precioLista)} ARS
                                         </p>
                                         <span className="whitespace-nowrap rounded-full border border-red-500/50 bg-red-500/5 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-red-500">
-                                          3 cuotas sin interés
+                                          3/6 cuotas sin interés
                                         </span>
                                       </div>
 
@@ -423,7 +425,15 @@ export const StockClient = () => {
   );
 };
 
-const ProductGallery = ({ images, name }: { images: string[]; name: string }) => {
+const ProductGallery = ({
+  images,
+  name,
+  showThumbnails = false,
+}: {
+  images: string[];
+  name: string;
+  showThumbnails?: boolean;
+}) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const selectedImage = images[selectedIndex] || images[0];
 
@@ -439,7 +449,7 @@ const ProductGallery = ({ images, name }: { images: string[]; name: string }) =>
         decoding="async"
         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
       />
-      {images.length > 1 && (
+      {showThumbnails && images.length > 1 && (
         <div className="absolute left-3 top-3 flex gap-2" aria-label={`Fotos de ${name}`}>
           {images.slice(0, 3).map((url, imageIndex) => (
             <button

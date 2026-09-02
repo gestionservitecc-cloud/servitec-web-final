@@ -6,6 +6,7 @@ import { ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import type { Equipo } from "@/lib/types";
+import { calculateInstallmentPrice } from "@/lib/utils";
 
 const currency = (n: number) => `$${n.toLocaleString("es-AR")}`;
 
@@ -96,6 +97,7 @@ function StockRow({
             ))
           : items.map((item, i) => {
               const price = Number(item.promo || item.original || 0);
+              const installmentPrice = calculateInstallmentPrice(price);
               return (
                 <motion.article
                   key={item.id}
@@ -124,6 +126,7 @@ function StockRow({
                       {item.nombre}
                     </h3>
                     <p className="text-xl font-bold">{currency(price)}</p>
+                    <p className="text-xs text-muted-foreground">3/6 cuotas: {currency(installmentPrice)}</p>
                     <Button
                       asChild
                       size="sm"

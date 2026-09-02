@@ -5,9 +5,11 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Minus, Plus, Search, ShoppingCart, Trash2, X } from "lucide-react";
 import { calculateNationalPrice } from "@/lib/utils";
+import { resolveBlueReferenceFactor } from "@/lib/blue-rate";
 import {
   catalogProductImage,
   componentCatalogLabels,
+  hasCatalogPrice,
   loadComponentCatalog,
   type ComponentCatalogKey,
 } from "@/lib/pc-catalog";
@@ -22,6 +24,8 @@ import {
 } from "@/components/ui/select";
 import { PageHero } from "@/components/site/PageHero";
 import { waLink } from "@/components/site/site-config";
+import { PedidoCheckoutModal } from "@/components/shared/PedidoCheckoutModal";
+import { buildPedidoMessage, formatPedidoNumero, getNextPedidoNumber, readStoredPedidos } from "@/lib/order-data";
 import { cn } from "@/lib/utils";
 
 interface Producto {
@@ -59,8 +63,14 @@ export function TiendaClient() {
   const [orden, setOrden] = useState<"" | "asc" | "desc">("");
   const [categoriaFiltro, setCategoriaFiltro] = useState({ tipo, value: "" });
   const [carrito, setCarrito] = useState<CartItem[]>(loadCart);
+  const normalizeComponentCategory = (value?: string) => {
+    const normalized = (value || "").trim();
+    if (!normalized || normalized === "Sin categoría") return "Periféricos";
+    return normalized;
+  };
   const [carritoAbierto, setCarritoAbierto] = useState(false);
-  const [blueRate, setBlueRate] = useState({ venta: 0, base: 0 });
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const [blueRate, setBlueRate] = useState({ compra: 0, venta: 0, base: 0 });
 
   useEffect(() => {
     window.localStorage.setItem(CART_KEY, JSON.stringify(carrito));
@@ -75,16 +85,24 @@ export function TiendaClient() {
       ])
         .then(([catalog, quote]) => {
           if (!alive) return;
-          if (quote?.venta && quote?.base) setBlueRate({ venta: Number(quote.venta), base: Number(quote.base) });
+          if (quote?.compra || quote?.venta || quote?.base) {
+            setBlueRate({
+              compra: Number(quote.compra || quote.base || 0),
+              venta: Number(quote.venta || 0),
+              base: Number(quote.base || quote.compra || 0),
+            });
+          }
           const items = Object.entries(catalog).flatMap(([key, products]) =>
-            products.map((p, i) => ({
-              id: `${key}-${i}-${p.nombre}`,
-              nombre: p.nombre,
-              categoria: componentCatalogLabels[key as ComponentCatalogKey],
-              imagen: catalogProductImage(p),
-              precio: Number(p.precio || 0),
-              stock: 1,
-            })),
+            products
+              .filter((product) => hasCatalogPrice(product.precio))
+              .map((p, i) => ({
+                id: `${key}-${i}-${p.nombre}`,
+                nombre: p.nombre,
+                categoria: componentCatalogLabels[key as ComponentCatalogKey],
+                imagen: catalogProductImage(p),
+                precio: Number(p.precio || 0),
+                stock: 1,
+              })),
           );
           setComponentes(items);
         })
@@ -107,10 +125,12 @@ export function TiendaClient() {
     };
   }, [tipo]);
 
-  const componentPriceFactor = blueRate.base > 0 ? blueRate.venta / blueRate.base : 1;
+  const componentPriceFactor = resolveBlueReferenceFactor(blueRate.base, blueRate.compra);
   const base = useMemo(
     () => tipo === "componentes"
-      ? componentes.map((product) => ({ ...product, precio: Math.round(product.precio * componentPriceFactor) }))
+      ? componentes
+          .filter((product) => hasCatalogPrice(product.precio))
+          .map((product) => ({ ...product, precio: Math.round(product.precio * componentPriceFactor) }))
       : productos,
     [componentPriceFactor, componentes, productos, tipo],
   );
@@ -118,7 +138,7 @@ export function TiendaClient() {
 
   const categorias = useMemo(
     () =>
-      [...new Set(base.map((p) => p.categoria || "Sin categoría"))].sort((a, b) =>
+      [...new Set(base.map((p) => normalizeComponentCategory(p.categoria)))].sort((a, b) =>
         a.localeCompare(b, "es"),
       ),
     [base],
@@ -128,7 +148,7 @@ export function TiendaClient() {
     const list = base.filter(
       (p) =>
         p.nombre.toLowerCase().includes(busqueda.toLowerCase()) &&
-        (!activeCategoriaFiltro || (p.categoria || "Sin categoría") === activeCategoriaFiltro),
+        (!activeCategoriaFiltro || normalizeComponentCategory(p.categoria) === activeCategoriaFiltro),
     );
     if (orden === "asc") list.sort((a, b) => a.precio - b.precio);
     if (orden === "desc") list.sort((a, b) => b.precio - a.precio);
@@ -148,13 +168,15 @@ export function TiendaClient() {
   const totalArticulos = carrito.reduce((t, i) => t + i.cantidad, 0);
   const totalCarrito = carrito.reduce((t, i) => t + i.precio * i.cantidad, 0);
 
-  const agregar = (p: Producto) =>
+  const agregar = (p: Producto) => {
+    if (!hasCatalogPrice(p.precio)) return;
     setCarrito((cur) => {
       const found = cur.find((i) => i.id === p.id);
       return found
         ? cur.map((i) => (i.id === p.id ? { ...i, cantidad: i.cantidad + 1 } : i))
         : [...cur, { ...p, cantidad: 1 }];
     });
+  };
 
   const cambiar = (id: string, delta: number) =>
     setCarrito((cur) =>
@@ -165,17 +187,10 @@ export function TiendaClient() {
       }),
     );
 
+  const pedidoNumero = useMemo(() => getNextPedidoNumber(readStoredPedidos()), [carrito.length]);
+
   const pedir = () => {
-    const detalle = carrito
-      .map((i) => `${i.cantidad} x ${i.nombre} — ${money(i.precio * i.cantidad)}`)
-      .join("\n");
-    window.open(
-      waLink(
-        `Hola ServiTec, quiero realizar este pedido:\n${detalle}\n\nTotal: ${money(totalCarrito)}\nEnvío: consultar`,
-      ),
-      "_blank",
-      "noopener,noreferrer",
-    );
+    setCheckoutOpen(true);
   };
 
   return (
@@ -295,7 +310,6 @@ export function TiendaClient() {
                     >
                       <div className="grid aspect-square place-items-center bg-white p-4">
                         {p.imagen ? (
-                          // eslint-disable-next-line @next/next/no-img-element
                           <img
                             src={p.imagen}
                             alt={p.nombre}
@@ -351,6 +365,14 @@ export function TiendaClient() {
           onCheckout={pedir}
         />
       )}
+      <PedidoCheckoutModal
+        open={checkoutOpen}
+        onClose={() => setCheckoutOpen(false)}
+        items={carrito.map((item) => ({ nombre: item.nombre, cantidad: item.cantidad, precio: item.precio }))}
+        total={totalCarrito}
+        numeroPedido={pedidoNumero}
+        origen="tienda"
+      />
     </>
   );
 }

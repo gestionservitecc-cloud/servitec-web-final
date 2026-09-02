@@ -9,26 +9,38 @@ export function ImageField({
   values,
   onChange,
   multiple = false,
+  maxFiles = multiple ? 3 : 1,
 }: {
   values: string[];
   onChange: (next: string[]) => void;
   multiple?: boolean;
+  maxFiles?: number;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [dragActive, setDragActive] = useState(false);
+  const limit = Math.max(1, Number(maxFiles) || (multiple ? 3 : 1));
+  const atLimit = multiple && values.length >= limit;
 
   const pick = async (files: FileList | null) => {
     if (!files?.length) return;
     setBusy(true);
     setError("");
     try {
+      const remaining = limit - values.length;
+      if (remaining <= 0) {
+        setError(`Máximo ${limit} imagen${limit === 1 ? "" : "es"}.`);
+        return;
+      }
+
+      const selectedFiles = Array.from(files).slice(0, remaining);
       const urls: string[] = [];
-      for (const f of Array.from(files)) {
+      for (const f of selectedFiles) {
         urls.push(await uploadImage(f));
         if (!multiple) break;
       }
-      onChange(multiple ? [...values, ...urls] : urls.slice(0, 1));
+      onChange(multiple ? [...values, ...urls].slice(0, limit) : urls.slice(0, 1));
     } catch (e) {
       setError(e instanceof Error ? e.message : "Error al subir.");
     } finally {
@@ -45,8 +57,26 @@ export function ImageField({
     onChange(next);
   };
 
+  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setDragActive(false);
+    void pick(event.dataTransfer.files);
+  };
+
   return (
-    <div className="space-y-2">
+    <div
+      className={`space-y-2 rounded-xl border border-dashed p-2 transition-colors ${dragActive ? "border-primary bg-primary/5" : "border-transparent"}`}
+      onDragOver={(event) => {
+        event.preventDefault();
+        if (!busy && !atLimit) setDragActive(true);
+      }}
+      onDragLeave={(event) => {
+        event.preventDefault();
+        setDragActive(false);
+      }}
+      onDrop={handleDrop}
+    >
       <div className="flex flex-wrap gap-2">
         {values.map((url, i) => (
           <div
@@ -79,8 +109,8 @@ export function ImageField({
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
-          disabled={busy}
-          className="group grid size-20 place-items-center rounded-xl border border-dashed border-slate-300 bg-slate-50 text-muted-foreground transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary disabled:opacity-50"
+          disabled={busy || atLimit}
+          className={`group grid size-20 place-items-center rounded-xl border border-dashed border-slate-300 bg-slate-50 text-muted-foreground transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary disabled:opacity-50 ${dragActive ? "border-primary bg-primary/5 text-primary" : ""}`}
           aria-label="Agregar imagen"
         >
           {busy ? (

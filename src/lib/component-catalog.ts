@@ -1,7 +1,7 @@
 import { getAssetUrl } from "@/lib/asset-url";
 import type { CatalogItem, ComponentKey } from "./types";
 
-export type ComponentCatalogKey = Exclude<ComponentKey, "peripherals">;
+export type ComponentCatalogKey = ComponentKey;
 export type CatalogProduct = CatalogItem & {
   id: string;
   categoria: string;
@@ -24,9 +24,11 @@ export const componentCatalogLabels: Record<ComponentCatalogKey, string> = {
   power: "Fuente",
   case: "Gabinete",
   cooling: "Refrigeración",
+  peripherals: "Periféricos",
 };
 
 export const componentCatalogKeys = Object.keys(componentCatalogLabels) as ComponentCatalogKey[];
+const COMPONENTS_ROOT_FOLDER = "componentes";
 const FOLDER_BY_KEY: Record<ComponentCatalogKey, string> = {
   motherboard: "MOTHERBOARD",
   processor: "PROCESADOR",
@@ -36,13 +38,43 @@ const FOLDER_BY_KEY: Record<ComponentCatalogKey, string> = {
   power: "FUENTE",
   case: "GABINETE",
   cooling: "COOLER",
+  peripherals: "PERIFERICO",
+};
+const IMAGE_FOLDER_BY_KEY: Record<ComponentCatalogKey, string> = {
+  motherboard: "motherboard_img",
+  processor: "procesador_img",
+  memory: "ram_img",
+  storage: "disco_img",
+  graphics: "grafica_img",
+  power: "fuente_img",
+  case: "gabinete_img",
+  cooling: "cooler_img",
+  peripherals: "periferico_img",
 };
 
 export const catalogDataKeys = [...componentCatalogKeys, "peripherals"] as ComponentKey[];
-const DATA_FOLDER_BY_KEY: Record<ComponentKey, string> = {
-  ...FOLDER_BY_KEY,
-  peripherals: "PERIFERICO",
-};
+const DATA_FOLDER_BY_KEY: Record<ComponentKey, string> = FOLDER_BY_KEY;
+
+export function catalogBlobFolderPath(category: ComponentKey): string {
+  return `${COMPONENTS_ROOT_FOLDER}/${DATA_FOLDER_BY_KEY[category]}`;
+}
+
+export function catalogBlobJsonPath(category: ComponentKey): string {
+  return `${catalogBlobFolderPath(category)}/productos.json`;
+}
+
+export function hasCatalogPrice(value: unknown): boolean {
+  if (value === null || value === undefined || value === "") return false;
+
+  if (typeof value === "number") return Number.isFinite(value) && value > 0;
+
+  if (typeof value === "string") {
+    const cleaned = Number(value.replace(/[^0-9.,-]/g, "").replace(",", "."));
+    return Number.isFinite(cleaned) && cleaned > 0;
+  }
+
+  return false;
+}
 
 export function normalizeCatalogText(value: unknown): string {
   return String(value ?? "")
@@ -70,11 +102,21 @@ function deriveModel(name: string, brand: string): string {
   return name.trim().slice(brand.length).trim();
 }
 
-function resolveCatalogImagePath(value: string, category: ComponentKey): string {
+export function resolveCatalogImagePath(value: string, category: ComponentKey): string {
   if (/^(?:https?:|data:|blob:|\/api\/assets\/)/i.test(value)) return value;
-  const path = value.replace(/^\/+/, "");
+
+  const path = value.replace(/^\/+/, "").replace(/\\/g, "/");
   const folder = DATA_FOLDER_BY_KEY[category];
-  return path.toLowerCase().startsWith(`${folder.toLowerCase()}/`) ? path : `${folder}/${path}`;
+  const imageFolder = IMAGE_FOLDER_BY_KEY[category];
+  const rootFolder = COMPONENTS_ROOT_FOLDER;
+
+  if (path.toLowerCase().startsWith(`${rootFolder.toLowerCase()}/`)) return path;
+  if (path.toLowerCase().startsWith(`${folder.toLowerCase()}/`)) return `${rootFolder}/${path}`;
+  if (path.toLowerCase().startsWith(`${imageFolder.toLowerCase()}/`)) return `${rootFolder}/${folder}/${path}`;
+
+  const hasSubfolder = path.includes("/");
+  const normalizedPath = hasSubfolder ? path : `${imageFolder}/${path}`;
+  return `${rootFolder}/${folder}/${normalizedPath}`;
 }
 
 export function normalizeCatalogProduct(raw: Record<string, unknown>, category: ComponentKey, index: number): CatalogProduct {
@@ -176,10 +218,21 @@ export async function loadCatalogFromBlob(): Promise<ComponentCatalog> {
   const base = (process.env.BLOB_CATALOG_BASE_URL || process.env.NEXT_PUBLIC_BLOB_PUBLIC_BASE_URL || "").replace(/\/+$/, "");
   const entries = await Promise.all(catalogDataKeys.map(async (key) => {
     if (!base) return [key, []] as const;
-    const response = await fetch(`${base}/${DATA_FOLDER_BY_KEY[key]}/productos.json`, { next: { revalidate: 300 } });
-    if (!response.ok) return [key, []] as const;
-    const data = await response.json();
-    const rows = Array.isArray(data) ? data : Array.isArray(data.productos) ? data.productos : [];
+
+    const candidates = [
+      `${base}/${catalogBlobJsonPath(key)}`,
+      `${base}/${DATA_FOLDER_BY_KEY[key]}/productos.json`,
+    ];
+
+    let data: unknown = [];
+    for (const url of candidates) {
+      const response = await fetch(url, { next: { revalidate: 300 } });
+      if (!response.ok) continue;
+      data = await response.json();
+      break;
+    }
+
+    const rows = Array.isArray(data) ? data : Array.isArray((data as any)?.productos) ? (data as any).productos : [];
     return [key, rows.map((row, index) => normalizeCatalogProduct(row, key, index))] as const;
   }));
   return Object.fromEntries(entries) as ComponentCatalog;

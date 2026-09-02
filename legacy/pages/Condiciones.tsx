@@ -24,7 +24,7 @@ const Condiciones = () => (
     <h2 className="font-display">Formas de Pago</h2>
     <p>Aceptamos la mayoría de los medios de pago disponibles:</p>
     <ul>
-      <li><strong>Efectivo</strong> (con gran descuento)</li>
+      <li>Efectivo</li>
       <li>Débito</li>
       <li>Crédito</li>
       <li>Transferencias</li>

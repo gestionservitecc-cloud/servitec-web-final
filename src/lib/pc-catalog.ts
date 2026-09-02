@@ -3,6 +3,7 @@ import {
   catalogProductImage,
   componentCatalogKeys,
   componentCatalogLabels,
+  hasCatalogPrice,
   loadCatalogFromBlob,
   matchesMonitorProduct,
   matchesProductKeywords,
@@ -16,7 +17,7 @@ import {
 import type { Catalog } from "./types";
 
 export type { CatalogProduct, ComponentCatalogKey };
-export { buildCatalogIndex, catalogProductImage, componentCatalogKeys, componentCatalogLabels, matchesMonitorProduct, matchesProductKeywords, matchesSpeakerProduct, normalizeCatalogProduct, normalizeCatalogText, searchCatalog };
+export { buildCatalogIndex, catalogProductImage, componentCatalogKeys, componentCatalogLabels, hasCatalogPrice, matchesMonitorProduct, matchesProductKeywords, matchesSpeakerProduct, normalizeCatalogProduct, normalizeCatalogText, searchCatalog };
 
 const emptyCatalog = (): Record<ComponentCatalogKey, CatalogProduct[]> => Object.fromEntries(componentCatalogKeys.map((key) => [key, []])) as Record<ComponentCatalogKey, CatalogProduct[]>;
 let catalogCache: Record<ComponentCatalogKey, CatalogProduct[]> | null = null;

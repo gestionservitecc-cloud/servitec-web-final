@@ -106,6 +106,7 @@ export function AdminDashboard({ persistent }: { persistent: boolean }) {
   const [productos, setProductos] = useState<Producto[]>([]);
   const [movimientos, setMovimientos] = useState<InventoryMovement[]>(readStoredMovements);
   const [loading, setLoading] = useState(true);
+  const [blueRate, setBlueRate] = useState({ compra: 0, venta: 0 });
   const [editEquipo, setEditEquipo] = useState<Equipo | null>(null);
   const [editProducto, setEditProducto] = useState<Producto | null>(null);
 
@@ -128,10 +129,17 @@ export function AdminDashboard({ persistent }: { persistent: boolean }) {
     Promise.all([
       fetch("/api/admin/equipos").then((r) => (r.ok ? r.json() : [])),
       fetch("/api/admin/productos").then((r) => (r.ok ? r.json() : [])),
+      fetch("/api/dolar-blue").then((r) => (r.ok ? r.json() : null)),
     ])
-      .then(([e, p]) => {
+      .then(([e, p, quote]) => {
         setEquipos(Array.isArray(e) ? e : []);
         setProductos(Array.isArray(p) ? p : []);
+        if (quote && (Number(quote.compra) || Number(quote.venta))) {
+          setBlueRate({
+            compra: Number(quote.compra || 0),
+            venta: Number(quote.venta || 0),
+          });
+        }
       })
       .finally(() => setLoading(false));
   }, []);
@@ -168,19 +176,32 @@ export function AdminDashboard({ persistent }: { persistent: boolean }) {
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Link
-            href="/"
-            className="rounded-xl border border-white/15 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/20"
-          >
-            Ir al inicio
-          </Link>
-          <button
-            onClick={logout}
-            className="rounded-xl border border-rose-300/30 bg-rose-500/80 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-500"
-          >
-            Cerrar sesión
-          </button>
+        <div className="flex items-center gap-3">
+          <div className="rounded-xl border border-emerald-400/30 bg-emerald-500/10 px-3 py-2 text-right">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-200/80">
+              Dólar blue
+            </div>
+            <div className="mt-1 text-sm font-bold text-emerald-300">
+              Compra: ${Number(blueRate.compra || 0).toLocaleString("es-AR", { maximumFractionDigits: 2 })}
+            </div>
+            <div className="text-xs text-emerald-200">
+              Venta: ${Number(blueRate.venta || 0).toLocaleString("es-AR", { maximumFractionDigits: 2 })}
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Link
+              href="/"
+              className="rounded-xl border border-white/15 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/20"
+            >
+              Ir al inicio
+            </Link>
+            <button
+              onClick={logout}
+              className="rounded-xl border border-rose-300/30 bg-rose-500/80 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-500"
+            >
+              Cerrar sesión
+            </button>
+          </div>
         </div>
       </header>
 
@@ -196,7 +217,7 @@ export function AdminDashboard({ persistent }: { persistent: boolean }) {
             },
             {
               id: "stock",
-              label: "Stock",
+              label: "Inventario",
               description: "Nuevos y reacondicionados",
               icon: Boxes,
             },
@@ -415,7 +436,7 @@ function DashboardTab({
   return (
     <div className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-3">
-        <StatCard label="Stock total" value={stockTotal} />
+        <StatCard label="Unidades totales" value={stockTotal} />
         <StatCard label="Valor inventario" value={money(valorInventario)} />
         <StatCard label="Rol actual" value="admin" />
       </div>
@@ -593,7 +614,7 @@ function DashboardTab({
                 <th className="px-3 py-2">Categoría</th>
                 <th className="px-3 py-2">Costo</th>
                 <th className="px-3 py-2">Precio</th>
-                <th className="px-3 py-2">Stock</th>
+                <th className="px-3 py-2">Unidades</th>
                 <th className="px-3 py-2"></th>
               </tr>
             </thead>
@@ -760,7 +781,7 @@ function AddProductoForm({
           <input
             className={`${input} md:col-span-2`}
             type="number"
-            placeholder="Stock a añadir"
+            placeholder="Unidades a añadir"
             value={form.stock || ""}
             onChange={(e) =>
               setForm((f) => ({ ...f, stock: Number(e.target.value) || 0 }))
@@ -802,20 +823,30 @@ function BulkStockImport({
   const [importando, setImportando] = useState(false);
   const [mensaje, setMensaje] = useState("");
 
-  const descargarPlantilla = () => {
+  const exportarCsv = () => {
     const headers = ["Name", "Description", "Category", "Cost", "Price", "Quantity", "DeletedAt"];
-    const row = ["Producto de ejemplo", "", "ACCESORIOS", "10000", "15000", "5", ""];
-    const csv = `${headers.join(",")}\n${row.join(",")}\n`;
-    const blob = new Blob([`\uFEFF${csv}`], { type: "text/csv;charset=utf-8;" });
+    const rows = productos.map((producto) => [
+      producto.nombre,
+      "",
+      producto.categoria,
+      String(producto.precioCosto ?? 0),
+      String(producto.precio ?? 0),
+      String(producto.stock ?? 0),
+      "",
+    ]);
+    const csv = [headers, ...rows]
+      .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","))
+      .join("\n");
+    const blob = new Blob([`\uFEFF${csv}\n`], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = "plantilla_stock.csv";
+    link.download = "inventario_servitec.csv";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
-    setMensaje("Plantilla descargada.");
+    setMensaje("CSV exportado.");
   };
 
   const parseCsvRows = (text: string) => {
@@ -953,15 +984,15 @@ function BulkStockImport({
     <section className={panel}>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg font-semibold">Carga masiva de stock</h2>
+          <h2 className="text-lg font-semibold">Carga de Inventario</h2>
           <p className="text-xs text-slate-500">Actualiza los accesorios mediante un archivo CSV.</p>
         </div>
         <button
           type="button"
-          onClick={descargarPlantilla}
+          onClick={exportarCsv}
           className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
         >
-          Descargar plantilla
+          Exportar CSV
         </button>
       </div>
 

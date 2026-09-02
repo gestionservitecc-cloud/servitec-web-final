@@ -38,6 +38,8 @@ import {
   Zap,
 } from "lucide-react";
 import { isPcArmadaCategoryValue } from "@/lib/utils";
+import { PedidoCheckoutModal } from "@/components/shared/PedidoCheckoutModal";
+import { buildPedidoMessage, formatPedidoNumero, getNextPedidoNumber, readStoredPedidos } from "@/lib/order-data";
 
 type ComponentKey =
   | "motherboard"
@@ -278,6 +280,10 @@ const groups: Group[] = [
         name: "Fuente 750 W 80+ Bronze",
         detail: "750 W - Margen extra para placa de video",
       },
+      {
+        name: "Gabinete + Fuente (Próximo Paso)",
+        detail: "Lo definimos en el próximo paso para seguir con la cotización.",
+      },
     ],
   },
   {
@@ -384,6 +390,7 @@ const ArmarPc = () => {
   const [catalogExtras, setCatalogExtras] = useState(extras);
   const [catalogExtraOptions, setCatalogExtraOptions] = useState<Partial<Record<ExtraKey, Option[]>>>({});
   const [editablePresets, setEditablePresets] = useState<Record<string, SavedPreset>>({});
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
 
   const availablePcs = useMemo(
     () => Object.entries(editablePresets)
@@ -523,7 +530,13 @@ const ArmarPc = () => {
   const selectedProcessor = catalogGroups.find((group) => group.key === "processor")?.options[selected.processor ?? 0];
   const requiresDedicatedGraphics = selectedProcessor !== undefined && !hasIntegratedGraphics(selectedProcessor);
   const requiredGroups = orderedGroups.filter((group) => group.key !== "graphics" || requiresDedicatedGraphics);
-  const isComponentSelectionComplete = requiredGroups.every((group) => selected[group.key] !== undefined);
+  const powerBundleOptionName = "Gabinete + Fuente (Próximo Paso)";
+  const isPowerBundleSelected = selected.power !== undefined
+    && catalogGroups.find((group) => group.key === "power")?.options[selected.power]?.name === powerBundleOptionName;
+  const isComponentSelectionComplete = requiredGroups.every((group) => {
+    if (group.key === "case" && isPowerBundleSelected) return true;
+    return selected[group.key] !== undefined;
+  });
   const graphicsSummary = selected.graphics !== undefined
     ? catalogGroups.find((group) => group.key === "graphics")?.options[selected.graphics]?.name
     : "Sin placa dedicada (usa los gráficos del procesador)";
@@ -568,21 +581,33 @@ const ArmarPc = () => {
     setOpenGroup(null);
     setOpenExtra(null);
   };
-  const sendQuote = () => {
-    const parts = orderedGroups
+  const pedidoNumero = useMemo(() => getNextPedidoNumber(readStoredPedidos()), [selected]);
+
+  const armarPedidoItems = useMemo(() => {
+    const items = orderedGroups
       .filter((group) => selected[group.key] !== undefined)
-      .map((group) => `${group.label}: ${group.options[selected[group.key] ?? 0].name}`);
-    if (selected.graphics === undefined) parts.push(`Placa de video: ${graphicsSummary}`);
-    const accessories =
-      selectedExtras
-        .map((key) => `${catalogExtras.find((item) => item.key === key)?.label}: ${catalogExtraOptions[key]?.[selectedExtraModels[key] ?? 0]?.name ?? "Seleccionado"}`)
-        .join(", ") || "Ninguno";
-    const message = `Hola ServiTec, quiero cotizar esta PC armada:%0A${parts.join("%0A")}%0AAccesorios: ${accessories}`;
-    window.open(
-      `https://wa.me/5491124873190?text=${message}`,
-      "_blank",
-      "noopener,noreferrer",
-    );
+      .map((group) => ({
+        nombre: group.options[selected[group.key] ?? 0].name,
+        cantidad: 1,
+        precio: Number(group.options[selected[group.key] ?? 0].precio || 0),
+      }));
+
+    selectedExtras.forEach((key) => {
+      const option = catalogExtraOptions[key]?.[selectedExtraModels[key] ?? 0] ?? catalogExtras.find((extra) => extra.key === key)?.option;
+      if (option?.name) {
+        items.push({
+          nombre: option.name,
+          cantidad: 1,
+          precio: Number(option.precio || 0),
+        });
+      }
+    });
+
+    return items;
+  }, [catalogExtraOptions, catalogExtras, selected, selectedExtraModels, selectedExtras, orderedGroups]);
+
+  const sendQuote = () => {
+    setCheckoutOpen(true);
   };
   return (
     <main className="pc-builder relative min-h-screen overflow-hidden bg-white text-slate-900">
@@ -1074,6 +1099,14 @@ const ArmarPc = () => {
           </div>
         </div>
       )}
+      <PedidoCheckoutModal
+        open={checkoutOpen}
+        onClose={() => setCheckoutOpen(false)}
+        items={armarPedidoItems}
+        total={nationalTotal}
+        numeroPedido={pedidoNumero}
+        origen="armado"
+      />
     </main>
   );
 };

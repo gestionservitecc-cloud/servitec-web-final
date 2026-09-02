@@ -88,6 +88,7 @@ export function ProductoDialog({
           <div className="space-y-1.5">
             <Label className="text-xs">Imagen</Label>
             <ImageField
+              maxFiles={1}
               values={draft.imagen ? [draft.imagen] : []}
               onChange={(v) => set("imagen", v[0] || "")}
             />

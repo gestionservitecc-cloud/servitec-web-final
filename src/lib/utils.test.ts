@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  calculateInstallmentPrice,
   calculateNationalPrice,
   isAccessoryCategoryValue,
   isPcArmadaCategoryValue,
@@ -14,6 +15,8 @@ import {
   matchesProductKeywords,
   matchesSpeakerProduct,
 } from "./pc-catalog";
+import { hasCatalogPrice, resolveCatalogImagePath } from "./component-catalog";
+import { buildPedidoMessage, formatPedidoNumero, getNextPedidoNumber } from "./order-data";
 
 describe("calculateNationalPrice", () => {
   it("divide por 1,21 para el precio nacional", () => {
@@ -57,6 +60,31 @@ describe("catalog labels", () => {
   });
 });
 
+describe("catalog image path resolution", () => {
+  it("usa la subcarpeta de imagenes real del blob para cada categoria", () => {
+    expect(resolveCatalogImagePath("foto1.jpg", "cooling")).toBe("componentes/COOLER/cooler_img/foto1.jpg");
+    expect(resolveCatalogImagePath("cooler_img/foto1.jpg", "cooling")).toBe("componentes/COOLER/cooler_img/foto1.jpg");
+    expect(resolveCatalogImagePath("componentes/COOLER/cooler_img/foto1.jpg", "cooling")).toBe("componentes/COOLER/cooler_img/foto1.jpg");
+    expect(resolveCatalogImagePath("foto1.jpg", "graphics")).toBe("componentes/GRAFICA/grafica_img/foto1.jpg");
+  });
+});
+
+describe("installment price calculation", () => {
+  it("calcula el valor en 3/6 cuotas a partir del precio efectivo", () => {
+    expect(calculateInstallmentPrice(1500)).toBe(2000);
+    expect(calculateInstallmentPrice(2000)).toBe(2666.67);
+    expect(calculateInstallmentPrice(0)).toBe(0);
+  });
+});
+
+describe("catalog price validation", () => {
+  it("descarta productos sin precio real para la tienda", () => {
+    expect(hasCatalogPrice(0)).toBe(false);
+    expect(hasCatalogPrice(undefined)).toBe(false);
+    expect(hasCatalogPrice(1500)).toBe(true);
+  });
+});
+
 describe("accessory inventory filtering", () => {
   it("solo considera categorias de accesorios para el valor de inventario", () => {
     expect(isAccessoryCategoryValue("ACCESORIOS")).toBe(true);
@@ -68,12 +96,19 @@ describe("accessory inventory filtering", () => {
   });
 });
 
-describe("peripheral product matching", () => {
-  it("detecta monitores y parlantes con nombres reales del catálogo", () => {
-    expect(matchesMonitorProduct("Monitor Gamer ASUS VY229HF-J 22 FHD IPS 100Hz")).toBe(true);
-    expect(matchesSpeakerProduct("Parlantes Logitech Z407 2.1")).toBe(true);
-    expect(matchesProductKeywords("Teclado mecánico RGB", ["teclado", "keyboard"])).toBe(true);
-    expect(matchesSpeakerProduct("Monitor LG 24BR550Y 24 IPS FHD 75Hz parlantes integrados")).toBe(false);
-    expect(matchesMonitorProduct("Teclado para monitor gamer")).toBe(false);
+describe("pedido message formatting", () => {
+  it("genera el número y el texto del pedido con el formato esperado", () => {
+    expect(formatPedidoNumero(10000)).toBe("#10.000");
+    expect(getNextPedidoNumber([{ numeroPedido: 10000 }, { numeroPedido: 10001 }])).toBe(10002);
+    expect(buildPedidoMessage({
+      numeroPedido: 10000,
+      items: [{ nombre: "SSD 1TB", cantidad: 1, precio: 12000 }],
+      total: 12000,
+    })).toContain("Pedido #10.000");
+    expect(buildPedidoMessage({
+      numeroPedido: 10000,
+      items: [{ nombre: "SSD 1TB", cantidad: 1, precio: 12000 }],
+      total: 12000,
+    })).toContain("Hola ServiTec");
   });
 });

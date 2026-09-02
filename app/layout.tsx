@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
 import "@/styles/globals.css";
 import { Providers } from "@/components/providers";
+import { getAssetUrl } from "@/lib/asset-url";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -56,7 +57,8 @@ export const metadata: Metadata = {
       "Comprá equipos con stock real, armá tu PC y sumá accesorios. Servicio técnico con garantía escrita en CABA.",
   },
   icons: {
-    icon: "/favicon.webp",
+    icon: getAssetUrl("favicon.png"),
+    apple: getAssetUrl("favicon.png"),
   },
 };
 

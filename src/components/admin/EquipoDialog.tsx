@@ -34,6 +34,7 @@ import {
 import { normalizeCatalogText } from "@/lib/pc-catalog";
 import { CATEGORIAS_EQUIPO, SPEC_FIELDS } from "./lib";
 import { ImageField } from "./ImageField";
+import { calculateInstallmentPrice } from "@/lib/utils";
 
 export function EquipoDialog({
   equipo,
@@ -48,6 +49,14 @@ export function EquipoDialog({
 
   const set = <K extends keyof Equipo>(key: K, value: Equipo[K]) =>
     setDraft((d) => ({ ...d, [key]: value }));
+  const setEffectivePrice = (value: number) => {
+    const promo = Number(value) || 0;
+    setDraft((d) => ({
+      ...d,
+      promo,
+      original: calculateInstallmentPrice(promo),
+    }));
+  };
   const setSpec = (key: string, value: string) =>
     setDraft((d) => ({ ...d, specs: { ...d.specs, [key]: value } }));
 
@@ -139,8 +148,10 @@ export function EquipoDialog({
                   </Field>
                 ))}
                 {(isTablet || isTv) && <Field label="Garantía"><Input value={draft.warranty} onChange={(e) => set("warranty", e.target.value)} /></Field>}
-                {(isTablet || isTv) && <Field label="Precio original"><Input type="number" value={draft.original || ""} onChange={(e) => set("original", Number(e.target.value) || 0)} /></Field>}
-                {(isTablet || isTv) && <Field label="Precio promo"><Input type="number" value={draft.promo || ""} onChange={(e) => set("promo", Number(e.target.value) || 0)} /></Field>}
+                {(isTablet || isTv) && <Field label="Precio efectivo">
+                  <Input type="number" value={draft.promo || ""} onChange={(e) => setEffectivePrice(Number(e.target.value) || 0)} />
+                  {draft.promo && <p className="mt-1 text-[11px] text-red-500">3/6 cuotas: ${draft.promo ? calculateInstallmentPrice(Number(draft.promo)).toLocaleString("es-AR") : "0"}</p>}
+                </Field>}
               </div>
             </details>
           ) : isCelular ? (
@@ -212,20 +223,14 @@ export function EquipoDialog({
             </details>
           )}
 
-          {!isTablet && !isTv && <div className="grid gap-4 sm:grid-cols-3">
-            <Field label="Precio de lista">
-              <Input
-                type="number"
-                value={draft.original || ""}
-                onChange={(e) => set("original", Number(e.target.value) || 0)}
-              />
-            </Field>
+          {!isTablet && !isTv && <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Precio efectivo">
               <Input
                 type="number"
                 value={draft.promo || ""}
-                onChange={(e) => set("promo", Number(e.target.value) || 0)}
+                onChange={(e) => setEffectivePrice(Number(e.target.value) || 0)}
               />
+              {draft.promo && <p className="mt-1 text-[11px] text-red-500">3/6 cuotas: ${draft.promo ? calculateInstallmentPrice(Number(draft.promo)).toLocaleString("es-AR") : "0"}</p>}
             </Field>
             <Field label="Condición">
               <Select
@@ -292,7 +297,8 @@ export function EquipoDialog({
 
           <Field label="Imágenes">
             <ImageField
-              multiple
+              multiple={isNotebook}
+              maxFiles={isNotebook ? 3 : 1}
               values={draft.imagenes}
               onChange={(v) => set("imagenes", v)}
             />
@@ -323,7 +329,14 @@ export function EquipoDialog({
             Cancelar
           </Button>
           <Button
-            onClick={() => onSave(isCelular || isNotebook || isTablet || isTv ? { ...draft, detail: "" } : draft)}
+            onClick={() => {
+              const normalized = {
+                ...draft,
+                promo: Number(draft.promo || 0),
+                original: calculateInstallmentPrice(Number(draft.promo || 0)),
+              };
+              onSave(isCelular || isNotebook || isTablet || isTv ? { ...normalized, detail: "" } : normalized);
+            }}
             disabled={!draft.nombre.trim()}
           >
             Guardar equipo

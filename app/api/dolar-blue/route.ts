@@ -9,12 +9,15 @@ export async function GET() {
     });
     if (!response.ok) throw new Error(`DolarAPI respondió ${response.status}`);
 
-    const data = (await response.json()) as { venta?: number };
+    const data = (await response.json()) as { compra?: number; venta?: number };
+    const compra = Number(data.compra);
     const venta = Number(data.venta);
-    if (!Number.isFinite(venta) || venta <= 0) throw new Error("Cotización blue inválida");
+    if (!Number.isFinite(compra) || compra <= 0 || !Number.isFinite(venta) || venta <= 0) {
+      throw new Error("Cotización blue inválida");
+    }
 
-    const base = Number(process.env.COMPONENTS_BASE_BLUE_RATE) || venta;
-    return NextResponse.json({ venta, base });
+    const base = Number(process.env.COMPONENTS_BASE_BLUE_RATE) || compra;
+    return NextResponse.json({ compra, venta, base });
   } catch (error) {
     console.error("dolar-blue: unable to load quote", error);
     return NextResponse.json({ error: "No se pudo obtener el dólar blue." }, { status: 502 });

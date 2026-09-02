@@ -1,0 +1,794 @@
+[
+  {
+    "nombre": "Monitor Gamer AsRock Challenger CL25FFA 24.5 IPS FHD 120Hz Flicker Free Technology",
+    "categoria": "periferico",
+    "precio": 185999,
+    "imagenes": [
+      "periferico_img/foto1.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Monitor Gamer ASUS VA24EHF-J 24 FHD IPS 100Hz",
+    "categoria": "periferico",
+    "precio": 187225,
+    "imagenes": [
+      "periferico_img/foto2.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Monitor Gamer ASUS VY229HF-J 22 FHD IPS 100Hz",
+    "categoria": "periferico",
+    "precio": 188040,
+    "imagenes": [
+      "periferico_img/foto3.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Monitor Gamer Samsung Essential S3 24 FHD IPS 100Hz LS24D300GALXZB",
+    "categoria": "periferico",
+    "precio": 208860,
+    "imagenes": [
+      "periferico_img/foto4.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Monitor Gamer AsRock Challenger CL27FFA 27 IPS FHD 120Hz Flicker Free Technology",
+    "categoria": "periferico",
+    "precio": 215999,
+    "imagenes": [
+      "periferico_img/foto5.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Monitor Gamer ASUS VA27EHF-J 27 FHD IPS 100Hz",
+    "categoria": "periferico",
+    "precio": 229972,
+    "imagenes": [
+      "periferico_img/foto6.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Monitor Gamer Gigabyte GS25F14 24.5 FHD SS IPS 144Hz 1ms Adaptive-Sync",
+    "categoria": "periferico",
+    "precio": 230100,
+    "imagenes": [
+      "periferico_img/foto7.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Monitor Gamer Acer Nitro 23.8 KG241Y FHD VA 180Hz 1ms AMD FreeSync Premium",
+    "categoria": "periferico",
+    "precio": 252750,
+    "imagenes": [
+      "periferico_img/foto8.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Monitor Gamer ViewSonic VX2429 24 1080p IPS 200Hz FreeSync Premium Ficha de poder Americana",
+    "categoria": "periferico",
+    "precio": 265188,
+    "imagenes": [
+      "periferico_img/foto9.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Monitor Gamer Acer Nitro KG241Y X1biip 23.8 FHD IPS 200Hz Freesync",
+    "categoria": "periferico",
+    "precio": 282750,
+    "imagenes": [
+      "periferico_img/foto10.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Monitor Gamer AsRock Phantom PG27FFT1A 27 FHD IPS 180Hz FreeSync",
+    "categoria": "periferico",
+    "precio": 293249,
+    "imagenes": [
+      "periferico_img/foto11.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Monitor Gamer ViewSonic VX2428A 24 FHD IPS 180Hz FreeSync Premium",
+    "categoria": "periferico",
+    "precio": 305812,
+    "imagenes": [
+      "periferico_img/foto12.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Monitor Gamer KTC 27GR951 27 FHD Fast IPS 180Hz 1ms FreeSync Premium G-SYNC",
+    "categoria": "periferico",
+    "precio": 308562,
+    "imagenes": [
+      "periferico_img/foto13.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Monitor Gamer Acer Nitro KG271 X1biip 27 FHD IPS 200Hz Freesync",
+    "categoria": "periferico",
+    "precio": 322638,
+    "imagenes": [
+      "periferico_img/foto14.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Monitor Gamer Samsung Odyssey G3 G30D 24 VA FHD 180Hz LS24DG300ELXZB",
+    "categoria": "periferico",
+    "precio": 324375,
+    "imagenes": [
+      "periferico_img/foto15.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Monitor Gamer ViewSonic VX2729 27 1080p IPS 200Hz FreeSync Premium",
+    "categoria": "periferico",
+    "precio": 330812,
+    "imagenes": [
+      "periferico_img/foto16.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Monitor Gamer ASUS TUF VG249QL3A-J 24 FHD IPS 180Hz Freesync Premium G-SYNC Compatible",
+    "categoria": "periferico",
+    "precio": 331062,
+    "imagenes": [
+      "periferico_img/foto17.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Monitor Gamer ASUS TUF VG279Q3A-J 27 FHD IPS 180Hz Freesync Premium G-SYNC Compatible",
+    "categoria": "periferico",
+    "precio": 350794,
+    "imagenes": [
+      "periferico_img/foto18.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Monitor Gamer Lenovo Legion 27-10 27 FHD IPS 240Hz FreeSync Premium G-SYNC",
+    "categoria": "periferico",
+    "precio": 416260,
+    "imagenes": [
+      "periferico_img/foto19.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Monitor Gamer Samsung Odyssey G3 G30D 27 VA FHD 180Hz LS27DG300ELXZB",
+    "categoria": "periferico",
+    "precio": 425100,
+    "imagenes": [
+      "periferico_img/foto20.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Monitor Gamer Samsung Odyssey G4 25 FHD 1080p IPS 240Hz 1ms G-SYNC FreeSync Premium",
+    "categoria": "periferico",
+    "precio": 445250,
+    "imagenes": [
+      "periferico_img/foto21.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Monitor Gamer HP OMEN 27 G2 27 FHD IPS 180Hz 1ms FreeSync",
+    "categoria": "periferico",
+    "precio": 502385,
+    "imagenes": [
+      "periferico_img/foto22.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Monitor Gamer ViewSonic VX2718-2KPC-MHD 27 Curvo QHD 1440p VA 180Hz 1500R FreeSync Premium Pro Parlantes Internos",
+    "categoria": "periferico",
+    "precio": 510510,
+    "imagenes": [
+      "periferico_img/foto23.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Monitor Gamer Lenovo Legion R27fc-30 27 Curvo FHD VA 240Hz FreeSync G-SYNC",
+    "categoria": "periferico",
+    "precio": 540670,
+    "imagenes": [
+      "periferico_img/foto24.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Monitor LG 24BR550Y 24 IPS FHD 75Hz parlantes integrados",
+    "categoria": "periferico",
+    "precio": 548210,
+    "imagenes": [
+      "periferico_img/foto25.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Monitor Gamer Samsung Odyssey G4 S25HG400EL 25 FHD 300Hz LS25HG400ELXZB",
+    "categoria": "periferico",
+    "precio": 549185,
+    "imagenes": [
+      "periferico_img/foto26.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Monitor Gamer Samsung Odyssey G4 27 FHD 1080p IPS 300Hz 1ms G-SYNC FreeSync Premium",
+    "categoria": "periferico",
+    "precio": 556660,
+    "imagenes": [
+      "periferico_img/foto27.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Monitor Gamer Samsung Odyssey G5 S27FG500EL 27 QHD IPS 180Hz HAS LS27FG500ELXZB",
+    "categoria": "periferico",
+    "precio": 598065,
+    "imagenes": [
+      "periferico_img/foto28.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Monitor Gamer ASUS TUF VG32AQA1A-J 32 QHD 1440p VA 170Hz Max FreeSync Premium G-Sync Compatible",
+    "categoria": "periferico",
+    "precio": 694437,
+    "imagenes": [
+      "periferico_img/foto29.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Monitor Gamer Gigabyte GS32QCA 31.5 Curvo 1500R QHD VA 180Hz 1ms FreeSync",
+    "categoria": "periferico",
+    "precio": 787995,
+    "imagenes": [
+      "periferico_img/foto30.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Monitor Gamer AsRock Phantom PG32QF2B 31.5 VA QHD 1440p 165Hz FreeSync Antena WiFi Integrada",
+    "categoria": "periferico",
+    "precio": 814320,
+    "imagenes": [
+      "periferico_img/foto31.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Monitor Gamer Acer Nitro XV273K V3 27 4K UHD IPS 160Hz 0.5ms AMD Freesync Premium Speakers",
+    "categoria": "periferico",
+    "precio": 957970,
+    "imagenes": [
+      "periferico_img/foto32.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Monitor Gamer Acer Nitro ED340CUR 34 WQHD 1440p VA 200Hz 1ms Freesync",
+    "categoria": "periferico",
+    "precio": 998335,
+    "imagenes": [
+      "periferico_img/foto33.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Monitor Gamer Acer Nitro XV275U F3 27 QHD 1440p IPS QD-MiniLED 320Hz 0.5ms HDR1000 FreeSync Premium G-SYNC",
+    "categoria": "periferico",
+    "precio": 1003925,
+    "imagenes": [
+      "periferico_img/foto34.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Monitor Gamer Samsung Odyssey G6 G65B 27 QHD 1440p VA 240Hz 1ms AMD FreeSync Premium Pro Curvo 1000R",
+    "categoria": "periferico",
+    "precio": 1010425,
+    "imagenes": [
+      "periferico_img/foto35.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Monitor Gamer Samsung Odyssey G5 G50SF 27 QD-OLED QHD 1440p 180Hz 0.03ms G-SYNC FreeSync Premium",
+    "categoria": "periferico",
+    "precio": 1134965,
+    "imagenes": [
+      "periferico_img/foto36.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Monitor Gamer Acer Predator X27U W1 26.5 QHD 1440p QD-OLED 240Hz 0.03ms HDR10 AMD FreeSync Premium",
+    "categoria": "periferico",
+    "precio": 1214460,
+    "imagenes": [
+      "periferico_img/foto37.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Monitor Gamer Lenovo Legion 27Q-10 OLED 26.5 QHD QD-OLED 240Hz FreeSync Premium",
+    "categoria": "periferico",
+    "precio": 1275430,
+    "imagenes": [
+      "periferico_img/foto38.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Monitor Gamer Acer Nitro XV275K P5 27 4K UHD IPS Mini LED 160Hz Dual Mode FHD 320Hz 1ms DisplayHDR 1000 FreeSync Premium",
+    "categoria": "periferico",
+    "precio": 1391455,
+    "imagenes": [
+      "periferico_img/foto39.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Monitor Gamer Lenovo Legion Pro 27Q-10 26.5 QHD QD-OLED 280Hz FreeSync Premium Pro",
+    "categoria": "periferico",
+    "precio": 1439165,
+    "imagenes": [
+      "periferico_img/foto40.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Monitor Gamer AsRock Phantom Gaming PGO27QFS 27 QHD WOLED 240Hz 0.03Ms FreeSync Premium Pro KVM",
+    "categoria": "periferico",
+    "precio": 1473086,
+    "imagenes": [
+      "periferico_img/foto41.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Monitor Gamer Acer Nitro XV325QK V3 31.5 4K UHD IPS QD-MiniLED 160Hz Dual Mode FHD 320Hz 0.5ms HDR1000 FreeSync Premium G-SYNC",
+    "categoria": "periferico",
+    "precio": 1542385,
+    "imagenes": [
+      "periferico_img/foto42.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Monitor ASUS ProArt Display PA329CV-J 32 UHD 4K IPS 60Hz 100% sRGB Rec.709 ΔE2",
+    "categoria": "periferico",
+    "precio": 1680298,
+    "imagenes": [
+      "periferico_img/foto43.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Monitor Gamer Samsung Odyssey OLED G6 S27HG610SL 27 QHD 240Hz LS27HG610SLXZB",
+    "categoria": "periferico",
+    "precio": 1767740,
+    "imagenes": [
+      "periferico_img/foto44.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Monitor Gamer AsRock Phantom Gaming PGO27QFV 27 QHD QD-OLED 360Hz 0.03Ms FreeSync Premium Pro Antena WiFi Integrada",
+    "categoria": "periferico",
+    "precio": 1846060,
+    "imagenes": [
+      "periferico_img/foto45.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Monitor Gamer Acer Predator X27U F5 26.5 QHD 1440p QD-OLED 500Hz 0.03ms DisplayHDR True Black 500 FreeSync Premium Pro G-SYNC",
+    "categoria": "periferico",
+    "precio": 2518685,
+    "imagenes": [
+      "periferico_img/foto46.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Monitor Gamer Samsung Odyssey G8 G81SF 27 UHD 4K QD-OLED 240Hz 0,03ms G-SYNC AMD FreeSync Premium Pro",
+    "categoria": "periferico",
+    "precio": 2596295,
+    "imagenes": [
+      "periferico_img/foto47.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Monitor Gamer Samsung Odyssey G9 G91F 49 Dual QHD 1440p VA 144Hz 1ms 329 AMD FreeSync Premium Pro",
+    "categoria": "periferico",
+    "precio": 2606630,
+    "imagenes": [
+      "periferico_img/foto48.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Monitor Gamer Acer Predator X27 X1 26.5 4K UHD QD-OLED 240Hz 0.03ms DisplayHDR True Black 400 FreeSync Premium Pro",
+    "categoria": "periferico",
+    "precio": 2847195,
+    "imagenes": [
+      "periferico_img/foto49.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Monitor Gamer Acer Predator X34 X5 34 Curvo 1800R UWQHD 1440p QD-OLED 240Hz 0.03ms DisplayHDR True Black 400 FreeSync Premium Pro G-SYNC",
+    "categoria": "periferico",
+    "precio": 3066245,
+    "imagenes": [
+      "periferico_img/foto50.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Monitor Gamer Gigabyte MO34WQC2 34 Curvo 1800R WQHD QD-OLED 240Hz 0.03ms FreeSync Premium Pro KVM",
+    "categoria": "periferico",
+    "precio": 3107195,
+    "imagenes": [
+      "periferico_img/foto51.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Monitor Gamer Acer Predator X32 X 31.5 Curvo 1700R 4K UHD QD-OLED 240Hz 0.03ms DisplayHDR True Black 400 FreeSync Premium G-SYNC",
+    "categoria": "periferico",
+    "precio": 3153865,
+    "imagenes": [
+      "periferico_img/foto52.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Monitor Gamer Samsung Odyssey 3D Glasses-Free G9 G90XF 27 UHD 4K Fast IPS 165Hz 1ms G-SYNC AMD FreeSync Premium",
+    "categoria": "periferico",
+    "precio": 3505515,
+    "imagenes": [
+      "periferico_img/foto53.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Monitor Gamer ASUS ROG Swift OLED PG32UCDP-J 32 4K UHD 240Hz y Full HD 480Hz AMD FreeSync Premium Pro G-SYNC Compatible",
+    "categoria": "periferico",
+    "precio": 3646708,
+    "imagenes": [
+      "periferico_img/foto54.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Auriculares Redragon H211 Cronus RGB Black",
+    "categoria": "periferico",
+    "precio": 35638,
+    "imagenes": [
+      "periferico_img/foto55.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Auriculares Redragon Lamia H320W RGB 7.1 White",
+    "categoria": "periferico",
+    "precio": 81305,
+    "imagenes": [
+      "periferico_img/foto56.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Auriculares Razer BLACKSHARK V2 X Green Black PCPS5XBOX",
+    "categoria": "periferico",
+    "precio": 97738,
+    "imagenes": [
+      "periferico_img/foto57.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Auriculares Razer BLACKSHARK V2 X White Black 7.1 PCPS5XBOX",
+    "categoria": "periferico",
+    "precio": 97738,
+    "imagenes": [
+      "periferico_img/foto58.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Auriculares Logitech G335 Black PCXBOXPS",
+    "categoria": "periferico",
+    "precio": 105685,
+    "imagenes": [
+      "periferico_img/foto59.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Auriculares Logitech G335 White PCXBOXPS",
+    "categoria": "periferico",
+    "precio": 105685,
+    "imagenes": [
+      "periferico_img/foto60.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Auriculares Redragon Zeus X H510 RGB Surround 7.1 Black",
+    "categoria": "periferico",
+    "precio": 108330,
+    "imagenes": [
+      "periferico_img/foto61.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Auriculares Redragon Zeus X H510W RGB Surround 7.1 White",
+    "categoria": "periferico",
+    "precio": 108330,
+    "imagenes": [
+      "periferico_img/foto62.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Auriculares HyperX Cloud Stinger 2 Black",
+    "categoria": "periferico",
+    "precio": 109238,
+    "imagenes": [
+      "periferico_img/foto63.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Auriculares HyperX Cloud Stinger 2 White",
+    "categoria": "periferico",
+    "precio": 109238,
+    "imagenes": [
+      "periferico_img/foto64.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Auriculares SteelSeries Arctis Nova 1P Ultra Lightweight Black Wired 3.5 PCPS5",
+    "categoria": "periferico",
+    "precio": 139680,
+    "imagenes": [
+      "periferico_img/foto65.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Auriculares SteelSeries Arctis Nova 1X Ultra Lightweight Black Wired 3.5 PCXBOX",
+    "categoria": "periferico",
+    "precio": 139980,
+    "imagenes": [
+      "periferico_img/foto66.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Auriculares HyperX Cloud Stinger Core Wireless 2.4Ghz White PCPS 17Hs",
+    "categoria": "periferico",
+    "precio": 149988,
+    "imagenes": [
+      "periferico_img/foto67.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Auriculares Redragon Zeus H510 PRO Wireless 2.4Ghz Bluetooth 5.2 RGB Surround 7.1 White",
+    "categoria": "periferico",
+    "precio": 151380,
+    "imagenes": [
+      "periferico_img/foto68.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Auriculares Hyperx Cloud Stinger 2 Wireless 2.4Ghz DTS X Sound Black 20Hs",
+    "categoria": "periferico",
+    "precio": 174000,
+    "imagenes": [
+      "periferico_img/foto69.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Auriculares Logitech G535 Wireless Lightspeed RGB Black PCPS4PS5",
+    "categoria": "periferico",
+    "precio": 270125,
+    "imagenes": [
+      "periferico_img/foto70.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Auriculares JBL QUANTUM TWS Wireless Bluetooth 2.4GHz 5.2 ANC Black 16Hs",
+    "categoria": "periferico",
+    "precio": 322562,
+    "imagenes": [
+      "periferico_img/foto71.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Auriculares SteelSeries Arctis Nova 5X Wireless 2.4Ghz Bluetooth ClearCast 2.X Black 60Hs XBOXPCMACSwitch",
+    "categoria": "periferico",
+    "precio": 344988,
+    "imagenes": [
+      "periferico_img/foto72.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Auriculares Logitech G522 Wireless 2.4Ghz Lightspeed Black RGB LightSync 40Hs",
+    "categoria": "periferico",
+    "precio": 364988,
+    "imagenes": [
+      "periferico_img/foto73.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Auriculares Logitech G522 Wireless 2.4Ghz Lightspeed White RGB LightSync 40Hs",
+    "categoria": "periferico",
+    "precio": 364988,
+    "imagenes": [
+      "periferico_img/foto74.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Auriculares Corsair Virtuoso PRO Carbon PCPS4PS5XBOX",
+    "categoria": "periferico",
+    "precio": 465400,
+    "imagenes": [
+      "periferico_img/foto75.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Auriculares Corsair Virtuoso PRO White PCPS4PS5XBOX",
+    "categoria": "periferico",
+    "precio": 465400,
+    "imagenes": [
+      "periferico_img/foto76.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Auriculares Corsair HS80 MAX Wireless 2.4Ghz Bluetooth Dolby Atmos Steel Gray 65Hs PCPSMAC",
+    "categoria": "periferico",
+    "precio": 501800,
+    "imagenes": [
+      "periferico_img/foto77.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Auriculares Corsair HS80 MAX Wireless 2.4Ghz Bluetooth Dolby Atmos White 65Hs PCPSMAC",
+    "categoria": "periferico",
+    "precio": 501800,
+    "imagenes": [
+      "periferico_img/foto78.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Auriculares Razer BLACKSHARK V2 PRO Wireless 2.4Ghz Bluetooth 5.2 70Hs USB-C Black PCPS4PS5 Licensed",
+    "categoria": "periferico",
+    "precio": 517270,
+    "imagenes": [
+      "periferico_img/foto79.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Auriculares Razer BLACKSHARK V2 PRO Wireless 2.4Ghz Bluetooth 5.2 70Hs USB-C White PCPS4PS5 Licensed",
+    "categoria": "periferico",
+    "precio": 517270,
+    "imagenes": [
+      "periferico_img/foto80.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Auriculares Razer BLACKSHARK V3 PRO HyperSpeed Gen2 Simultaneus Wireless 2.4Ghz Bluetooth THX Spatial Audio 70Hs",
+    "categoria": "periferico",
+    "precio": 644605,
+    "imagenes": [
+      "periferico_img/foto81.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Auriculares SteelSeries Arctis Nova PRO Hi-Res Certified GameDAC Gen 2 Black PCXBOXMACSwitch",
+    "categoria": "periferico",
+    "precio": 660595,
+    "imagenes": [
+      "periferico_img/foto82.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Auriculares Logitech Astro A50 Wireless Bluetooth Lighstpeed Black PCPS5SWITCH HDMI 2.1 GEN 5",
+    "categoria": "periferico",
+    "precio": 831987,
+    "imagenes": [
+      "periferico_img/foto83.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Auriculares Corsair Virtuoso MAX Wireless 2.4Ghz Bluetooth Premium Dolby Atmos Black USB-C 60Hs PCPSNINTENDOMAC",
+    "categoria": "periferico",
+    "precio": 909987,
+    "imagenes": [
+      "periferico_img/foto84.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Auriculares Corsair Virtuoso MAX Wireless 2.4Ghz Bluetooth Premium Dolby Atmos White USB-C 60Hs PCPSNINTENDOMAC",
+    "categoria": "periferico",
+    "precio": 909987,
+    "imagenes": [
+      "periferico_img/foto85.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Auriculares SteelSeries Arctis Nova PRO OMNI Wireless 2.4Ghz Bluetooth 5.3 Hi-Res Audio Infinity Power System 60Hs Hot-swap PCPSXBOXNINTENDOMETA",
+    "categoria": "periferico",
+    "precio": 961220,
+    "imagenes": [
+      "periferico_img/foto86.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Auriculares Logitech Astro A50X Wireless Lightspeed 2.4Ghz Bluetooth Black PCPS5XBOX HDMI 2.1 24HS",
+    "categoria": "periferico",
+    "precio": 1024387,
+    "imagenes": [
+      "periferico_img/foto87.jpg"
+    ],
+    "url": ""
+  },
+  {
+    "nombre": "Auriculares Logitech Astro A50X Wireless Lightspeed 2.4Ghz Bluetooth White PCPS5XBOX HDMI 2.1 24HS",
+    "categoria": "periferico",
+    "precio": 1024387,
+    "imagenes": [
+      "periferico_img/foto88.jpg"
+    ],
+    "url": ""
+  }
+]
