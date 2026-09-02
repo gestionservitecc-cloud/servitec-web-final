@@ -8,7 +8,6 @@ import {
   loadComponentCatalog,
   matchesMonitorProduct,
   matchesProductKeywords,
-  matchesSpeakerProduct,
   type CatalogProduct,
 } from "@/lib/pc-catalog";
 import { calculateNationalPrice } from "@/lib/utils";
@@ -23,7 +22,6 @@ import {
   ChevronRight,
   Cpu,
   Fan,
-  Gamepad2,
   HardDrive,
   Headphones,
   Keyboard,
@@ -34,7 +32,6 @@ import {
   PackageCheck,
   RotateCcw,
   Send,
-  Speaker,
   X,
   Zap,
 } from "lucide-react";
@@ -52,7 +49,7 @@ type ComponentKey =
   | "case"
   | "cooling";
 type ExtraKey =
-  "monitor" | "speakers" | "headphones" | "mouse" | "keyboard" | "pad";
+  "monitor" | "headphones" | "mouse" | "keyboard";
 type Option = {
   name: string;
   detail: string;
@@ -332,15 +329,6 @@ const extras: Extra[] = [
     },
   },
   {
-    key: "speakers",
-    label: "Parlantes",
-    icon: Speaker,
-    option: {
-      name: "Parlantes 2.1",
-      detail: "Sonido stereo - Conexion auxiliar",
-    },
-  },
-  {
     key: "headphones",
     label: "Auriculares",
     icon: Headphones,
@@ -365,15 +353,6 @@ const extras: Extra[] = [
     option: {
       name: "Teclado mecanico",
       detail: "Retroiluminado - Layout espanol",
-    },
-  },
-  {
-    key: "pad",
-    label: "Pad",
-    icon: Gamepad2,
-    option: {
-      name: "Pad gamer XL",
-      detail: "Superficie de tela - Base antideslizante",
     },
   },
 ];
@@ -494,11 +473,9 @@ const ArmarPc = () => {
       const monitorProducts = peripheralProducts.filter((product) => matchesMonitorProduct(product.nombre));
       const accessoryMatchers: Record<ExtraKey, (productName: string) => boolean> = {
         monitor: matchesMonitorProduct,
-        speakers: matchesSpeakerProduct,
         headphones: (productName) => matchesProductKeywords(productName, ["auricular", "auriculares", "headset"]),
         mouse: (productName) => matchesProductKeywords(productName, ["mouse", "raton"]),
         keyboard: (productName) => matchesProductKeywords(productName, ["teclado", "keyboard"]),
-        pad: (productName) => matchesProductKeywords(productName, ["pad", "almohadilla", "mousepad"]),
       };
       const loadedExtras = extras.map((extra) => {
         const source = extra.key === "monitor"

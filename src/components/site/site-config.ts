@@ -16,6 +16,7 @@ export const stockCategories = [
   { label: "Celulares", value: "celular" },
   { label: "Notebooks", value: "notebook" },
   { label: "Tablets", value: "tablet" },
+  { label: "Consolas", value: "consola" },
   { label: "PC armada", value: "pc-armada" },
   { label: "TV's", value: "tv" },
 ];

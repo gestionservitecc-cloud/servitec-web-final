@@ -67,6 +67,7 @@ export function normalizeStockCategoryValue(value?: string): string {
   if (["celular", "celulares"].includes(normalized)) return "celular";
   if (["notebook", "notebooks"].includes(normalized)) return "notebook";
   if (["tablet", "tablets"].includes(normalized)) return "tablet";
+  if (["consola", "consolas", "videoconsola", "video consola"].includes(normalized)) return "consola";
   if (["tv", "tvs", "tvs"].includes(normalized)) return "tv";
 
   return normalized;

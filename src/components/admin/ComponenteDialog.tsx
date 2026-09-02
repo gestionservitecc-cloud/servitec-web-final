@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { ComponenteAdmin } from "@/lib/types";
 import { ImageField } from "./ImageField";
+import { componentSpecificationFields } from "@/lib/component-catalog";
 
 export function ComponenteDialog({ componente, onClose, onSave }: {
   componente: ComponenteAdmin;
@@ -14,6 +15,11 @@ export function ComponenteDialog({ componente, onClose, onSave }: {
 }) {
   const [draft, setDraft] = useState(componente);
   const set = (field: keyof ComponenteAdmin, value: string | number) => setDraft((current) => ({ ...current, [field]: value }));
+  const specificationFields = useMemo(
+    () => componentSpecificationFields(componente.categoria as Parameters<typeof componentSpecificationFields>[0], componente.nombre),
+    [componente.categoria, componente.nombre],
+  );
+  const setSpec = (key: string, value: string) => setDraft((current) => ({ ...current, specs: { ...(current.specs || {}), [key]: value } }));
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-950/80 p-3 sm:p-4" role="dialog" aria-modal="true">
       <form onSubmit={async (event) => { event.preventDefault(); await onSave(draft); }} className="my-auto max-h-[calc(100dvh-1.5rem)] w-full max-w-lg overflow-y-auto rounded-3xl bg-white p-4 text-slate-900 shadow-2xl sm:max-h-[92vh] sm:p-6">
@@ -25,6 +31,17 @@ export function ComponenteDialog({ componente, onClose, onSave }: {
           <div className="space-y-1.5"><Label>Costo</Label><Input type="number" value={draft.precioCosto || ""} onChange={(event) => set("precioCosto", Number(event.target.value) || 0)} /></div>
           <div className="space-y-1.5"><Label>Stock</Label><Input type="number" value={draft.stock} onChange={(event) => set("stock", Number(event.target.value) || 0)} /></div>
           <div className="space-y-1.5 sm:col-span-2"><Label>Imagen</Label><ImageField values={draft.imagen ? [draft.imagen] : []} onChange={(values) => set("imagen", values[0] || "")} /></div>
+          <div className="space-y-3 sm:col-span-2">
+            <Label>Especificaciones</Label>
+            <div className="grid gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3 sm:grid-cols-2">
+              {specificationFields.map((field) => (
+                <div key={field.key} className="space-y-1">
+                  <Label className="text-xs text-slate-600">{field.label}</Label>
+                  <Input value={draft.specs?.[field.key] || ""} onChange={(event) => setSpec(field.key, event.target.value)} />
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
         <p className="mt-4 text-xs text-slate-500">Los componentes existentes conservan su precio original. Los nuevos se indexan al dólar blue compra al mostrarse.</p>
         <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end"><Button type="button" variant="outline" onClick={onClose}>Cancelar</Button><Button type="submit">Guardar</Button></div>

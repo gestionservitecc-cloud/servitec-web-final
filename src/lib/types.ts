@@ -2,6 +2,7 @@ export type EquipoCategoria =
   | "celular"
   | "notebook"
   | "tablet"
+  | "consola"
   | "pc-armada"
   | "tv";
 
@@ -23,6 +24,10 @@ export interface EquipoSpecs {
   pulgadas?: string;
   placaVideo?: string;
   sistema?: string;
+  generacion?: string;
+  resolucion?: string;
+  unidadOptica?: string;
+  conectividad?: string;
   bateria?: string;
   distribucionTeclado?: string;
   tecladoRetroiluminado?: string;
@@ -78,6 +83,7 @@ export interface ComponenteAdmin {
   precioCosto: number;
   stock: number;
   imagen: string;
+  specs?: Record<string, string>;
   imagenes?: string[];
   originalCatalogPrice?: number;
   esNuevo?: boolean;

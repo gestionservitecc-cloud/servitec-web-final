@@ -40,6 +40,7 @@ export function newId() {
 export const CATEGORIAS_EQUIPO = [
   { value: "notebook", label: "Notebook" },
   { value: "celular", label: "Celular" },
+  { value: "consola", label: "Consolas" },
   { value: "pc-armada", label: "PC armada" },
   { value: "tablet", label: "Tablet" },
   { value: "tv", label: "TV" },

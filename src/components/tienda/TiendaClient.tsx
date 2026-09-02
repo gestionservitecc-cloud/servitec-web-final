@@ -3,18 +3,26 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Minus, Plus, Search, ShoppingCart, Trash2, X } from "lucide-react";
+import { Info, Minus, Plus, Search, ShoppingCart, Trash2, X } from "lucide-react";
 import { calculateInstallmentPrice, calculateNationalPrice } from "@/lib/utils";
 import { resolveBlueReferenceFactor } from "@/lib/blue-rate";
 import {
   catalogProductImage,
   componentCatalogLabels,
+  componentSpecificationFields,
   hasCatalogPrice,
   loadComponentCatalog,
   type ComponentCatalogKey,
 } from "@/lib/pc-catalog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -35,6 +43,8 @@ interface Producto {
   imagen: string;
   precio: number;
   stock: number;
+  specs?: Record<string, string>;
+  componentKey?: ComponentCatalogKey;
 }
 interface CartItem extends Producto {
   cantidad: number;
@@ -108,9 +118,11 @@ export function TiendaClient() {
                 id: `${key}-${i}-${p.nombre}`,
                 nombre: p.nombre,
                 categoria: componentCatalogLabels[key as ComponentCatalogKey],
+                componentKey: key as ComponentCatalogKey,
                 imagen: catalogProductImage(p),
                 precio: Number(p.precio || 0),
                 stock: 1,
+                specs: p.specs as Record<string, string> | undefined,
               })),
           );
           setComponentes(items);
@@ -318,7 +330,25 @@ export function TiendaClient() {
                       key={p.id}
                       className="group flex flex-col overflow-hidden rounded-2xl border bg-card shadow-soft transition-all hover:-translate-y-1 hover:shadow-soft-lg"
                     >
-                      <div className="grid aspect-square place-items-center bg-white p-4">
+                      <div className="relative grid aspect-square place-items-center bg-white p-4">
+                        {tipo === "componentes" && p.componentKey && (
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button variant="outline" size="icon" className="absolute right-2 top-2 z-10 size-8 rounded-full bg-white/90 shadow-sm" aria-label={`Ver especificaciones de ${p.nombre}`}>
+                                <Info className="size-4" />
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-h-[85vh] max-w-lg overflow-y-auto">
+                              <DialogHeader><DialogTitle>{p.nombre}</DialogTitle></DialogHeader>
+                              <div className="grid gap-3 border-t pt-4 sm:grid-cols-2">
+                                {componentSpecificationFields(p.componentKey, p.nombre).map((field) => p.specs?.[field.key] ? (
+                                  <p key={field.key} className="text-sm text-slate-600"><span className="font-semibold text-slate-900">{field.label}:</span> {p.specs[field.key]}</p>
+                                ) : null)}
+                                {!Object.values(p.specs || {}).some(Boolean) && <p className="text-sm text-muted-foreground">Especificaciones no cargadas.</p>}
+                              </div>
+                            </DialogContent>
+                          </Dialog>
+                        )}
                         {p.imagen ? (
                           <img
                             src={p.imagen}

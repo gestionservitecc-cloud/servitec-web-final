@@ -34,7 +34,7 @@ import {
 import { normalizeCatalogText } from "@/lib/pc-catalog";
 import { CATEGORIAS_EQUIPO, SPEC_FIELDS } from "./lib";
 import { ImageField } from "./ImageField";
-import { calculateInstallmentPrice } from "@/lib/utils";
+import { calculateInstallmentPrice, normalizeStockCategoryValue } from "@/lib/utils";
 
 export function EquipoDialog({
   equipo,
@@ -65,6 +65,7 @@ export function EquipoDialog({
   const isNotebook = draft.categoria === "notebook";
   const isTablet = draft.categoria === "tablet";
   const isTv = draft.categoria === "tv";
+  const isConsola = normalizeStockCategoryValue(draft.categoria) === "consola";
 
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
@@ -154,6 +155,27 @@ export function EquipoDialog({
                 </Field>}
               </div>
             </details>
+          ) : isConsola ? (
+            <details className="rounded-xl border border-slate-200 bg-slate-50/60 p-4" open>
+              <summary className="cursor-pointer text-sm font-semibold text-slate-800">
+                Especificaciones de la consola
+              </summary>
+              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                <Field label="Marca"><Input value={draft.marca} onChange={(e) => set("marca", e.target.value)} /></Field>
+                <Field label="Modelo"><Input value={draft.modelo} onChange={(e) => set("modelo", e.target.value)} /></Field>
+                {[
+                  ["generacion", "Generación"],
+                  ["almacenamiento", "Almacenamiento"],
+                  ["resolucion", "Resolución máxima"],
+                  ["unidadOptica", "Unidad óptica"],
+                  ["conectividad", "Conectividad"],
+                ].map(([key, label]) => (
+                  <Field key={key} label={label}>
+                    <Input value={(draft.specs as Record<string, string>)[key] || ""} onChange={(e) => setSpec(key, e.target.value)} />
+                  </Field>
+                ))}
+              </div>
+            </details>
           ) : isCelular ? (
             <details className="rounded-xl border border-slate-200 bg-slate-50/60 p-4" open>
               <summary className="cursor-pointer text-sm font-semibold text-slate-800">
@@ -194,7 +216,7 @@ export function EquipoDialog({
             </div>
           )}
 
-          {!isCelular && !isNotebook && !isPc && !isTablet && !isTv && (
+          {!isCelular && !isNotebook && !isPc && !isTablet && !isTv && !isConsola && (
             <Field label="Descripción corta">
               <Textarea
                 rows={2}
@@ -304,7 +326,7 @@ export function EquipoDialog({
             />
           </Field>
 
-          {!isPc && !isCelular && !isNotebook && !isTablet && !isTv && (
+          {!isPc && !isCelular && !isNotebook && !isTablet && !isTv && !isConsola && (
             <details className="rounded-lg border p-3" open>
               <summary className="cursor-pointer text-sm font-medium">
                 Especificaciones

@@ -26,6 +26,10 @@ interface EquipoStock {
   procesador?: string;
   pantalla?: string;
   sistema?: string;
+  generacion?: string;
+  resolucion?: string;
+  unidadOptica?: string;
+  conectividad?: string;
   placaVideo?: string;
   distribucionTeclado?: string;
   tecladoRetroiluminado?: string;
@@ -76,6 +80,7 @@ const categoryLabels: Record<string, string> = {
   pc: "PC armada",
   "pc-armada": "PC armada",
   tv: "TV´s",
+  consola: "Consolas",
 };
 
 const normalizeStockCategory = (category?: string) => normalizeStockCategoryValue(category);
@@ -91,6 +96,10 @@ const toStockShape = (e: Equipo): EquipoStock => ({
   modelo: e.modelo,
   upc: e.specs?.upc,
   procesador: e.specs?.procesador,
+  generacion: e.specs?.generacion,
+  resolucion: e.specs?.resolucion,
+  unidadOptica: e.specs?.unidadOptica,
+  conectividad: e.specs?.conectividad,
   pantalla: e.specs?.pantalla,
   sistema: e.specs?.sistema,
   placaVideo: e.specs?.placaVideo,
@@ -236,6 +245,7 @@ export const StockClient = () => {
                         const imagenes = (p.imagenes?.length ? p.imagenes : p.imagen || p.image ? [p.imagen || p.image || ""] : [])
                           .map(resolveEquipmentImage);
                         const isNotebook = normalizeStockCategory(p.categoria) === "notebook";
+                        const isConsola = normalizeStockCategory(p.categoria) === "consola";
                         const almacenamiento = p.almacenamiento || p.storage || "-";
                         const vendido = String(p.estado || "disponible").toLowerCase() === "vendido";
                         const nombreDisplay = p.nombre || `${p.marca || ""} ${p.modelo || ""}`.trim() || "Equipo";
@@ -249,12 +259,18 @@ export const StockClient = () => {
                         const specifications = [
                           ["Marca", p.marca],
                           ["Modelo", p.modelo],
+                          ...(isConsola ? [["Generación", p.generacion]] : []),
                           ["UPC / EAN", p.upc],
                           ["Procesador", p.procesador],
                           ["Memoria", p.ram],
                           ["Gráficos", p.placaVideo],
                           ["Almacenamiento", almacenamiento],
                           ["Pantalla", p.pantalla],
+                          ...(isConsola ? [
+                            ["Resolución máxima", p.resolucion],
+                            ["Unidad óptica", p.unidadOptica],
+                            ["Conectividad", p.conectividad],
+                          ] : []),
                           ["Distribución teclado", p.distribucionTeclado],
                           ["Teclado retroiluminado", p.tecladoRetroiluminado],
                           ["Sist. Operativo", p.sistema],
