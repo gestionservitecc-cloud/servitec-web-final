@@ -1034,13 +1034,13 @@ const ArmarPc = () => {
       </div>
       {currentGroup && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/80 p-3 backdrop-blur-sm sm:p-4"
           role="dialog"
           aria-modal="true"
           aria-labelledby="component-dialog-title"
         >
-          <div className="max-h-[90vh] w-full max-w-5xl overflow-y-auto rounded-2xl border border-red-200 bg-white p-5 text-slate-900 shadow-2xl sm:rounded-3xl sm:p-7">
-            <div className="sticky top-0 z-10 -mx-5 -mt-5 flex items-start justify-between gap-4 border-b border-red-100 bg-white px-5 py-5 sm:-mx-7 sm:-mt-7 sm:px-7 sm:py-7">
+          <div className="max-h-[calc(100dvh-1.5rem)] w-full max-w-5xl overflow-y-auto overscroll-contain rounded-2xl border border-red-200 bg-white p-4 text-slate-900 shadow-2xl sm:max-h-[90vh] sm:rounded-3xl sm:p-7">
+            <div className="sticky top-0 z-10 -mx-4 -mt-4 flex items-start justify-between gap-3 border-b border-red-100 bg-white px-4 py-4 sm:-mx-7 sm:-mt-7 sm:gap-4 sm:px-7 sm:py-7">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-secondary">
                   Seleccionar componente
@@ -1131,8 +1131,8 @@ const ArmarPc = () => {
         </div>
       )}
       {currentExtra && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="extra-dialog-title">
-          <div className="max-h-[90vh] w-full max-w-5xl overflow-y-auto rounded-2xl border border-red-200 bg-white p-5 text-slate-900 shadow-2xl sm:rounded-3xl sm:p-7">
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/80 p-3 backdrop-blur-sm sm:p-4" role="dialog" aria-modal="true" aria-labelledby="extra-dialog-title">
+          <div className="max-h-[calc(100dvh-1.5rem)] w-full max-w-5xl overflow-y-auto overscroll-contain rounded-2xl border border-red-200 bg-white p-4 text-slate-900 shadow-2xl sm:max-h-[90vh] sm:rounded-3xl sm:p-7">
             <div className="flex items-start justify-between">
               <div><p className="text-xs font-semibold uppercase tracking-[0.2em] text-secondary">Seleccionar periferico</p><h2 id="extra-dialog-title" className="mt-1 font-display text-2xl font-bold">{currentExtra.label}</h2></div>
               <button type="button" onClick={() => setOpenExtra(null)} aria-label="Cerrar selector" className="text-slate-400 hover:text-white"><X size={21} /></button>

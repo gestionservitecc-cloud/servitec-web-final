@@ -19,7 +19,7 @@ const folders: Record<string, string> = {
 
 const componentCatalogRoots = ["componentes", ""] as const;
 
-export const revalidate = 300;
+export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
@@ -61,7 +61,7 @@ export async function GET() {
     }));
 
     return NextResponse.json(Object.fromEntries(entries) as ComponentCatalog, {
-      headers: { "Cache-Control": "public, s-maxage=300, stale-while-revalidate=3600" },
+      headers: { "Cache-Control": "no-store, max-age=0" },
     });
   } catch (error) {
     console.error("catalog: unable to load Blob catalog", error);

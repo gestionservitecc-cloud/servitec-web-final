@@ -291,36 +291,15 @@ export const StockClient = () => {
                                     </p>
                                   ) : (
                                     <>
-                                      <div className="flex flex-wrap items-center gap-2 text-sm sm:text-base">
-                                        <p className="text-red-500">
-                                          ${formatPrice(precioLista)} ARS
-                                        </p>
-                                        <span className="whitespace-nowrap rounded-full border border-red-500/50 bg-red-500/5 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-red-500">
-                                          3/6 cuotas sin interés
-                                        </span>
-                                      </div>
-
                                       <div className="space-y-1.5">
-                                        <div className="flex items-center gap-2">
-                                          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">
-                                            Mejor precio
-                                          </p>
-                                          <span className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-slate-500 text-[9px] font-bold text-slate-400">
-                                            i
-                                          </span>
-                                        </div>
-
-                                        <div className="flex flex-wrap items-center gap-2">
-                                          <p className="text-2xl font-black text-emerald-500 sm:text-3xl">
-                                            ${formatPrice(precioEfectivo)}
-                                          </p>
-                                          <span className="whitespace-nowrap rounded-full border border-emerald-500/50 bg-emerald-500/5 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-emerald-400">
-                                            Efectivo / Transferencia
-                                          </span>
-                                        </div>
-
+                                        <p className="text-2xl font-black text-emerald-500 sm:text-3xl">
+                                          ${formatPrice(precioEfectivo)}
+                                        </p>
+                                        <p className="text-[11px] font-semibold text-rose-500">
+                                          3/6 cuotas sin interés: ${formatPrice(precioLista)}
+                                        </p>
                                         <p className="text-[11px] font-medium text-slate-400">
-                                          Precio sin impuestos nac. ${formatPrice(precioNacional)}
+                                          Sin imp. nac. ${formatPrice(precioNacional)}
                                         </p>
                                       </div>
                                     </>

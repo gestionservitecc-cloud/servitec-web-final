@@ -159,6 +159,7 @@ export function Header() {
                   <Link
                     key={link.href}
                     href={link.href}
+                    onClick={() => setMobileOpen(false)}
                     className={cn(
                       "rounded-lg px-3 py-2.5 text-sm font-medium",
                       isActive(link.href)
@@ -175,6 +176,7 @@ export function Header() {
                     <Link
                       key={c.value}
                       href={`/stock?categoria=${c.value}`}
+                      onClick={() => setMobileOpen(false)}
                       className="rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-muted"
                     >
                       {c.label}
@@ -187,6 +189,7 @@ export function Header() {
                     <Link
                       key={c.value}
                       href={`/tienda?tipo=${c.value}`}
+                      onClick={() => setMobileOpen(false)}
                       className="rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-muted"
                     >
                       {c.label}
@@ -198,6 +201,7 @@ export function Header() {
                   <Link
                     key={link.href}
                     href={link.href}
+                    onClick={() => setMobileOpen(false)}
                     className={cn(
                       "rounded-lg px-3 py-2.5 text-sm font-medium",
                       isActive(link.href)
@@ -211,19 +215,21 @@ export function Header() {
 
                 <Link
                   href="/condiciones"
+                  onClick={() => setMobileOpen(false)}
                   className="rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted"
                 >
                   Condiciones generales
                 </Link>
                 <Link
                   href="/contacto"
+                  onClick={() => setMobileOpen(false)}
                   className="rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted"
                 >
                   Contacto
                 </Link>
 
                 <Button asChild className="mt-3">
-                  <Link href="/presupuesto">Presupuesto online</Link>
+                  <Link href="/presupuesto" onClick={() => setMobileOpen(false)}>Presupuesto online</Link>
                 </Button>
                 <Button
                   asChild

@@ -31,7 +31,7 @@ export function ProductoDialog({
 
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-h-[calc(100dvh-1.5rem)] max-w-[calc(100vw-1.5rem)] overflow-y-auto p-4 sm:max-w-md sm:p-6">
         <DialogHeader>
           <DialogTitle>
             {producto.nombre ? "Editar accesorio" : "Nuevo accesorio"}
@@ -58,7 +58,7 @@ export function ProductoDialog({
             </datalist>
           </div>
 
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid gap-3 sm:grid-cols-3">
             <div className="space-y-1.5">
               <Label className="text-xs">Precio</Label>
               <Input
@@ -95,7 +95,7 @@ export function ProductoDialog({
           </div>
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="flex-col-reverse gap-2 sm:flex-row sm:justify-end">
           <Button variant="outline" onClick={onClose}>
             Cancelar
           </Button>

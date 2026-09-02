@@ -178,8 +178,8 @@ export function AdminDashboard({ persistent }: { persistent: boolean }) {
   return (
     <div className="mx-auto max-w-6xl space-y-6 px-4 py-6 sm:px-6">
       {/* Header */}
-      <header className="flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-white/10 bg-white/[0.03] p-4 shadow-xl sm:p-5">
-        <div className="flex items-center gap-3">
+      <header className="flex flex-col gap-4 rounded-3xl border border-white/10 bg-white/[0.03] p-4 shadow-xl sm:flex-row sm:items-center sm:justify-between sm:p-5">
+        <div className="flex min-w-0 items-center gap-3">
           <div className="grid size-12 place-items-center rounded-xl border border-white/15 bg-white/10 p-2">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={getAssetUrl("logo.png")} alt="ServiTec" className="h-full w-full object-contain" />
@@ -194,8 +194,8 @@ export function AdminDashboard({ persistent }: { persistent: boolean }) {
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="rounded-xl border border-emerald-400/30 bg-emerald-500/10 px-3 py-2 text-right">
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="min-w-0 flex-1 rounded-xl border border-emerald-400/30 bg-emerald-500/10 px-3 py-2 text-left sm:flex-none sm:text-right">
             <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-200/80">
               Dólar blue
             </div>
@@ -206,16 +206,16 @@ export function AdminDashboard({ persistent }: { persistent: boolean }) {
               Venta: ${Number(blueRate.venta || 0).toLocaleString("es-AR", { maximumFractionDigits: 2 })}
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex w-full items-center gap-2 sm:w-auto">
             <Link
               href="/"
-              className="rounded-xl border border-white/15 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/20"
+              className="flex-1 rounded-xl border border-white/15 bg-white/10 px-3 py-2 text-center text-sm font-semibold text-white transition hover:bg-white/20 sm:flex-none sm:px-4"
             >
               Ir al inicio
             </Link>
             <button
               onClick={logout}
-              className="rounded-xl border border-rose-300/30 bg-rose-500/80 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-500"
+              className="flex-1 rounded-xl border border-rose-300/30 bg-rose-500/80 px-3 py-2 text-sm font-semibold text-white transition hover:bg-rose-500 sm:flex-none sm:px-4"
             >
               Cerrar sesión
             </button>
@@ -224,7 +224,7 @@ export function AdminDashboard({ persistent }: { persistent: boolean }) {
       </header>
 
       {/* Tabs */}
-      <nav className="grid gap-2 rounded-3xl border border-white/10 bg-white/[0.03] p-2 shadow-xl sm:grid-cols-2">
+      <nav className="grid gap-2 rounded-3xl border border-white/10 bg-white/[0.03] p-2 shadow-xl sm:grid-cols-3">
         {(
           [
             {
@@ -250,7 +250,7 @@ export function AdminDashboard({ persistent }: { persistent: boolean }) {
           <button
             key={id}
             onClick={() => setSegment(id)}
-            className={`flex items-center gap-3 rounded-2xl px-4 py-3 text-left transition ${
+            className={`flex min-w-0 items-center gap-3 rounded-2xl px-3 py-3 text-left transition sm:px-4 ${
               segment === id
                 ? "bg-white text-slate-950 shadow-lg"
                 : "text-white/60 hover:bg-white/10 hover:text-white"
@@ -258,11 +258,11 @@ export function AdminDashboard({ persistent }: { persistent: boolean }) {
           >
             <Icon className="size-5 shrink-0" />
             <span>
-              <span className="block text-sm font-bold uppercase tracking-wide">
+              <span className="block truncate text-sm font-bold uppercase tracking-wide">
                 {label}
               </span>
               <span
-                className={`block text-xs ${
+                className={`block truncate text-xs ${
                   segment === id ? "text-slate-500" : "text-white/45"
                 }`}
               >
@@ -476,7 +476,7 @@ function ComponentesTab({
   });
 
   return (
-    <section className={`${panel} space-y-5`}>
+    <section className={`${panel} space-y-5 p-4 sm:p-6`}>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="text-lg font-semibold">Gestión de componentes</h2>
@@ -502,7 +502,7 @@ function ComponentesTab({
 
       {loading ? <p className="py-10 text-center text-sm text-slate-500">Cargando componentes…</p> : (
         <div className="max-h-[620px] overflow-auto">
-          <table className="w-full text-sm">
+          <table className="min-w-[640px] w-full text-sm">
             <thead className="sticky top-0 border-b bg-white text-left text-xs uppercase text-slate-400">
               <tr><th className="py-2 pr-3">Componente</th><th className="px-3 py-2">Precio base</th><th className="px-3 py-2">Stock</th><th className="px-3 py-2" /></tr>
             </thead>
@@ -744,7 +744,7 @@ function DashboardTab({
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="min-w-[720px] w-full text-sm">
             <thead className="border-b text-left text-xs uppercase text-slate-400">
               <tr>
                 <th className="py-2 pr-3">Producto</th>

@@ -68,7 +68,7 @@ export function EquipoDialog({
 
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-h-[92vh] max-w-2xl overflow-y-auto p-4 sm:p-6">
+      <DialogContent className="max-h-[calc(100dvh-1.5rem)] max-w-[calc(100vw-1.5rem)] overflow-x-hidden overflow-y-auto p-4 sm:max-h-[92vh] sm:max-w-[calc(100vw-2rem)] sm:p-6 md:max-w-2xl">
         <DialogHeader className="pr-8 sm:flex-row sm:items-center sm:justify-between">
           <DialogTitle>{equipo.nombre ? "Editar equipo" : "Nuevo equipo"}</DialogTitle>
           <PrivateNotesButton

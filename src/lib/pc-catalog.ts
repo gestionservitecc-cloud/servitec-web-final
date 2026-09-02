@@ -26,7 +26,7 @@ export async function loadComponentCatalog(): Promise<Record<ComponentCatalogKey
   if (catalogCache) return catalogCache;
   if (typeof window !== "undefined") {
     try {
-      const response = await fetch("/api/catalog");
+      const response = await fetch("/api/catalog", { cache: "no-store" });
       if (response.ok) catalogCache = await response.json();
     } catch {
       // Existing UI fallback options remain available when Blob is unavailable.
