@@ -16,7 +16,7 @@ import {
   Star,
   Trash2,
 } from "lucide-react";
-import type { Equipo, Producto } from "@/lib/types";
+import type { ComponenteAdmin, Equipo, Producto } from "@/lib/types";
 import { getAssetUrl } from "@/lib/asset-url";
 import {
   normalizeCsvProductName,
@@ -35,13 +35,15 @@ import {
 } from "./lib";
 import { EquipoDialog } from "./EquipoDialog";
 import { ProductoDialog } from "./ProductoDialog";
+import { ComponenteDialog } from "./ComponenteDialog";
+import { componentCatalogLabels, componentCatalogKeys, type ComponentCatalogKey } from "@/lib/component-catalog";
 
 const money = (n: number) =>
   `$ ${Math.round(Number(n) || 0).toLocaleString("es-AR")}`;
 const catLabel = (v: string) =>
   CATEGORIAS_EQUIPO.find((c) => c.value === v)?.label || v;
 
-type Segment = "dashboard" | "stock";
+type Segment = "dashboard" | "stock" | "componentes";
 
 type InventoryMovement = {
   id: string;
@@ -109,6 +111,7 @@ export function AdminDashboard({ persistent }: { persistent: boolean }) {
   const [blueRate, setBlueRate] = useState({ compra: 0, venta: 0 });
   const [editEquipo, setEditEquipo] = useState<Equipo | null>(null);
   const [editProducto, setEditProducto] = useState<Producto | null>(null);
+  const [editComponente, setEditComponente] = useState<ComponenteAdmin | null>(null);
 
   const addMovement = (movement: Omit<InventoryMovement, "id" | "fecha">) => {
     setMovimientos((cur) => {
@@ -232,8 +235,14 @@ export function AdminDashboard({ persistent }: { persistent: boolean }) {
             },
             {
               id: "stock",
-              label: "Inventario",
+              label: "STOCK",
               description: "Nuevos y reacondicionados",
+              icon: Boxes,
+            },
+            {
+              id: "componentes",
+              label: "Componentes",
+              description: "Catálogo por categoría",
               icon: Boxes,
             },
           ] as const
@@ -281,12 +290,17 @@ export function AdminDashboard({ persistent }: { persistent: boolean }) {
           movimientos={movimientos}
           addMovement={addMovement}
         />
-      ) : (
+      ) : segment === "stock" ? (
         <StockTab
           equipos={equipos}
           setEquipos={setEquipos}
           persistent={persistent}
           onEdit={setEditEquipo}
+        />
+      ) : (
+        <ComponentesTab
+          persistent={persistent}
+          onEdit={setEditComponente}
         />
       )}
 
@@ -320,6 +334,23 @@ export function AdminDashboard({ persistent }: { persistent: boolean }) {
                 : [...cur, saved],
             );
             setEditProducto(null);
+          }}
+        />
+      )}
+
+      {editComponente && (
+        <ComponenteDialog
+          key={editComponente.id}
+          componente={editComponente}
+          onClose={() => setEditComponente(null)}
+          onSave={async (saved) => {
+            const response = await fetch("/api/admin/componentes", {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(saved),
+            });
+            if (!response.ok) throw new Error("No se pudo guardar el componente.");
+            setEditComponente(null);
           }}
         />
       )}
@@ -401,6 +432,97 @@ function useSaver<T>(data: T, save: (d: T) => Promise<unknown>) {
 const panel = "rounded-3xl border border-white/10 bg-white p-5 text-slate-900 shadow-2xl sm:p-6";
 const input =
   "w-full rounded-lg border border-slate-300 bg-white p-3 text-sm outline-none focus:border-slate-900";
+
+function ComponentesTab({
+  persistent,
+  onEdit,
+}: {
+  persistent: boolean;
+  onEdit: (component: ComponenteAdmin) => void;
+}) {
+  const [category, setCategory] = useState<ComponentCatalogKey>("motherboard");
+  const [components, setComponents] = useState<ComponenteAdmin[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState("");
+
+  const loadCategory = async (nextCategory = category) => {
+    setLoading(true);
+    try {
+      const response = await fetch(`/api/admin/componentes?categoria=${nextCategory}`, { cache: "no-store" });
+      const data = response.ok ? await response.json() : [];
+      setComponents(Array.isArray(data) ? data : []);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    void loadCategory();
+  }, [category]);
+
+  const visible = components.filter((component) =>
+    component.nombre.toLowerCase().includes(filter.toLowerCase()),
+  );
+
+  const addNew = () => onEdit({
+    id: newId(),
+    nombre: "",
+    categoria: category,
+    precio: 0,
+    precioCosto: 0,
+    stock: 0,
+    imagen: "",
+    esNuevo: true,
+  });
+
+  return (
+    <section className={`${panel} space-y-5`}>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 className="text-lg font-semibold">Gestión de componentes</h2>
+          <p className="text-xs text-slate-500">Editá datos e imágenes. El precio de los componentes existentes no se puede modificar.</p>
+        </div>
+        <button type="button" onClick={addNew} disabled={!persistent} className="flex items-center gap-2 rounded-xl bg-slate-950 px-4 py-2 text-sm font-semibold text-white disabled:opacity-40">
+          <Plus className="size-4" /> Nuevo componente
+        </button>
+      </div>
+
+      <div className="flex gap-2 overflow-x-auto pb-1">
+        {componentCatalogKeys.map((key) => (
+          <button key={key} type="button" onClick={() => { setCategory(key); setFilter(""); }} className={`whitespace-nowrap rounded-xl px-3 py-2 text-xs font-semibold ${category === key ? "bg-slate-950 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}>
+            {componentCatalogLabels[key]}
+          </button>
+        ))}
+      </div>
+
+      <div className="relative">
+        <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+        <input className={`${input} pl-9`} placeholder={`Buscar en ${componentCatalogLabels[category]}…`} value={filter} onChange={(event) => setFilter(event.target.value)} />
+      </div>
+
+      {loading ? <p className="py-10 text-center text-sm text-slate-500">Cargando componentes…</p> : (
+        <div className="max-h-[620px] overflow-auto">
+          <table className="w-full text-sm">
+            <thead className="sticky top-0 border-b bg-white text-left text-xs uppercase text-slate-400">
+              <tr><th className="py-2 pr-3">Componente</th><th className="px-3 py-2">Precio base</th><th className="px-3 py-2">Stock</th><th className="px-3 py-2" /></tr>
+            </thead>
+            <tbody className="divide-y">
+              {visible.map((component) => (
+                <tr key={component.id} className="hover:bg-slate-50">
+                  <td className="py-2 pr-3"><div className="flex items-center gap-2">{component.imagen && <img src={component.imagen} alt="" className="size-10 rounded border bg-white object-contain" />}<span className="line-clamp-2 font-medium">{component.nombre}</span></div></td>
+                  <td className="px-3 py-2 font-semibold">{money(component.precio)}</td>
+                  <td className="px-3 py-2">{component.stock}</td>
+                  <td className="px-3 py-2 text-right"><button type="button" onClick={() => onEdit(component)} className="rounded p-1.5 text-slate-500 hover:bg-slate-100" aria-label={`Editar ${component.nombre}`}><Pencil className="size-4" /></button></td>
+                </tr>
+              ))}
+              {visible.length === 0 && <tr><td colSpan={4} className="py-10 text-center text-slate-400">Sin resultados</td></tr>}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </section>
+  );
+}
 
 /* ---------------------------- DASHBOARD ---------------------------- */
 

@@ -67,9 +67,7 @@ export function AdminLogin({ configured }: { configured: boolean }) {
 
           {!configured ? (
             <p className="rounded-lg bg-amber-500/15 px-3 py-2 text-sm text-amber-100">
-              El panel todavía no está configurado. Definí la variable de entorno{" "}
-              <code className="font-mono">ADMIN_PASSWORD</code> en Vercel y volvé a
-              desplegar.
+              El panel todavía no está configurado.
             </p>
           ) : (
             <>

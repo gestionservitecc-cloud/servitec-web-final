@@ -70,6 +70,19 @@ export interface Producto {
   imagen: string;
 }
 
+export interface ComponenteAdmin {
+  id: string;
+  nombre: string;
+  categoria: string;
+  precio: number;
+  precioCosto: number;
+  stock: number;
+  imagen: string;
+  imagenes?: string[];
+  originalCatalogPrice?: number;
+  esNuevo?: boolean;
+}
+
 export interface CatalogItem {
   nombre: string;
   precio: number;

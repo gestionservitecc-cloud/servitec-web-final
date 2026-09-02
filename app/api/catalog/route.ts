@@ -1,6 +1,8 @@
 import { get } from "@vercel/blob";
 import { NextResponse } from "next/server";
 import { catalogDataKeys, normalizeCatalogProduct, type ComponentCatalog } from "@/lib/component-catalog";
+import { isAccessoryCategoryValue } from "@/lib/utils";
+import { getComponentes, getProductos } from "@/lib/store";
 import localPeripheralFallback from "@/data/perifericos-fallback.json";
 
 const folders: Record<string, string> = {
@@ -25,6 +27,7 @@ export async function GET() {
       return NextResponse.json({ error: "Blob no está configurado." }, { status: 503 });
     }
 
+    const componentOverrides = await getComponentes().catch(() => []);
     const entries = await Promise.all(catalogDataKeys.map(async (key) => {
       const candidates = componentCatalogRoots.flatMap((root) => {
         const folder = `${root ? `${root}/` : ""}${folders[key]}`;
@@ -40,8 +43,21 @@ export async function GET() {
       }
 
       const data = payload;
-      const rows = Array.isArray(data) ? data : Array.isArray((data as any)?.productos) ? (data as any).productos : [];
-      return [key, rows.map((row, index) => normalizeCatalogProduct(row, key, index))] as const;
+      let rows = Array.isArray(data) ? data : Array.isArray((data as any)?.productos) ? (data as any).productos : [];
+      if (key === "peripherals" && rows.length === 0) {
+        const storedProducts = await getProductos().catch(() => []);
+        rows = storedProducts
+          .filter((product) => isAccessoryCategoryValue(product.categoria))
+          .map((product) => ({ ...product, categoria: "PERIFERICO" }));
+      }
+      const normalizedRows = rows.map((row, index) => normalizeCatalogProduct(row, key, index));
+      const overrides = componentOverrides.filter((item) => item.categoria === key);
+      const overrideIds = new Set(overrides.map((item) => item.id));
+      const normalizedOverrides = overrides.map((item, index) => normalizeCatalogProduct(item, key, normalizedRows.length + index));
+      return [key, [
+        ...normalizedRows.filter((row) => !overrideIds.has(row.id)),
+        ...normalizedOverrides,
+      ]] as const;
     }));
 
     return NextResponse.json(Object.fromEntries(entries) as ComponentCatalog, {

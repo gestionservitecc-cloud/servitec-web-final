@@ -53,7 +53,7 @@ export function calculateNationalPrice(price: number): number {
 export function calculateInstallmentPrice(price: number): number {
   const safePrice = Number(price) || 0;
   if (safePrice <= 0) return 0;
-  return Number(((safePrice * 100) / 75).toFixed(2));
+  return Math.ceil((safePrice * 100) / 75);
 }
 
 export function normalizeStockCategoryValue(value?: string): string {

@@ -81,7 +81,7 @@ describe("catalog image path resolution", () => {
 describe("installment price calculation", () => {
   it("calcula el valor en 3/6 cuotas a partir del precio efectivo", () => {
     expect(calculateInstallmentPrice(1500)).toBe(2000);
-    expect(calculateInstallmentPrice(2000)).toBe(2666.67);
+    expect(calculateInstallmentPrice(2000)).toBe(2667);
     expect(calculateInstallmentPrice(0)).toBe(0);
   });
 });

@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Minus, Plus, Search, ShoppingCart, Trash2, X } from "lucide-react";
-import { calculateNationalPrice } from "@/lib/utils";
+import { calculateInstallmentPrice, calculateNationalPrice } from "@/lib/utils";
 import { resolveBlueReferenceFactor } from "@/lib/blue-rate";
 import {
   catalogProductImage,
@@ -135,12 +135,12 @@ export function TiendaClient() {
     };
   }, [tipo]);
 
-  const componentPriceFactor = resolveBlueReferenceFactor(blueRate.base, blueRate.compra);
+  const componentPriceFactor = resolveBlueReferenceFactor(blueRate.base, blueRate.venta);
   const base = useMemo(
     () => tipo === "componentes"
       ? componentes
           .filter((product) => hasCatalogPrice(product.precio))
-          .map((product) => ({ ...product, precio: Math.round(product.precio * componentPriceFactor) }))
+          .map((product) => ({ ...product, precio: Math.round(product.precio * componentPriceFactor * 1.08) }))
       : productos,
     [componentPriceFactor, componentes, productos, tipo],
   );
@@ -324,6 +324,10 @@ export function TiendaClient() {
                             src={p.imagen}
                             alt={p.nombre}
                             loading="lazy"
+                            onError={(event) => {
+                              event.currentTarget.onerror = null;
+                              event.currentTarget.src = "/api/assets/placeholder.svg";
+                            }}
                             className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-105"
                           />
                         ) : (
@@ -340,8 +344,11 @@ export function TiendaClient() {
                           </p>
                         ) : (
                           <div>
-                            <p className="text-lg font-bold text-primary">
+                            <p className="text-lg font-bold text-emerald-700">
                               {money(p.precio)}
+                            </p>
+                            <p className="text-[11px] font-semibold text-rose-600">
+                              3/6 cuotas sin interés: {money(calculateInstallmentPrice(p.precio))}
                             </p>
                             <p className="text-[11px] text-muted-foreground">
                               Sin imp. nac. {money(calculateNationalPrice(p.precio))}

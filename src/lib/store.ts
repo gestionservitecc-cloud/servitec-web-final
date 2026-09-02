@@ -1,6 +1,6 @@
 import "server-only";
 import { get, put } from "@vercel/blob";
-import type { Equipo, Producto } from "./types";
+import type { ComponenteAdmin, Equipo, Producto } from "./types";
 
 /**
  * Data store. Uses Vercel Blob (one JSON document per collection) when
@@ -12,11 +12,12 @@ import type { Equipo, Producto } from "./types";
 const PREFIX = "servitec-data";
 const hasBlob = () => Boolean(process.env.BLOB_READ_WRITE_TOKEN);
 
-type Collection = "equipos" | "productos";
+type Collection = "equipos" | "productos" | "componentes";
 
 const seeds: Record<Collection, unknown[]> = {
   equipos: [],
   productos: [],
+  componentes: [],
 };
 
 async function readCollection<T>(name: Collection): Promise<T[]> {
@@ -47,8 +48,11 @@ async function writeCollection<T>(name: Collection, data: T[]): Promise<void> {
 
 export const getEquipos = () => readCollection<Equipo>("equipos");
 export const getProductos = () => readCollection<Producto>("productos");
+export const getComponentes = () => readCollection<ComponenteAdmin>("componentes");
 export const saveEquipos = (data: Equipo[]) => writeCollection("equipos", data);
 export const saveProductos = (data: Producto[]) =>
   writeCollection("productos", data);
+export const saveComponentes = (data: ComponenteAdmin[]) =>
+  writeCollection("componentes", data);
 
 export const storeIsPersistent = hasBlob;

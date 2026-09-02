@@ -12,6 +12,7 @@ import {
   type CatalogProduct,
 } from "@/lib/pc-catalog";
 import { calculateNationalPrice } from "@/lib/utils";
+import { resolveBlueReferenceFactor } from "@/lib/blue-rate";
 import { getAssetUrl } from "@/lib/asset-url";
 import type { Equipo } from "@/lib/types";
 import {
@@ -167,6 +168,8 @@ const normalizePlatform = (value?: string) => {
 
 const getPlatform = (option: Option) => normalizePlatform(option.platform ?? `${option.name} ${option.detail}`.match(/AM[45]|S\d{4}|LGA\s?\d+/i)?.[0]);
 const getMemoryType = (option: Option) => option.memoryType ?? `${option.name} ${option.detail}`.match(/DDR[45]/i)?.[0].toUpperCase();
+const powerBundleOptionName = "Fuente + Gabinete (Próximo Paso)";
+const legacyPowerBundleOptionName = "Gabinete + Fuente (Próximo Paso)";
 const hasIntegratedGraphics = (option?: Option) => {
   if (!option) return false;
   const description = `${option.name} ${option.detail}`;
@@ -281,7 +284,7 @@ const groups: Group[] = [
         detail: "750 W - Margen extra para placa de video",
       },
       {
-        name: "Gabinete + Fuente (Próximo Paso)",
+        name: powerBundleOptionName,
         detail: "Lo definimos en el próximo paso para seguir con la cotización.",
       },
     ],
@@ -391,6 +394,7 @@ const ArmarPc = () => {
   const [catalogExtraOptions, setCatalogExtraOptions] = useState<Partial<Record<ExtraKey, Option[]>>>({});
   const [editablePresets, setEditablePresets] = useState<Record<string, SavedPreset>>({});
   const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const [blueRate, setBlueRate] = useState({ compra: 0, venta: 0, base: 0 });
 
   const availablePcs = useMemo(
     () => Object.entries(editablePresets)
@@ -441,13 +445,49 @@ const ArmarPc = () => {
   }, []);
 
   useEffect(() => {
+    let alive = true;
+    const updateBlueRate = () => {
+      fetch("/api/dolar-blue", { cache: "no-store" })
+        .then((response) => (response.ok ? response.json() : null))
+        .then((quote) => {
+          if (!alive || !quote || !Number(quote.venta)) return;
+          setBlueRate({
+            compra: Number(quote.compra || 0),
+            venta: Number(quote.venta),
+            base: Number(quote.base || quote.venta),
+          });
+        })
+        .catch(() => undefined);
+    };
+
+    updateBlueRate();
+    const blueRateInterval = window.setInterval(updateBlueRate, 5 * 60 * 1000);
+    return () => {
+      alive = false;
+      window.clearInterval(blueRateInterval);
+    };
+  }, []);
+
+  useEffect(() => {
     const loadCatalog = async () => {
       const productMap = await loadComponentCatalog() as unknown as Record<string, CatalogProduct[]>;
       const loadedGroups = groups.map((group) => ({
         ...group,
-        options: productMap[group.key]
-          ? productMap[group.key].map((product) => mapProduct(product))
-          : group.options,
+        options: (() => {
+          const remoteOptions = productMap[group.key]?.map((product) => mapProduct(product));
+          const options = remoteOptions?.length ? remoteOptions : group.options;
+          if (group.key !== "power") return options;
+          const bundleOption = group.options.find((option) => option.name === powerBundleOptionName);
+          const coolerImage = productMap.cooling
+            ?.find((product) => product.nombre === "Usar Cooler CPU incluido en el procesador Intel");
+          const bundleWithImage = bundleOption
+            ? { ...bundleOption, image: coolerImage ? mapProduct(coolerImage).image : bundleOption.image }
+            : undefined;
+          const withoutBundle = options.filter((option) =>
+            option.name !== powerBundleOptionName && option.name !== legacyPowerBundleOptionName,
+          );
+          return bundleWithImage ? [bundleWithImage, ...withoutBundle] : options;
+        })(),
       }));
       setCatalogGroups(loadedGroups);
       const peripheralProducts = productMap.peripherals ?? [];
@@ -476,10 +516,21 @@ const ArmarPc = () => {
     };
     void loadCatalog();
   }, []);
-  const selectedGroups = catalogGroups.filter(
+  const armComponentPriceFactor = resolveBlueReferenceFactor(blueRate.base, blueRate.venta);
+  const pricedCatalogGroups = useMemo(
+    () => catalogGroups.map((group) => ({
+      ...group,
+      options: group.options.map((option) => ({
+        ...option,
+        precio: option.precio === undefined ? undefined : Number((option.precio * armComponentPriceFactor).toFixed(2)),
+      })),
+    })),
+    [armComponentPriceFactor, catalogGroups],
+  );
+  const selectedGroups = pricedCatalogGroups.filter(
     (group) => selected[group.key] !== undefined,
   );
-  const orderedGroups = [...catalogGroups].sort((left, right) => {
+  const orderedGroups = [...pricedCatalogGroups].sort((left, right) => {
     if (left.key === "processor") return -1;
     if (right.key === "processor") return 1;
     return 0;
@@ -530,9 +581,8 @@ const ArmarPc = () => {
   const selectedProcessor = catalogGroups.find((group) => group.key === "processor")?.options[selected.processor ?? 0];
   const requiresDedicatedGraphics = selectedProcessor !== undefined && !hasIntegratedGraphics(selectedProcessor);
   const requiredGroups = orderedGroups.filter((group) => group.key !== "graphics" || requiresDedicatedGraphics);
-  const powerBundleOptionName = "Gabinete + Fuente (Próximo Paso)";
   const isPowerBundleSelected = selected.power !== undefined
-    && catalogGroups.find((group) => group.key === "power")?.options[selected.power]?.name === powerBundleOptionName;
+    && [powerBundleOptionName, legacyPowerBundleOptionName].includes(catalogGroups.find((group) => group.key === "power")?.options[selected.power]?.name || "");
   const isComponentSelectionComplete = requiredGroups.every((group) => {
     if (group.key === "case" && isPowerBundleSelected) return true;
     return selected[group.key] !== undefined;
@@ -571,7 +621,7 @@ const ArmarPc = () => {
   const nationalTotal = useMemo(
     () => selectedGroups.reduce((sum, group) => sum + Number(group.options[selected[group.key] ?? 0].precio || 0), 0)
       + selectedExtras.reduce((sum, key) => sum + Number(catalogExtraOptions[key]?.[selectedExtraModels[key] ?? 0]?.precio || catalogExtras.find((item) => item.key === key)?.option.precio || 0), 0),
-    [catalogExtraOptions, catalogExtras, selected, selectedExtras, selectedExtraModels, selectedGroups],
+    [catalogExtraOptions, catalogExtras, selectedGroups, selected, selectedExtras, selectedExtraModels],
   );
   const reset = () => {
     setSelected({});
@@ -694,6 +744,10 @@ const ArmarPc = () => {
                         key={activePreset.id}
                         src={activePresetImage}
                         alt={`PC armada ${activePreset.name}`}
+                        onError={(event) => {
+                          event.currentTarget.onerror = null;
+                          event.currentTarget.src = "/api/assets/placeholder.svg";
+                        }}
                         className="h-full max-h-[20rem] w-full object-contain transition-all duration-700 group-hover:scale-105"
                       />
                     </div>
@@ -739,23 +793,38 @@ const ArmarPc = () => {
                   const Icon = group.icon;
                   const value = selected[group.key];
                   return (
-                    <button
-                      key={group.key}
-                      type="button"
-                      onClick={() => setOpenGroup(group.key)}
-                      className={`flex items-center gap-3 rounded-xl border border-red-100 bg-white p-3 text-left transition-colors hover:border-secondary/70 hover:bg-red-50 ${value !== undefined ? "border-secondary/60 bg-red-50" : ""}`}
-                    >
-                      <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${value !== undefined ? "bg-secondary text-slate-950" : "bg-red-50 text-red-800"}`}>
-                        {value !== undefined ? <Check size={19} /> : <Icon size={19} />}
-                      </span>
-                      <span className="min-w-0">
-                        <span className="block text-sm font-semibold">{group.label}</span>
-                        <span className="block truncate text-xs text-slate-500">
-                          {value !== undefined ? group.options[value].name : group.key === "graphics" && !requiresDedicatedGraphics ? "Opcional con gráficos integrados" : "Seleccioná una opción"}
+                    <div key={group.key} className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setOpenGroup(group.key)}
+                        className={`flex min-w-0 flex-1 items-center gap-3 rounded-xl border border-red-100 bg-white p-3 text-left transition-colors hover:border-secondary/70 hover:bg-red-50 ${value !== undefined ? "border-secondary/60 bg-red-50" : ""}`}
+                      >
+                        <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${value !== undefined ? "bg-secondary text-slate-950" : "bg-red-50 text-red-800"}`}>
+                          {value !== undefined ? <Check size={19} /> : <Icon size={19} />}
                         </span>
-                      </span>
-                      <ArrowRight size={15} className="ml-auto shrink-0 text-slate-500" />
-                    </button>
+                        <span className="min-w-0">
+                          <span className="block text-sm font-semibold">{group.label}</span>
+                          <span className="block truncate text-xs text-slate-500">
+                            {value !== undefined ? group.options[value].name : group.key === "graphics" && !requiresDedicatedGraphics ? "Opcional con gráficos integrados" : "Seleccioná una opción"}
+                          </span>
+                        </span>
+                        <ArrowRight size={15} className="ml-auto shrink-0 text-slate-500" />
+                      </button>
+                      {value !== undefined && (
+                        <button
+                          type="button"
+                          onClick={() => setSelected((current) => {
+                            const next = { ...current };
+                            delete next[group.key];
+                            return next;
+                          })}
+                          aria-label={`Quitar ${group.label}`}
+                          className="grid size-9 shrink-0 place-items-center rounded-full border border-red-200 bg-white text-red-700 transition hover:border-red-400 hover:bg-red-50"
+                        >
+                          <X size={16} />
+                        </button>
+                      )}
+                    </div>
                   );
                 })}
               </div>
@@ -971,7 +1040,7 @@ const ArmarPc = () => {
           aria-labelledby="component-dialog-title"
         >
           <div className="max-h-[90vh] w-full max-w-5xl overflow-y-auto rounded-2xl border border-red-200 bg-white p-5 text-slate-900 shadow-2xl sm:rounded-3xl sm:p-7">
-            <div className="flex items-start justify-between">
+            <div className="sticky top-0 z-10 -mx-5 -mt-5 flex items-start justify-between gap-4 border-b border-red-100 bg-white px-5 py-5 sm:-mx-7 sm:-mt-7 sm:px-7 sm:py-7">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-secondary">
                   Seleccionar componente
@@ -987,9 +1056,9 @@ const ArmarPc = () => {
                 type="button"
                 onClick={() => setOpenGroup(null)}
                 aria-label="Cerrar selector"
-                className="text-slate-400 hover:text-white"
+                className="grid size-10 shrink-0 place-items-center rounded-full border border-red-200 text-slate-500 transition hover:border-secondary hover:bg-red-50 hover:text-slate-900"
               >
-                <X size={21} />
+                <X size={19} />
               </button>
             </div>
             <div className="mt-6 grid gap-3 sm:grid-cols-2">
@@ -1025,6 +1094,10 @@ const ArmarPc = () => {
                       <img
                         src={option.image}
                         alt={`Imagen de ${option.name}`}
+                        onError={(event) => {
+                          event.currentTarget.onerror = null;
+                          event.currentTarget.src = "/api/assets/placeholder.svg";
+                        }}
                       />
                     </span>
                     <span className="flex min-w-0 flex-1 flex-col justify-center">
@@ -1068,7 +1141,7 @@ const ArmarPc = () => {
               {currentExtraOptions.map((option, index) => {
                 const active = selectedExtras.includes(currentExtra.key) && selectedExtraModels[currentExtra.key] === index;
                 return <button key={option.name} type="button" onClick={() => { setSelectedExtras((value) => value.includes(currentExtra.key) ? value : [...value, currentExtra.key]); setSelectedExtraModels((value) => ({ ...value, [currentExtra.key]: index })); setOpenExtra(null); }} className={`group flex min-h-32 w-full items-stretch gap-3 overflow-hidden rounded-xl border p-3 text-left transition-all duration-200 hover:-translate-y-1 hover:border-secondary hover:bg-red-50 ${active ? "border-secondary bg-red-50" : "border-red-100 bg-white"}`}>
-                  <span className="component-image-slot"><img src={option.image} alt={`Imagen de ${option.name}`} /></span>
+                  <span className="component-image-slot"><img src={option.image} alt={`Imagen de ${option.name}`} onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = "/api/assets/placeholder.svg"; }} /></span>
                   <span className="flex min-w-0 flex-1 flex-col justify-center"><span className="block font-semibold">{option.name}</span>{option.detail && <span className="mt-1 block text-sm text-slate-400">{option.detail}</span>}{option.precio !== undefined && <><span className="mt-2 block text-sm font-bold text-emerald-700">Precio: {formatPrice(option.precio)}</span><span className="mt-1 block text-xs text-slate-500">Sin impuestos nac.: ${calculateNationalPrice(Number(option.precio)).toLocaleString("es-AR")}</span></>}</span>
                   {active && <Check className="shrink-0 text-secondary" size={20} />}
                 </button>;
