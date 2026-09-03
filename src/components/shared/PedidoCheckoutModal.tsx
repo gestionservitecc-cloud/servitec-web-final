@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useState, type FormEvent, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { waLink } from "@/components/site/site-config";
+import { calculateInstallmentPrice, calculateNationalPrice } from "@/lib/utils";
 import {
   buildPedidoMessage,
   readStoredClientes,
@@ -31,6 +32,7 @@ export function PedidoCheckoutModal({
 }) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState<"efectivo" | "tarjeta" | null>(null);
   const [form, setForm] = useState({
     nombre: "",
     apellido: "",
@@ -72,6 +74,7 @@ export function PedidoCheckoutModal({
       ...payload,
       items,
       total,
+      formaPago: paymentMethod || undefined,
       createdAt: new Date().toISOString(),
       origen,
     };
@@ -110,20 +113,18 @@ export function PedidoCheckoutModal({
     }
 
     const fullName = `${payload.nombre} ${payload.apellido}`.trim();
-    const message = [
-      buildPedidoMessage({
-        numeroPedido,
-        items,
-        total,
-        nombre: fullName,
-      }),
-      "",
+    const lines = [
+      buildPedidoMessage({ numeroPedido, items, total, nombre: fullName }),
+    ];
+    if (paymentMethod) lines.push(`Forma de pago: ${paymentMethod === "tarjeta" ? "Tarjeta (3/6 cuotas)" : "Efectivo / Transferencia"}`);
+    lines.push("",
       `Nombre y Apellido: ${fullName}`,
       `DNI: ${payload.dni}`,
       `Correo electrónico: ${payload.email}`,
       `Teléfono: ${payload.telefono}`,
       `Dirección: ${payload.direccion}`,
-    ].join("\n");
+    );
+    const message = lines.join("\n");
 
     window.open(waLink(message), "_blank", "noopener,noreferrer");
     setSubmitting(false);
@@ -171,6 +172,25 @@ export function PedidoCheckoutModal({
 
           {error ? <p className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p> : null}
 
+          {origen === "tienda" && (
+            <div className="rounded-2xl border border-red-100 bg-red-50 p-4">
+              <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Precio final</p>
+              <div className="mt-3 space-y-3">
+                <button type="button" onClick={() => setPaymentMethod("efectivo")}
+                  className={`w-full rounded-xl border p-3 text-left ${paymentMethod === "efectivo" ? "border-emerald-500 bg-white" : "border-emerald-200 bg-white"}`}>
+                  <p className="text-xs font-semibold text-emerald-700">Efectivo / Transferencia</p>
+                  <p className="mt-1 font-display text-lg font-bold text-emerald-700">{`$${Number(total || 0).toLocaleString("es-AR")}`}</p>
+                </button>
+                <button type="button" onClick={() => setPaymentMethod("tarjeta")}
+                  className={`w-full rounded-xl border p-3 text-left ${paymentMethod === "tarjeta" ? "border-secondary bg-white" : "border-slate-200 bg-white"}`}>
+                  <p className="text-xs font-semibold text-rose-500">Tarjeta de crédito</p>
+                  <p className="mt-1 font-display text-lg font-bold text-slate-900">{`$${items.reduce((s, it) => s + calculateInstallmentPrice(Number(it.precio || 0)) * (it.cantidad || 1), 0).toLocaleString("es-AR")}`}</p>
+                  <p className="mt-1 text-xs text-slate-500">3/6 cuotas sin interés (VISA / Mastercard)</p>
+                </button>
+              </div>
+            </div>
+          )}
+
           <div className="rounded-2xl border border-red-100 bg-red-50 p-4">
             <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Resumen</p>
             <div className="mt-3 space-y-2">
@@ -189,7 +209,7 @@ export function PedidoCheckoutModal({
 
           <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
             <Button type="button" variant="outline" onClick={onClose} className="border-slate-600 bg-transparent text-slate-700 hover:bg-slate-100">Cancelar</Button>
-            <Button type="submit" disabled={submitting} className="bg-secondary text-slate-950 hover:bg-secondary/90">
+            <Button type="submit" disabled={submitting || (origen === "tienda" && !paymentMethod)} className="bg-secondary text-slate-950 hover:bg-secondary/90">
               {submitting ? "Guardando…" : "Enviar por WhatsApp"}
             </Button>
           </div>

@@ -601,12 +601,13 @@ const ArmarPc = () => {
       + selectedExtras.reduce((sum, key) => sum + Number(catalogExtraOptions[key]?.[selectedExtraModels[key] ?? 0]?.precio || catalogExtras.find((item) => item.key === key)?.option.precio || 0), 0),
     [catalogExtraOptions, catalogExtras, selectedGroups, selected, selectedExtras, selectedExtraModels],
   );
-  // Card total mirrors the per-component 3/6-cuotas amounts shown in each card.
-  const cardTotal = useMemo(
-    () => selectedGroups.reduce((sum, group) => sum + calculateInstallmentPrice(Number(group.options[selected[group.key] ?? 0].precio || 0)), 0)
-      + selectedExtras.reduce((sum, key) => sum + calculateInstallmentPrice(Number(catalogExtraOptions[key]?.[selectedExtraModels[key] ?? 0]?.precio || catalogExtras.find((item) => item.key === key)?.option.precio || 0)), 0),
-    [catalogExtraOptions, catalogExtras, selectedGroups, selected, selectedExtras, selectedExtraModels],
-  );
+  // Previously showed per-component installment sums. Now calculate installment on final efectivo/transferencia
+  // amount only when the full component selection is complete.
+  const installmentTotal = useMemo(() => {
+    if (!isComponentSelectionComplete) return 0;
+    const efectivoPrice = calculateNationalPrice(nationalTotal);
+    return calculateInstallmentPrice(Number(efectivoPrice || 0));
+  }, [isComponentSelectionComplete, nationalTotal]);
   const reset = () => {
     setSelected({});
     setSelectedExtras([]);
@@ -650,7 +651,7 @@ const ArmarPc = () => {
     return items;
   }, [catalogExtraOptions, catalogExtras, paymentMethod, selected, selectedExtraModels, selectedExtras, orderedGroups]);
 
-  const selectedTotal = paymentMethod === "tarjeta" ? cardTotal : calculateNationalPrice(nationalTotal);
+  const selectedTotal = paymentMethod === "tarjeta" && isComponentSelectionComplete ? installmentTotal : calculateNationalPrice(nationalTotal);
 
   const sendQuote = () => {
     setCheckoutOpen(true);
@@ -935,9 +936,7 @@ const ArmarPc = () => {
                             <p className="text-sm font-semibold text-emerald-700">
                               Precio: {formatPrice(group.options[selected[group.key] ?? 0].precio)}
                             </p>
-                            <p className="text-[11px] font-semibold text-rose-500">
-                              3/6 cuotas sin interés: ${calculateInstallmentPrice(Number(group.options[selected[group.key] ?? 0].precio)).toLocaleString("es-AR")}
-                            </p>
+                            {/* Installments per-item removed; show installments only on final total when selection complete */}
                             <p className="text-xs text-slate-500">
                               Sin impuestos nac.: ${calculateNationalPrice(Number(group.options[selected[group.key] ?? 0].precio)).toLocaleString("es-AR")}
                             </p>
@@ -980,9 +979,7 @@ const ArmarPc = () => {
                                 <p className="text-sm font-semibold text-emerald-700">
                                   Precio: {formatPrice(extraOption.precio)}
                                 </p>
-                                <p className="text-[11px] font-semibold text-rose-500">
-                                  3/6 cuotas sin interés: ${calculateInstallmentPrice(Number(extraOption.precio)).toLocaleString("es-AR")}
-                                </p>
+                                {/* Installments per-item removed; displayed on final price when ready */}
                                 <p className="text-xs text-slate-500">
                                   Sin impuestos nac.: ${calculateNationalPrice(Number(extraOption.precio)).toLocaleString("es-AR")}
                                 </p>
@@ -1023,7 +1020,7 @@ const ArmarPc = () => {
                   >
                     <p className="text-xs font-semibold uppercase tracking-wide text-rose-500">Tarjeta de crédito</p>
                     <p className="mt-1 font-display text-2xl font-bold text-slate-900 sm:text-3xl">
-                      {cardTotal > 0 ? `$${cardTotal.toLocaleString("es-AR")}` : "A confirmar"}
+                      {isComponentSelectionComplete && installmentTotal > 0 ? `$${installmentTotal.toLocaleString("es-AR")}` : "A confirmar"}
                     </p>
                     <p className="mt-1 text-xs text-slate-500">En 3/6 cuotas sin interés con VISA o Mastercard.</p>
                     <div className="mt-3 flex items-center gap-2">
@@ -1140,19 +1137,10 @@ const ArmarPc = () => {
                       <span className="block font-semibold">{option.name}</span>
                       {option.detail && <span className="mt-1 block text-sm text-slate-400">{option.detail}</span>}
                       {option.precio !== undefined && (
-                        <span className="mt-2 block text-sm font-bold text-emerald-700">
-                          Precio: {formatPrice(option.precio)}
-                        </span>
-                      )}
-                      {option.precio !== undefined && (
-                        <span className="mt-1 block text-[11px] font-semibold text-rose-500">
-                          3/6 cuotas sin interés: ${calculateInstallmentPrice(Number(option.precio)).toLocaleString("es-AR")}
-                        </span>
-                      )}
-                      {option.precio !== undefined && (
-                        <span className="mt-1 block text-xs text-slate-500">
-                          Sin impuestos nac.: ${calculateNationalPrice(Number(option.precio)).toLocaleString("es-AR")}
-                        </span>
+                        <>
+                          <span className="mt-2 block text-sm font-bold text-emerald-700">Precio: {formatPrice(option.precio)}</span>
+                          <span className="mt-1 block text-xs text-slate-500">Sin impuestos nac.: ${calculateNationalPrice(Number(option.precio)).toLocaleString("es-AR")}</span>
+                        </>
                       )}
                       {!compatible && (
                         <span className="mt-2 block text-xs font-bold uppercase tracking-wide text-red-400">
@@ -1181,11 +1169,40 @@ const ArmarPc = () => {
             <div className="mt-6 grid gap-3 sm:grid-cols-2">
               {currentExtraOptions.map((option, index) => {
                 const active = selectedExtras.includes(currentExtra.key) && selectedExtraModels[currentExtra.key] === index;
-                return <button key={option.name} type="button" onClick={() => { setSelectedExtras((value) => value.includes(currentExtra.key) ? value : [...value, currentExtra.key]); setSelectedExtraModels((value) => ({ ...value, [currentExtra.key]: index })); setOpenExtra(null); }} className={`group flex min-h-32 w-full items-stretch gap-3 overflow-hidden rounded-xl border p-3 text-left transition-all duration-200 hover:-translate-y-1 hover:border-secondary hover:bg-red-50 ${active ? "border-secondary bg-red-50" : "border-red-100 bg-white"}`}>
-                  <span className="component-image-slot"><img src={option.image} alt={`Imagen de ${option.name}`} onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = "/api/assets/placeholder.svg"; }} /></span>
-                  <span className="flex min-w-0 flex-1 flex-col justify-center"><span className="block font-semibold">{option.name}</span>{option.detail && <span className="mt-1 block text-sm text-slate-400">{option.detail}</span>}{option.precio !== undefined && <><span className="mt-2 block text-sm font-bold text-emerald-700">Precio: {formatPrice(option.precio)}</span><span className="mt-1 block text-[11px] font-semibold text-rose-500">3/6 cuotas sin interés: ${calculateInstallmentPrice(Number(option.precio)).toLocaleString("es-AR")}</span><span className="mt-1 block text-xs text-slate-500">Sin impuestos nac.: ${calculateNationalPrice(Number(option.precio)).toLocaleString("es-AR")}</span></>}</span>
-                  {active && <Check className="shrink-0 text-secondary" size={20} />}
-                </button>;
+                return (
+                  <button
+                    key={option.name}
+                    type="button"
+                    onClick={() => {
+                      setSelectedExtras((value) => value.includes(currentExtra.key) ? value : [...value, currentExtra.key]);
+                      setSelectedExtraModels((value) => ({ ...value, [currentExtra.key]: index }));
+                      setOpenExtra(null);
+                    }}
+                    className={`group flex min-h-32 w-full items-stretch gap-3 overflow-hidden rounded-xl border p-3 text-left transition-all duration-200 hover:-translate-y-1 hover:border-secondary hover:bg-red-50 ${active ? "border-secondary bg-red-50" : "border-red-100 bg-white"}`}
+                  >
+                    <span className="component-image-slot">
+                      <img
+                        src={option.image}
+                        alt={`Imagen de ${option.name}`}
+                        onError={(event) => {
+                          event.currentTarget.onerror = null;
+                          event.currentTarget.src = "/api/assets/placeholder.svg";
+                        }}
+                      />
+                    </span>
+                    <span className="flex min-w-0 flex-1 flex-col justify-center">
+                      <span className="block font-semibold">{option.name}</span>
+                      {option.detail && <span className="mt-1 block text-sm text-slate-400">{option.detail}</span>}
+                      {option.precio !== undefined && (
+                        <>
+                          <span className="mt-2 block text-sm font-bold text-emerald-700">Precio: {formatPrice(option.precio)}</span>
+                          <span className="mt-1 block text-xs text-slate-500">Sin impuestos nac.: ${calculateNationalPrice(Number(option.precio)).toLocaleString("es-AR")}</span>
+                        </>
+                      )}
+                    </span>
+                    {active && <Check className="shrink-0 text-secondary" size={20} />}
+                  </button>
+                );
               })}
             </div>
           </div>
