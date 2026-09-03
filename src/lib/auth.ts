@@ -48,9 +48,23 @@ export function adminConfigured() {
   return Boolean(process.env.ADMIN_PASSWORD);
 }
 
-export function checkPassword(input: string) {
+function timingSafeEqualBytes(a: Uint8Array, b: Uint8Array): boolean {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i += 1) diff |= a[i] ^ b[i];
+  return diff === 0;
+}
+
+// Compares fixed-length digests (not the raw strings) so the check takes the
+// same time regardless of the submitted password's length or content.
+export async function checkPassword(input: string): Promise<boolean> {
   const expected = process.env.ADMIN_PASSWORD || "";
-  return expected.length > 0 && input === expected;
+  if (!expected) return false;
+  const [expectedHash, inputHash] = await Promise.all([
+    crypto.subtle.digest("SHA-256", enc.encode(expected)),
+    crypto.subtle.digest("SHA-256", enc.encode(input)),
+  ]);
+  return timingSafeEqualBytes(new Uint8Array(expectedHash), new Uint8Array(inputHash));
 }
 
 export async function createSessionCookie() {
