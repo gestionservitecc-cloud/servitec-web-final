@@ -498,16 +498,10 @@ const ArmarPc = () => {
   const pricedCatalogGroups = useMemo(
     () => catalogGroups.map((group) => ({
       ...group,
-      options: group.options.map((option) => {
-        const serverPrecio = (option as any).precioARS;
-        const precio = serverPrecio && Number.isFinite(Number(serverPrecio)) && Number(serverPrecio) > 0
-          ? Number(serverPrecio)
-          : option.precio === undefined ? undefined : Number((parsePrice(option.precio) * armComponentPriceFactor).toFixed(2));
-        return {
-          ...option,
-          precio,
-        };
-      }),
+      options: group.options.map((option) => ({
+        ...option,
+        precio: option.precio === undefined ? undefined : Number((parsePrice(option.precio) * armComponentPriceFactor).toFixed(2)),
+      })),
     })),
     [armComponentPriceFactor, catalogGroups],
   );

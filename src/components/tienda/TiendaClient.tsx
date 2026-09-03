@@ -148,19 +148,14 @@ export function TiendaClient() {
   }, [tipo]);
 
   const componentPriceFactor = resolveBlueReferenceFactor(blueRate.base, blueRate.venta);
-  const base = useMemo(() => {
-    if (tipo !== "componentes") return productos;
-    return componentes
-      .filter((product) => hasCatalogPrice(product.precio))
-      .map((product) => {
-        // prefer server-computed precioARS when present
-        const precioARS = (product as any).precioARS;
-        if (precioARS && Number.isFinite(Number(precioARS)) && Number(precioARS) > 0) {
-          return { ...product, precio: Number(precioARS) };
-        }
-        return { ...product, precio: Math.round(product.precio * componentPriceFactor * 1.08) };
-      });
-  }, [componentPriceFactor, componentes, productos, tipo]);
+  const base = useMemo(
+    () => tipo === "componentes"
+      ? componentes
+          .filter((product) => hasCatalogPrice(product.precio))
+          .map((product) => ({ ...product, precio: Math.round(product.precio * componentPriceFactor * 1.08) }))
+      : productos,
+    [componentPriceFactor, componentes, productos, tipo],
+  );
   const activeCategoriaFiltro = categoriaFiltro.tipo === tipo ? categoriaFiltro.value : "";
 
   const categorias = useMemo(
