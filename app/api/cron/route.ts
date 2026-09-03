@@ -13,8 +13,14 @@ export async function GET(request: Request) {
     // Call internal recompute endpoint; prefer using the request origin, then VERCEL_URL, then NEXT_PUBLIC_BASE_URL
     const adminToken = process.env.ADMIN_CRON_TOKEN || process.env.CRON_SECRET;
     const reqUrl = new URL(request.url);
-    const origin = process.env.NEXT_PUBLIC_BASE_URL
-      || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : reqUrl.origin);
+    // Prefer the Vercel runtime URL, then Host header (actual request host), then NEXT_PUBLIC_BASE_URL, then request origin
+    const hostHeader = request.headers.get("host");
+    const origin = process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : hostHeader
+      ? `${reqUrl.protocol}//${hostHeader}`
+      : process.env.NEXT_PUBLIC_BASE_URL || reqUrl.origin;
+    console.log("cron: chosen origin", origin);
     const url = new URL("/api/admin/recompute-prices", origin);
     const resp = await fetch(url.toString(), {
       method: "GET",
