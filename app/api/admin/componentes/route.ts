@@ -1,4 +1,4 @@
-import { get } from "@vercel/blob";
+import { get, put } from "@vercel/blob";
 import { NextResponse } from "next/server";
 import { isAuthed } from "@/lib/auth";
 import { catalogDataKeys, normalizeCatalogProduct, type ComponentCatalogKey } from "@/lib/component-catalog";
@@ -67,6 +67,31 @@ export async function PUT(request: Request) {
         esNuevo: false,
       };
       await saveComponentes([...current.filter((component) => component.id !== item.id), nextItem]);
+      // Try to persist into the catalog productos.json for that category (non-fatal)
+      try {
+        const folder = folders[catalogMatch.key];
+        const pathname = `componentes/${folder}/productos.json`;
+        const blob = await get(pathname, { access: "private" }).catch(() => null);
+        const payload = blob ? await new Response(blob.stream).json() : [];
+        const rows = Array.isArray(payload) ? payload : Array.isArray(payload?.productos) ? payload.productos : [];
+        const raw = {
+          id: nextItem.id,
+          nombre: nextItem.nombre,
+          precio: nextItem.precio,
+          imagen: nextItem.imagen,
+          categoria: folder,
+        };
+        const replaced = rows.filter((r: any) => String(r.id) !== String(nextItem.id));
+        replaced.push(raw);
+        await put(pathname, JSON.stringify(replaced, null, 2), {
+          access: "private",
+          addRandomSuffix: false,
+          allowOverwrite: true,
+          contentType: "application/json",
+        }).catch(() => null);
+      } catch {
+        // ignore
+      }
       return NextResponse.json(nextItem);
     }
     const nextItem: ComponenteAdmin = {
@@ -84,6 +109,33 @@ export async function PUT(request: Request) {
     } else {
       // New override — append to the list
       await saveComponentes([...current.filter((component) => component.id !== item.id), nextItem]);
+    }
+
+    // Try to persist the component into the catalog productos.json for its category (non-fatal)
+    try {
+      const targetCategory = nextItem.categoria as ComponentCatalogKey;
+      const folder = folders[targetCategory];
+      const pathname = `componentes/${folder}/productos.json`;
+      const blob = await get(pathname, { access: "private" }).catch(() => null);
+      const payload = blob ? await new Response(blob.stream).json() : [];
+      const rows = Array.isArray(payload) ? payload : Array.isArray(payload?.productos) ? payload.productos : [];
+      const raw = {
+        id: nextItem.id,
+        nombre: nextItem.nombre,
+        precio: nextItem.precio,
+        imagen: nextItem.imagen,
+        categoria: folder,
+      };
+      const replaced = rows.filter((r: any) => String(r.id) !== String(nextItem.id));
+      replaced.push(raw);
+      await put(pathname, JSON.stringify(replaced, null, 2), {
+        access: "private",
+        addRandomSuffix: false,
+        allowOverwrite: true,
+        contentType: "application/json",
+      }).catch(() => null);
+    } catch {
+      // ignore
     }
 
     return NextResponse.json(nextItem);

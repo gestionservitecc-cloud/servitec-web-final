@@ -327,13 +327,24 @@ export function AdminDashboard({ persistent }: { persistent: boolean }) {
           producto={editProducto}
           categorias={[...new Set(productos.map((p) => p.categoria))].sort()}
           onClose={() => setEditProducto(null)}
-          onSave={(saved) => {
-            setProductos((cur) =>
-              cur.some((p) => p.id === saved.id)
-                ? cur.map((p) => (p.id === saved.id ? saved : p))
-                : [...cur, saved],
-            );
-            setEditProducto(null);
+          onSave={async (saved) => {
+            if (persistent) {
+              const next = productos.some((p) => p.id === saved.id)
+                ? productos.map((p) => (p.id === saved.id ? saved : p))
+                : [...productos, saved];
+              await saveProductos(next);
+              // notify other clients / loaders
+              window.dispatchEvent(new Event("productosUpdated"));
+              setProductos(next);
+              setEditProducto(null);
+            } else {
+              setProductos((cur) =>
+                cur.some((p) => p.id === saved.id)
+                  ? cur.map((p) => (p.id === saved.id ? saved : p))
+                  : [...cur, saved],
+              );
+              setEditProducto(null);
+            }
           }}
         />
       )}
