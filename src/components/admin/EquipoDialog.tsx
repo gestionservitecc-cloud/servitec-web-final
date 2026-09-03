@@ -403,7 +403,7 @@ function PrivateNotesButton({
           {value.trim() ? "Editar nota privada" : "Agregar nota privada"}
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md p-4 sm:p-6">
         <DialogHeader>
           <DialogTitle>Nota privada</DialogTitle>
         </DialogHeader>
@@ -507,9 +507,9 @@ function ComponentesEditor({
         ))}
       </div>
 
-      <div className="mt-3 flex gap-2">
+      <div className="mt-3 flex flex-col gap-2 sm:flex-row">
         <Select value={addKey} onValueChange={(value) => setAddKey(value as ComponentCatalogKey)}>
-          <SelectTrigger className="w-40">
+          <SelectTrigger className="w-full sm:w-40">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>

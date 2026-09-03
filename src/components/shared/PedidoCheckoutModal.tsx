@@ -131,8 +131,8 @@ export function PedidoCheckoutModal({
   };
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm" role="dialog" aria-modal="true">
-      <div className="w-full max-w-2xl rounded-3xl border border-red-200 bg-white p-5 text-slate-900 shadow-2xl sm:p-7">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/80 p-3 backdrop-blur-sm sm:p-4" role="dialog" aria-modal="true">
+      <div className="max-h-[calc(100dvh-1.5rem)] w-full max-w-2xl overflow-y-auto overscroll-contain rounded-3xl border border-red-200 bg-white p-4 text-slate-900 shadow-2xl sm:max-h-[92vh] sm:p-7">
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-secondary">Finalizar pedido</p>

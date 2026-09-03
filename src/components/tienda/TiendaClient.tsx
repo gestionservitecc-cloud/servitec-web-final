@@ -338,7 +338,7 @@ export function TiendaClient() {
                                 <Info className="size-4" />
                               </Button>
                             </DialogTrigger>
-                            <DialogContent className="max-h-[85vh] max-w-lg overflow-y-auto">
+                            <DialogContent className="max-h-[85vh] max-w-lg overflow-y-auto p-4 sm:p-6">
                               <DialogHeader><DialogTitle>{p.nombre}</DialogTitle></DialogHeader>
                               <div className="grid gap-3 border-t pt-4 sm:grid-cols-2">
                                 {componentSpecificationFields(p.componentKey, p.nombre).map((field) => p.specs?.[field.key] ? (

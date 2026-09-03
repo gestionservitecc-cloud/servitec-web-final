@@ -328,7 +328,7 @@ export const StockClient = () => {
                                       <DialogTrigger className="w-full rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100">
                                         Ver componentes
                                       </DialogTrigger>
-                                      <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
+                                      <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto p-4 sm:p-6">
                                         <DialogHeader>
                                           <DialogTitle>{nombreDisplay}</DialogTitle>
                                         </DialogHeader>
@@ -368,7 +368,7 @@ export const StockClient = () => {
                                       <DialogTrigger className="w-full rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100">
                                         Especificaciones
                                       </DialogTrigger>
-                                      <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
+                                      <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto p-4 sm:p-6">
                                         <DialogHeader>
                                           <DialogTitle>{nombreDisplay}</DialogTitle>
                                         </DialogHeader>
