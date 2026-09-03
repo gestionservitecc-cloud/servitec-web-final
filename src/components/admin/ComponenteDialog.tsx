@@ -43,15 +43,18 @@ export function ComponenteDialog({ componente, onClose, onSave }: {
           <div className="space-y-1.5 sm:col-span-2"><Label>Nombre</Label><Input value={draft.nombre} onChange={(event) => set("nombre", event.target.value)} required /></div>
           <div className="space-y-1.5">
             <Label>Categoría</Label>
-            {componente.esNuevo ? (
-              <select value={draft.categoria} onChange={(e) => set("categoria", e.target.value)} className="w-full rounded border px-3 py-2">
-                {componentCatalogKeys.map((key) => (
-                  <option key={key} value={key}>{componentCatalogLabels[key]}</option>
-                ))}
-              </select>
-            ) : (
-              <Input value={draft.categoria} readOnly onChange={(event) => set("categoria", event.target.value)} required />
-            )}
+            <div className="flex gap-2 overflow-x-auto pb-1">
+              {componentCatalogKeys.map((key) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => set("categoria", key)}
+                  className={`whitespace-nowrap rounded-xl px-3 py-2 text-xs font-semibold ${draft.categoria === key ? "bg-slate-950 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}
+                >
+                  {componentCatalogLabels[key]}
+                </button>
+              ))}
+            </div>
           </div>
           <div className="space-y-1.5"><Label>Precio base</Label><Input type="number" value={draft.precio || ""} disabled={!componente.esNuevo} onChange={(event) => set("precio", Number(event.target.value) || 0)} /></div>
           <div className="space-y-1.5"><Label>Costo</Label><Input type="number" value={draft.precioCosto || ""} onChange={(event) => set("precioCosto", Number(event.target.value) || 0)} /></div>
