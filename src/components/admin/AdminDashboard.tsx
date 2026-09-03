@@ -309,14 +309,24 @@ export function AdminDashboard({ persistent }: { persistent: boolean }) {
           key={editEquipo.id}
           equipo={editEquipo}
           onClose={() => setEditEquipo(null)}
-          onSave={(saved) => {
-            setEquipos((cur) => {
-              const exists = cur.some((e) => e.id === saved.id);
-              return exists
-                ? cur.map((e) => (e.id === saved.id ? saved : e))
-                : [...cur, { ...saved, orden: cur.length }];
-            });
-            setEditEquipo(null);
+          onSave={async (saved) => {
+            if (persistent) {
+              const next = equipos.some((e) => e.id === saved.id)
+                ? equipos.map((e) => (e.id === saved.id ? saved : e))
+                : [...equipos, { ...saved, orden: equipos.length }];
+              await saveEquipos(next);
+              window.dispatchEvent(new Event("equiposUpdated"));
+              setEquipos(next);
+              setEditEquipo(null);
+            } else {
+              setEquipos((cur) => {
+                const exists = cur.some((e) => e.id === saved.id);
+                return exists
+                  ? cur.map((e) => (e.id === saved.id ? saved : e))
+                  : [...cur, { ...saved, orden: cur.length }];
+              });
+              setEditEquipo(null);
+            }
           }}
         />
       )}
