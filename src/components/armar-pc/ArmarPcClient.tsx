@@ -10,7 +10,7 @@ import {
   matchesProductKeywords,
   type CatalogProduct,
 } from "@/lib/pc-catalog";
-import { calculateNationalPrice } from "@/lib/utils";
+import { calculateInstallmentPrice, calculateNationalPrice } from "@/lib/utils";
 import { resolveBlueReferenceFactor } from "@/lib/blue-rate";
 import { getAssetUrl } from "@/lib/asset-url";
 import type { Equipo } from "@/lib/types";
@@ -373,6 +373,7 @@ const ArmarPc = () => {
   const [catalogExtraOptions, setCatalogExtraOptions] = useState<Partial<Record<ExtraKey, Option[]>>>({});
   const [editablePresets, setEditablePresets] = useState<Record<string, SavedPreset>>({});
   const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<"efectivo" | "tarjeta" | null>(null);
   const [blueRate, setBlueRate] = useState({ compra: 0, venta: 0, base: 0 });
 
   const availablePcs = useMemo(
@@ -600,10 +601,17 @@ const ArmarPc = () => {
       + selectedExtras.reduce((sum, key) => sum + Number(catalogExtraOptions[key]?.[selectedExtraModels[key] ?? 0]?.precio || catalogExtras.find((item) => item.key === key)?.option.precio || 0), 0),
     [catalogExtraOptions, catalogExtras, selectedGroups, selected, selectedExtras, selectedExtraModels],
   );
+  // Card total mirrors the per-component 3/6-cuotas amounts shown in each card.
+  const cardTotal = useMemo(
+    () => selectedGroups.reduce((sum, group) => sum + calculateInstallmentPrice(Number(group.options[selected[group.key] ?? 0].precio || 0)), 0)
+      + selectedExtras.reduce((sum, key) => sum + calculateInstallmentPrice(Number(catalogExtraOptions[key]?.[selectedExtraModels[key] ?? 0]?.precio || catalogExtras.find((item) => item.key === key)?.option.precio || 0)), 0),
+    [catalogExtraOptions, catalogExtras, selectedGroups, selected, selectedExtras, selectedExtraModels],
+  );
   const reset = () => {
     setSelected({});
     setSelectedExtras([]);
     setSelectedExtraModels({});
+    setPaymentMethod(null);
     setStep(1);
     setOpenGroup(null);
     setOpenExtra(null);
@@ -611,13 +619,22 @@ const ArmarPc = () => {
   const pedidoNumero = useMemo(() => getNextPedidoNumber(readStoredPedidos()), [selected]);
 
   const armarPedidoItems = useMemo(() => {
-    const items = orderedGroups
-      .filter((group) => selected[group.key] !== undefined)
-      .map((group) => ({
-        nombre: group.options[selected[group.key] ?? 0].name,
+    const items = paymentMethod
+      ? [{
+        nombre: `Forma de pago: ${paymentMethod === "tarjeta" ? "Tarjeta de crédito (3/6 cuotas)" : "Efectivo / Transferencia"}`,
         cantidad: 1,
-        precio: Number(group.options[selected[group.key] ?? 0].precio || 0),
-      }));
+        precio: 0,
+      }]
+      : [];
+    orderedGroups
+      .filter((group) => selected[group.key] !== undefined)
+      .forEach((group) => {
+        items.push({
+          nombre: group.options[selected[group.key] ?? 0].name,
+          cantidad: 1,
+          precio: Number(group.options[selected[group.key] ?? 0].precio || 0),
+        });
+      });
 
     selectedExtras.forEach((key) => {
       const option = catalogExtraOptions[key]?.[selectedExtraModels[key] ?? 0] ?? catalogExtras.find((extra) => extra.key === key)?.option;
@@ -631,7 +648,9 @@ const ArmarPc = () => {
     });
 
     return items;
-  }, [catalogExtraOptions, catalogExtras, selected, selectedExtraModels, selectedExtras, orderedGroups]);
+  }, [catalogExtraOptions, catalogExtras, paymentMethod, selected, selectedExtraModels, selectedExtras, orderedGroups]);
+
+  const selectedTotal = paymentMethod === "tarjeta" ? cardTotal : calculateNationalPrice(nationalTotal);
 
   const sendQuote = () => {
     setCheckoutOpen(true);
@@ -916,6 +935,9 @@ const ArmarPc = () => {
                             <p className="text-sm font-semibold text-emerald-700">
                               Precio: {formatPrice(group.options[selected[group.key] ?? 0].precio)}
                             </p>
+                            <p className="text-[11px] font-semibold text-rose-500">
+                              3/6 cuotas sin interés: ${calculateInstallmentPrice(Number(group.options[selected[group.key] ?? 0].precio)).toLocaleString("es-AR")}
+                            </p>
                             <p className="text-xs text-slate-500">
                               Sin impuestos nac.: ${calculateNationalPrice(Number(group.options[selected[group.key] ?? 0].precio)).toLocaleString("es-AR")}
                             </p>
@@ -958,6 +980,9 @@ const ArmarPc = () => {
                                 <p className="text-sm font-semibold text-emerald-700">
                                   Precio: {formatPrice(extraOption.precio)}
                                 </p>
+                                <p className="text-[11px] font-semibold text-rose-500">
+                                  3/6 cuotas sin interés: ${calculateInstallmentPrice(Number(extraOption.precio)).toLocaleString("es-AR")}
+                                </p>
                                 <p className="text-xs text-slate-500">
                                   Sin impuestos nac.: ${calculateNationalPrice(Number(extraOption.precio)).toLocaleString("es-AR")}
                                 </p>
@@ -975,14 +1000,48 @@ const ArmarPc = () => {
                 </div>
               </div>
               <aside className="rounded-2xl border border-secondary/40 bg-red-50 p-6 shadow-xl sm:rounded-3xl">
-                <p className="text-sm text-slate-400">Precio nacional estimado</p>
-                <p className="mt-1 font-display text-2xl font-bold text-emerald-700 sm:text-3xl">
-                  {nationalTotal > 0 ? `$${nationalTotal.toLocaleString("es-AR")}` : "A confirmar"}
-                </p>
-                {nationalTotal > 0 && <p className="mt-1 text-xs text-slate-500">Sin impuestos nac.: ${calculateNationalPrice(nationalTotal).toLocaleString("es-AR")}</p>}
+                <p className="text-sm text-slate-400">Precio Final</p>
+                <p className="mt-1 text-xs text-slate-500">Elegí cómo vas a pagar para pedir la cotización.</p>
+                <div className="mt-3 space-y-3">
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod("efectivo")}
+                    aria-pressed={paymentMethod === "efectivo"}
+                    className={`w-full rounded-xl border p-4 text-left transition-colors ${paymentMethod === "efectivo" ? "border-emerald-500 bg-white ring-2 ring-emerald-500" : "border-emerald-200 bg-white hover:border-emerald-400"}`}
+                  >
+                    <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700">Efectivo / Transferencia</p>
+                    <p className="mt-1 font-display text-2xl font-bold text-emerald-700 sm:text-3xl">
+                      {nationalTotal > 0 ? `$${calculateNationalPrice(nationalTotal).toLocaleString("es-AR")}` : "A confirmar"}
+                    </p>
+                    <p className="mt-1 text-xs text-slate-500">Pagando en efectivo o transferencia bancaria.</p>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod("tarjeta")}
+                    aria-pressed={paymentMethod === "tarjeta"}
+                    className={`w-full rounded-xl border p-4 text-left transition-colors ${paymentMethod === "tarjeta" ? "border-secondary bg-white ring-2 ring-secondary" : "border-slate-200 bg-white hover:border-secondary/60"}`}
+                  >
+                    <p className="text-xs font-semibold uppercase tracking-wide text-rose-500">Tarjeta de crédito</p>
+                    <p className="mt-1 font-display text-2xl font-bold text-slate-900 sm:text-3xl">
+                      {cardTotal > 0 ? `$${cardTotal.toLocaleString("es-AR")}` : "A confirmar"}
+                    </p>
+                    <p className="mt-1 text-xs text-slate-500">En 3/6 cuotas sin interés con VISA o Mastercard.</p>
+                    <div className="mt-3 flex items-center gap-2">
+                      <div className="flex h-8 w-12 items-center justify-center rounded-md border border-dashed border-slate-300 bg-slate-50">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src="/pagos/visa.svg" alt="Visa" className="max-h-5 max-w-full object-contain" />
+                      </div>
+                      <div className="flex h-8 w-12 items-center justify-center rounded-md border border-dashed border-slate-300 bg-slate-50">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src="/pagos/mastercard.svg" alt="Mastercard" className="max-h-5 max-w-full object-contain" />
+                      </div>
+                    </div>
+                  </button>
+                </div>
                 <Button
                   type="button"
                   onClick={sendQuote}
+                  disabled={!paymentMethod}
                   className="mt-7 w-full gap-2 bg-secondary py-6 text-base font-bold text-slate-950 shadow-lg shadow-secondary/20 hover:bg-secondary/90"
                 >
                   <Send size={18} /> Pedir cotización
@@ -1086,6 +1145,11 @@ const ArmarPc = () => {
                         </span>
                       )}
                       {option.precio !== undefined && (
+                        <span className="mt-1 block text-[11px] font-semibold text-rose-500">
+                          3/6 cuotas sin interés: ${calculateInstallmentPrice(Number(option.precio)).toLocaleString("es-AR")}
+                        </span>
+                      )}
+                      {option.precio !== undefined && (
                         <span className="mt-1 block text-xs text-slate-500">
                           Sin impuestos nac.: ${calculateNationalPrice(Number(option.precio)).toLocaleString("es-AR")}
                         </span>
@@ -1119,7 +1183,7 @@ const ArmarPc = () => {
                 const active = selectedExtras.includes(currentExtra.key) && selectedExtraModels[currentExtra.key] === index;
                 return <button key={option.name} type="button" onClick={() => { setSelectedExtras((value) => value.includes(currentExtra.key) ? value : [...value, currentExtra.key]); setSelectedExtraModels((value) => ({ ...value, [currentExtra.key]: index })); setOpenExtra(null); }} className={`group flex min-h-32 w-full items-stretch gap-3 overflow-hidden rounded-xl border p-3 text-left transition-all duration-200 hover:-translate-y-1 hover:border-secondary hover:bg-red-50 ${active ? "border-secondary bg-red-50" : "border-red-100 bg-white"}`}>
                   <span className="component-image-slot"><img src={option.image} alt={`Imagen de ${option.name}`} onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = "/api/assets/placeholder.svg"; }} /></span>
-                  <span className="flex min-w-0 flex-1 flex-col justify-center"><span className="block font-semibold">{option.name}</span>{option.detail && <span className="mt-1 block text-sm text-slate-400">{option.detail}</span>}{option.precio !== undefined && <><span className="mt-2 block text-sm font-bold text-emerald-700">Precio: {formatPrice(option.precio)}</span><span className="mt-1 block text-xs text-slate-500">Sin impuestos nac.: ${calculateNationalPrice(Number(option.precio)).toLocaleString("es-AR")}</span></>}</span>
+                  <span className="flex min-w-0 flex-1 flex-col justify-center"><span className="block font-semibold">{option.name}</span>{option.detail && <span className="mt-1 block text-sm text-slate-400">{option.detail}</span>}{option.precio !== undefined && <><span className="mt-2 block text-sm font-bold text-emerald-700">Precio: {formatPrice(option.precio)}</span><span className="mt-1 block text-[11px] font-semibold text-rose-500">3/6 cuotas sin interés: ${calculateInstallmentPrice(Number(option.precio)).toLocaleString("es-AR")}</span><span className="mt-1 block text-xs text-slate-500">Sin impuestos nac.: ${calculateNationalPrice(Number(option.precio)).toLocaleString("es-AR")}</span></>}</span>
                   {active && <Check className="shrink-0 text-secondary" size={20} />}
                 </button>;
               })}
@@ -1153,7 +1217,7 @@ const ArmarPc = () => {
         open={checkoutOpen}
         onClose={() => setCheckoutOpen(false)}
         items={armarPedidoItems}
-        total={nationalTotal}
+        total={selectedTotal}
         numeroPedido={pedidoNumero}
         origen="armado"
       />

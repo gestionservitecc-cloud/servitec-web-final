@@ -29,10 +29,22 @@ import {
   waLink,
 } from "./site-config";
 
+// Radix leaves the body locked (no scroll, no clicks) when a menu/sheet
+// closes because a Link inside it navigated, racing its own close cleanup.
+function unstickBody() {
+  document.body.style.removeProperty("pointer-events");
+  document.body.style.removeProperty("overflow");
+}
+
 export function Header() {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const closeMobileMenu = () => {
+    setMobileOpen(false);
+    window.setTimeout(unstickBody, 0);
+  };
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -72,23 +84,6 @@ export function Header() {
             </Link>
           ))}
 
-          <NavDropdown
-            label="Stock"
-            active={pathname.startsWith("/stock")}
-            items={stockCategories.map((c) => ({
-              label: c.label,
-              href: `/stock?categoria=${c.value}`,
-            }))}
-          />
-          <NavDropdown
-            label="Tienda"
-            active={pathname.startsWith("/tienda")}
-            items={storeCategories.map((c) => ({
-              label: c.label,
-              href: `/tienda?tipo=${c.value}`,
-            }))}
-          />
-
           {secondaryNav.map((link) => (
             <Link
               key={link.href}
@@ -103,6 +98,23 @@ export function Header() {
               {link.label}
             </Link>
           ))}
+
+          <NavDropdown
+            label="Tienda"
+            active={pathname.startsWith("/tienda")}
+            items={storeCategories.map((c) => ({
+              label: c.label,
+              href: `/tienda?tipo=${c.value}`,
+            }))}
+          />
+          <NavDropdown
+            label="Stock"
+            active={pathname.startsWith("/stock")}
+            items={stockCategories.map((c) => ({
+              label: c.label,
+              href: `/stock?categoria=${c.value}`,
+            }))}
+          />
         </nav>
 
         <div className="hidden items-center gap-2 lg:flex">
@@ -142,7 +154,13 @@ export function Header() {
               <MessageCircle className="size-5" />
             </a>
           </Button>
-          <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+          <Sheet
+            open={mobileOpen}
+            onOpenChange={(open) => {
+              setMobileOpen(open);
+              if (!open) window.setTimeout(unstickBody, 0);
+            }}
+          >
             <SheetTrigger asChild>
               <Button size="icon" variant="ghost" aria-label="Abrir menú">
                 <Menu className="size-5" />
@@ -159,7 +177,7 @@ export function Header() {
                   <Link
                     key={link.href}
                     href={link.href}
-                    onClick={() => setMobileOpen(false)}
+                    onClick={closeMobileMenu}
                     className={cn(
                       "rounded-lg px-3 py-2.5 text-sm font-medium",
                       isActive(link.href)
@@ -171,25 +189,28 @@ export function Header() {
                   </Link>
                 ))}
 
-                <MobileGroup label="Stock">
-                  {stockCategories.map((c) => (
-                    <Link
-                      key={c.value}
-                      href={`/stock?categoria=${c.value}`}
-                      onClick={() => setMobileOpen(false)}
-                      className="rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-muted"
-                    >
-                      {c.label}
-                    </Link>
-                  ))}
-                </MobileGroup>
+                {secondaryNav.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={closeMobileMenu}
+                    className={cn(
+                      "rounded-lg px-3 py-2.5 text-sm font-medium",
+                      isActive(link.href)
+                        ? "bg-accent text-accent-foreground"
+                        : "text-muted-foreground hover:bg-muted",
+                    )}
+                  >
+                    {link.label}
+                  </Link>
+                ))}
 
                 <MobileGroup label="Tienda">
                   {storeCategories.map((c) => (
                     <Link
                       key={c.value}
                       href={`/tienda?tipo=${c.value}`}
-                      onClick={() => setMobileOpen(false)}
+                      onClick={closeMobileMenu}
                       className="rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-muted"
                     >
                       {c.label}
@@ -197,39 +218,36 @@ export function Header() {
                   ))}
                 </MobileGroup>
 
-                {secondaryNav.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    onClick={() => setMobileOpen(false)}
-                    className={cn(
-                      "rounded-lg px-3 py-2.5 text-sm font-medium",
-                      isActive(link.href)
-                        ? "bg-accent text-accent-foreground"
-                        : "text-muted-foreground hover:bg-muted",
-                    )}
-                  >
-                    {link.label}
-                  </Link>
-                ))}
+                <MobileGroup label="Stock">
+                  {stockCategories.map((c) => (
+                    <Link
+                      key={c.value}
+                      href={`/stock?categoria=${c.value}`}
+                      onClick={closeMobileMenu}
+                      className="rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-muted"
+                    >
+                      {c.label}
+                    </Link>
+                  ))}
+                </MobileGroup>
 
                 <Link
                   href="/condiciones"
-                  onClick={() => setMobileOpen(false)}
+                  onClick={closeMobileMenu}
                   className="rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted"
                 >
                   Condiciones generales
                 </Link>
                 <Link
                   href="/contacto"
-                  onClick={() => setMobileOpen(false)}
+                  onClick={closeMobileMenu}
                   className="rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted"
                 >
                   Contacto
                 </Link>
 
                 <Button asChild className="mt-3">
-                  <Link href="/presupuesto" onClick={() => setMobileOpen(false)}>Presupuesto online</Link>
+                  <Link href="/presupuesto" onClick={closeMobileMenu}>Presupuesto online</Link>
                 </Button>
                 <Button
                   asChild
@@ -263,7 +281,12 @@ function NavDropdown({
   items: { label: string; href: string }[];
 }) {
   return (
-    <DropdownMenu>
+    <DropdownMenu
+      modal={false}
+      onOpenChange={(open) => {
+        if (!open) window.setTimeout(unstickBody, 0);
+      }}
+    >
       <DropdownMenuTrigger
         className={cn(
           "inline-flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-medium outline-none transition-colors",

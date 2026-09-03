@@ -914,7 +914,7 @@ const ArmarPc = () => {
                 </div>
               </div>
               <aside className="rounded-2xl border border-secondary/40 bg-red-50 p-6 shadow-xl sm:rounded-3xl">
-                <p className="text-sm text-slate-400">Precio nacional estimado</p>
+                <p className="text-sm text-slate-400">Precio Final</p>
                 <p className="mt-1 font-display text-2xl font-bold text-emerald-700 sm:text-3xl">
                   {nationalTotal > 0 ? `$${nationalTotal.toLocaleString("es-AR")}` : "A confirmar"}
                 </p>
