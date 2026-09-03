@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { componentCatalogLabels, componentCatalogKeys } from "@/lib/component-catalog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,8 +19,8 @@ export function ComponenteDialog({ componente, onClose, onSave }: {
   const [newSpecValue, setNewSpecValue] = useState("");
   const set = (field: keyof ComponenteAdmin, value: string | number) => setDraft((current) => ({ ...current, [field]: value }));
   const specificationFields = useMemo(
-    () => componentSpecificationFields(componente.categoria as Parameters<typeof componentSpecificationFields>[0], componente.nombre),
-    [componente.categoria, componente.nombre],
+    () => componentSpecificationFields((draft.categoria as Parameters<typeof componentSpecificationFields>[0]) || componente.categoria, draft.nombre || componente.nombre),
+    [draft.categoria, draft.nombre, componente.categoria, componente.nombre],
   );
   const setSpec = (key: string, value: string) => setDraft((current) => ({ ...current, specs: { ...(current.specs || {}), [key]: value } }));
   const removeSpec = (key: string) => setDraft((current) => {
@@ -40,7 +41,18 @@ export function ComponenteDialog({ componente, onClose, onSave }: {
         <h2 className="text-xl font-bold">{componente.esNuevo ? "Nuevo componente" : "Editar componente"}</h2>
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
           <div className="space-y-1.5 sm:col-span-2"><Label>Nombre</Label><Input value={draft.nombre} onChange={(event) => set("nombre", event.target.value)} required /></div>
-          <div className="space-y-1.5"><Label>Categoría</Label><Input value={draft.categoria} readOnly={!componente.esNuevo} onChange={(event) => set("categoria", event.target.value)} required /></div>
+          <div className="space-y-1.5">
+            <Label>Categoría</Label>
+            {componente.esNuevo ? (
+              <select value={draft.categoria} onChange={(e) => set("categoria", e.target.value)} className="w-full rounded border px-3 py-2">
+                {componentCatalogKeys.map((key) => (
+                  <option key={key} value={key}>{componentCatalogLabels[key]}</option>
+                ))}
+              </select>
+            ) : (
+              <Input value={draft.categoria} readOnly onChange={(event) => set("categoria", event.target.value)} required />
+            )}
+          </div>
           <div className="space-y-1.5"><Label>Precio base</Label><Input type="number" value={draft.precio || ""} disabled={!componente.esNuevo} onChange={(event) => set("precio", Number(event.target.value) || 0)} /></div>
           <div className="space-y-1.5"><Label>Costo</Label><Input type="number" value={draft.precioCosto || ""} onChange={(event) => set("precioCosto", Number(event.target.value) || 0)} /></div>
           <div className="space-y-1.5"><Label>Stock</Label><Input type="number" value={draft.stock} onChange={(event) => set("stock", Number(event.target.value) || 0)} /></div>

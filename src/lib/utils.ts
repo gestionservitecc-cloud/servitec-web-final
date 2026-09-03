@@ -56,6 +56,27 @@ export function calculateInstallmentPrice(price: number): number {
   return Math.ceil((safePrice * 100) / 75);
 }
 
+export function parsePrice(value: unknown): number {
+  if (value === undefined || value === null) return 0;
+  if (typeof value === "number") return Number(value) || 0;
+  const s = String(value).trim();
+  if (!s) return 0;
+  // Remove currency symbols and spaces
+  let cleaned = s.replace(/[^0-9.,-]/g, "");
+  // If both dot and comma exist, assume dot is thousands separator and comma is decimal
+  if (cleaned.indexOf(".") !== -1 && cleaned.indexOf(",") !== -1) {
+    cleaned = cleaned.replace(/\./g, "").replace(/,/g, ".");
+  } else if (cleaned.indexOf(",") !== -1) {
+    // If only comma exists, treat it as decimal separator
+    cleaned = cleaned.replace(/\./g, "").replace(/,/g, ".");
+  } else {
+    // Only dots or only digits
+    cleaned = cleaned.replace(/\./g, "");
+  }
+  const n = Number(cleaned);
+  return Number.isFinite(n) ? n : 0;
+}
+
 export function normalizeStockCategoryValue(value?: string): string {
   const normalized = String(value ?? "").trim().toLowerCase();
   if (!normalized) return "";

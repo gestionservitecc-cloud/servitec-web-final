@@ -344,13 +344,31 @@ export function AdminDashboard({ persistent }: { persistent: boolean }) {
           componente={editComponente}
           onClose={() => setEditComponente(null)}
           onSave={async (saved) => {
-            const response = await fetch("/api/admin/componentes", {
-              method: "PUT",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(saved),
-            });
-            if (!response.ok) throw new Error("No se pudo guardar el componente.");
-            setEditComponente(null);
+            if (persistent) {
+              const response = await fetch("/api/admin/componentes", {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(saved),
+              });
+              if (!response.ok) throw new Error("No se pudo guardar el componente.");
+              window.dispatchEvent(new Event("componentesUpdated"));
+              setEditComponente(null);
+            } else {
+              try {
+                const key = "servitec-admin-componentes-local";
+                const raw = window.localStorage.getItem(key) || "[]";
+                const arr = Array.isArray(JSON.parse(raw)) ? (JSON.parse(raw) as ComponenteAdmin[]) : [];
+                const exists = arr.some((c) => c.id === saved.id);
+                const next = exists ? arr.map((c) => (c.id === saved.id ? saved : c)) : [...arr, saved];
+                window.localStorage.setItem(key, JSON.stringify(next));
+                // notify ComponentesTab to reload
+                window.dispatchEvent(new Event("componentesUpdated"));
+                setEditComponente(null);
+              } catch (err) {
+                console.error("local save componentes", err);
+                throw err;
+              }
+            }
           }}
         />
       )}
@@ -450,7 +468,25 @@ function ComponentesTab({
     try {
       const response = await fetch(`/api/admin/componentes?categoria=${nextCategory}`, { cache: "no-store" });
       const data = response.ok ? await response.json() : [];
-      setComponents(Array.isArray(data) ? data : []);
+      let list = Array.isArray(data) ? data : [];
+      try {
+        const raw = window.localStorage.getItem("servitec-admin-componentes-local") || "[]";
+        const localOverrides = Array.isArray(JSON.parse(raw)) ? (JSON.parse(raw) as ComponenteAdmin[]) : [];
+        const custom = localOverrides.filter((c) => String(c.categoria || "").toLowerCase().includes(String(nextCategory || "").toLowerCase()));
+        if (custom.length > 0) {
+          const overrideMap = new Map(custom.map((c) => [c.id, c]));
+          // Replace originals with overrides (preserve original positions), then append any new custom items
+          const replaced = (list as ComponenteAdmin[]).map((item) => overrideMap.get(item.id) || item);
+          const originalsIds = new Set((list as ComponenteAdmin[]).map((i) => i.id));
+          const extras = custom.filter((c) => !originalsIds.has(c.id));
+          list = [...replaced, ...extras];
+        }
+      } catch (err) {
+        // ignore local overrides parsing errors
+      }
+      // Order components by precio ascendente (menor a mayor)
+      list = (list as ComponenteAdmin[]).slice().sort((a, b) => (Number(a.precio) || 0) - (Number(b.precio) || 0));
+      setComponents(list);
     } finally {
       setLoading(false);
     }
@@ -458,6 +494,9 @@ function ComponentesTab({
 
   useEffect(() => {
     void loadCategory();
+    const handler = () => loadCategory();
+    window.addEventListener("componentesUpdated", handler);
+    return () => window.removeEventListener("componentesUpdated", handler);
   }, [category]);
 
   const visible = components.filter((component) =>
@@ -482,7 +521,7 @@ function ComponentesTab({
           <h2 className="text-lg font-semibold">Gestión de componentes</h2>
           <p className="text-xs text-slate-500">Editá datos e imágenes. El precio de los componentes existentes no se puede modificar.</p>
         </div>
-        <button type="button" onClick={addNew} disabled={!persistent} className="flex items-center gap-2 rounded-xl bg-slate-950 px-4 py-2 text-sm font-semibold text-white disabled:opacity-40">
+        <button type="button" onClick={addNew} className="flex items-center gap-2 rounded-xl bg-slate-950 px-4 py-2 text-sm font-semibold text-white">
           <Plus className="size-4" /> Nuevo componente
         </button>
       </div>

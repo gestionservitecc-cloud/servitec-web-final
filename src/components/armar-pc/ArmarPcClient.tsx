@@ -10,7 +10,7 @@ import {
   matchesProductKeywords,
   type CatalogProduct,
 } from "@/lib/pc-catalog";
-import { calculateInstallmentPrice, calculateNationalPrice } from "@/lib/utils";
+import { calculateInstallmentPrice, calculateNationalPrice, parsePrice } from "@/lib/utils";
 import { resolveBlueReferenceFactor } from "@/lib/blue-rate";
 import { getAssetUrl } from "@/lib/asset-url";
 import type { Equipo } from "@/lib/types";
@@ -500,7 +500,7 @@ const ArmarPc = () => {
       ...group,
       options: group.options.map((option) => ({
         ...option,
-        precio: option.precio === undefined ? undefined : Number((option.precio * armComponentPriceFactor).toFixed(2)),
+        precio: option.precio === undefined ? undefined : Number((parsePrice(option.precio) * armComponentPriceFactor).toFixed(2)),
       })),
     })),
     [armComponentPriceFactor, catalogGroups],
@@ -597,17 +597,11 @@ const ArmarPc = () => {
     ? [...currentGroup.options].sort((left, right) => Number(isCompatible(currentGroup, right)) - Number(isCompatible(currentGroup, left)))
     : [];
   const nationalTotal = useMemo(
-    () => selectedGroups.reduce((sum, group) => sum + Number(group.options[selected[group.key] ?? 0].precio || 0), 0)
-      + selectedExtras.reduce((sum, key) => sum + Number(catalogExtraOptions[key]?.[selectedExtraModels[key] ?? 0]?.precio || catalogExtras.find((item) => item.key === key)?.option.precio || 0), 0),
+    () => selectedGroups.reduce((sum, group) => sum + parsePrice(group.options[selected[group.key] ?? 0].precio || 0), 0)
+      + selectedExtras.reduce((sum, key) => sum + parsePrice(catalogExtraOptions[key]?.[selectedExtraModels[key] ?? 0]?.precio || catalogExtras.find((item) => item.key === key)?.option.precio || 0), 0),
     [catalogExtraOptions, catalogExtras, selectedGroups, selected, selectedExtras, selectedExtraModels],
   );
-  // Previously showed per-component installment sums. Now calculate installment on final efectivo/transferencia
-  // amount only when the full component selection is complete.
-  const installmentTotal = useMemo(() => {
-    if (!isComponentSelectionComplete) return 0;
-    const efectivoPrice = calculateNationalPrice(nationalTotal);
-    return calculateInstallmentPrice(Number(efectivoPrice || 0));
-  }, [isComponentSelectionComplete, nationalTotal]);
+  
   const reset = () => {
     setSelected({});
     setSelectedExtras([]);
@@ -633,7 +627,7 @@ const ArmarPc = () => {
         items.push({
           nombre: group.options[selected[group.key] ?? 0].name,
           cantidad: 1,
-          precio: Number(group.options[selected[group.key] ?? 0].precio || 0),
+          precio: parsePrice(group.options[selected[group.key] ?? 0].precio || 0),
         });
       });
 
@@ -643,7 +637,7 @@ const ArmarPc = () => {
         items.push({
           nombre: option.name,
           cantidad: 1,
-          precio: Number(option.precio || 0),
+          precio: parsePrice(option.precio || 0),
         });
       }
     });
@@ -651,7 +645,18 @@ const ArmarPc = () => {
     return items;
   }, [catalogExtraOptions, catalogExtras, paymentMethod, selected, selectedExtraModels, selectedExtras, orderedGroups]);
 
-  const selectedTotal = paymentMethod === "tarjeta" && isComponentSelectionComplete ? installmentTotal : calculateNationalPrice(nationalTotal);
+  const itemsSubtotal = useMemo(() => armarPedidoItems.reduce((s, it) => s + (Number(it.precio || 0) * (it.cantidad || 1)), 0), [armarPedidoItems]);
+
+  // Use gross sum of green "Precio" values as efectivo/transferencia total
+  const itemsGrossTotal = itemsSubtotal;
+
+  // Calculate installment on the gross total when selection is complete
+  const installmentTotal = useMemo(() => {
+    if (!isComponentSelectionComplete) return 0;
+    return calculateInstallmentPrice(itemsGrossTotal);
+  }, [isComponentSelectionComplete, itemsGrossTotal]);
+
+  const selectedTotal = paymentMethod === "tarjeta" && isComponentSelectionComplete ? installmentTotal : itemsGrossTotal;
 
   const sendQuote = () => {
     setCheckoutOpen(true);
@@ -934,11 +939,11 @@ const ArmarPc = () => {
                         {group.options[selected[group.key] ?? 0].precio !== undefined && (
                           <>
                             <p className="text-sm font-semibold text-emerald-700">
-                              Precio: {formatPrice(group.options[selected[group.key] ?? 0].precio)}
+                              Precio: {formatPrice(parsePrice(group.options[selected[group.key] ?? 0].precio))}
                             </p>
                             {/* Installments per-item removed; show installments only on final total when selection complete */}
                             <p className="text-xs text-slate-500">
-                              Sin impuestos nac.: ${calculateNationalPrice(Number(group.options[selected[group.key] ?? 0].precio)).toLocaleString("es-AR")}
+                              Sin impuestos nac.: ${calculateNationalPrice(parsePrice(group.options[selected[group.key] ?? 0].precio)).toLocaleString("es-AR")}
                             </p>
                           </>
                         )}
@@ -977,11 +982,11 @@ const ArmarPc = () => {
                             return extraOption.precio !== undefined ? (
                               <>
                                 <p className="text-sm font-semibold text-emerald-700">
-                                  Precio: {formatPrice(extraOption.precio)}
+                                  Precio: {formatPrice(parsePrice(extraOption.precio))}
                                 </p>
                                 {/* Installments per-item removed; displayed on final price when ready */}
                                 <p className="text-xs text-slate-500">
-                                  Sin impuestos nac.: ${calculateNationalPrice(Number(extraOption.precio)).toLocaleString("es-AR")}
+                                  Sin impuestos nac.: ${calculateNationalPrice(parsePrice(extraOption.precio)).toLocaleString("es-AR")}
                                 </p>
                               </>
                             ) : null;
@@ -1008,7 +1013,7 @@ const ArmarPc = () => {
                   >
                     <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700">Efectivo / Transferencia</p>
                     <p className="mt-1 font-display text-2xl font-bold text-emerald-700 sm:text-3xl">
-                      {nationalTotal > 0 ? `$${calculateNationalPrice(nationalTotal).toLocaleString("es-AR")}` : "A confirmar"}
+                      {itemsGrossTotal > 0 ? formatPrice(itemsGrossTotal) : "A confirmar"}
                     </p>
                     <p className="mt-1 text-xs text-slate-500">Pagando en efectivo o transferencia bancaria.</p>
                   </button>
@@ -1138,8 +1143,8 @@ const ArmarPc = () => {
                       {option.detail && <span className="mt-1 block text-sm text-slate-400">{option.detail}</span>}
                       {option.precio !== undefined && (
                         <>
-                          <span className="mt-2 block text-sm font-bold text-emerald-700">Precio: {formatPrice(option.precio)}</span>
-                          <span className="mt-1 block text-xs text-slate-500">Sin impuestos nac.: ${calculateNationalPrice(Number(option.precio)).toLocaleString("es-AR")}</span>
+                          <span className="mt-2 block text-sm font-bold text-emerald-700">Precio: {formatPrice(parsePrice(option.precio))}</span>
+                          <span className="mt-1 block text-xs text-slate-500">Sin impuestos nac.: ${calculateNationalPrice(parsePrice(option.precio)).toLocaleString("es-AR")}</span>
                         </>
                       )}
                       {!compatible && (
@@ -1195,8 +1200,8 @@ const ArmarPc = () => {
                       {option.detail && <span className="mt-1 block text-sm text-slate-400">{option.detail}</span>}
                       {option.precio !== undefined && (
                         <>
-                          <span className="mt-2 block text-sm font-bold text-emerald-700">Precio: {formatPrice(option.precio)}</span>
-                          <span className="mt-1 block text-xs text-slate-500">Sin impuestos nac.: ${calculateNationalPrice(Number(option.precio)).toLocaleString("es-AR")}</span>
+                          <span className="mt-2 block text-sm font-bold text-emerald-700">Precio: {formatPrice(parsePrice(option.precio))}</span>
+                          <span className="mt-1 block text-xs text-slate-500">Sin impuestos nac.: ${calculateNationalPrice(parsePrice(option.precio)).toLocaleString("es-AR")}</span>
                         </>
                       )}
                     </span>

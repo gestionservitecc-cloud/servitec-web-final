@@ -76,7 +76,16 @@ export async function PUT(request: Request) {
       originalCatalogPrice: existing?.originalCatalogPrice,
       esNuevo: existing?.esNuevo ?? Boolean(item.esNuevo),
     };
-    await saveComponentes([...current.filter((component) => component.id !== item.id), nextItem]);
+
+    if (existing) {
+      // Preserve the original ordering when updating an existing component
+      const updated = current.map((component) => (component.id === item.id ? nextItem : component));
+      await saveComponentes(updated);
+    } else {
+      // New override — append to the list
+      await saveComponentes([...current.filter((component) => component.id !== item.id), nextItem]);
+    }
+
     return NextResponse.json(nextItem);
   } catch (error) {
     return NextResponse.json({ error: error instanceof Error ? error.message : "No se pudo guardar" }, { status: 400 });
