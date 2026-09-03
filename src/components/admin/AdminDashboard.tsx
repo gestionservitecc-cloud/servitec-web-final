@@ -1421,8 +1421,24 @@ function StockTab({
                             </button>
                             <button
                               onClick={() => {
-                                if (confirm(`¿Eliminar "${e.nombre}"?`))
+                                if (!confirm(`¿Eliminar "${e.nombre}"?`)) return;
+                                if (persistent) {
+                                  const next = equipos
+                                    .filter((x) => x.id !== e.id)
+                                    .map((item, i) => ({ ...item, orden: typeof item.orden === "number" ? item.orden : i }));
+                                  (async () => {
+                                    try {
+                                      await saveEquipos(next);
+                                      window.dispatchEvent(new Event("equiposUpdated"));
+                                      setEquipos(next);
+                                    } catch (err) {
+                                      console.error("delete equipo", err);
+                                      alert("No se pudo eliminar el equipo.");
+                                    }
+                                  })();
+                                } else {
                                   setEquipos((cur) => cur.filter((x) => x.id !== e.id));
+                                }
                               }}
                               className="rounded p-1.5 text-rose-600 hover:bg-rose-50"
                               aria-label="Eliminar"
