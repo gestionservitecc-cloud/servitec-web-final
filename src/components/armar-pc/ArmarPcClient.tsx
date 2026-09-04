@@ -160,11 +160,16 @@ const formatPrice = (price?: number) =>
 
 const normalizePlatform = (value?: string) => {
   if (!value) return undefined;
-  const socket = value.match(/AM[45]|S\d{4}|LGA\s?\d+/i)?.[0] || value;
-  const normalized = socket.replace(/\s/g, "").toUpperCase();
-  if (normalized === "S1851" || normalized === "LGA1851") return "S1851";
-  if (normalized === "S1700" || normalized === "LGA1700") return "S1700";
-  return normalized;
+  const amdSocket = value.match(/AM[45]/i)?.[0];
+  if (amdSocket) return amdSocket.toUpperCase();
+
+  const explicitIntelSocket = value.match(/(?:LGA|SOCKET)\s*(\d{4})/i)?.[1];
+  const knownIntelSocket = value.match(/\b(1150|1151|1155|1200|1700|1851|2066|3647)\b/)?.[1];
+  const intelSocket = explicitIntelSocket || knownIntelSocket;
+  if (intelSocket) return `S${intelSocket}`;
+
+  const normalized = value.replace(/\s/g, "").toUpperCase();
+  return normalized.startsWith("S") ? normalized : undefined;
 };
 
 const normalizeSpecKey = (value: string) => normalizeCatalogText(value).replace(/[^a-z0-9]/g, "");
@@ -179,17 +184,22 @@ const getOptionText = (option: Option) => `${option.name} ${option.detail} ${Obj
 const getPlatform = (option: Option) => normalizePlatform(
   option.platform
     || getSpec(option, ["socket", "plataforma", "socket compatible"])
-    || getOptionText(option).match(/AM[45]|S\d{4}|LGA\s?\d+/i)?.[0],
+    || getOptionText(option).match(/AM[45]|S\d{4}|LGA\s?\d+|Socket\s?\d+/i)?.[0],
 );
 const getMemoryType = (option: Option) => (
   option.memoryType
   || getSpec(option, ["memoryType", "ramType", "tipo de memoria", "tipo de memoria ram"])
   || getOptionText(option).match(/DDR[45]/i)?.[0]
 )?.toUpperCase();
-const getBrand = (option: Option) => {
-  const value = option.brand || getSpec(option, ["marca", "brand"]) || getOptionText(option);
-  if (/\bamd\b|\bryzen\b|\bathlon\b/i.test(value)) return "AMD";
-  if (/\bintel\b|\bcore\b|\bceleron\b|\bpentium\b/i.test(value)) return "INTEL";
+const getPlatformFamily = (platform?: string) => {
+  if (!platform) return undefined;
+  if (/^AM[45]$/i.test(platform)) return "AMD";
+  if (/^(?:S\d{4}|LGA\d+)$/i.test(platform)) return "INTEL";
+  return undefined;
+};
+const getMemoryNamedFamily = (option: Option) => {
+  if (/\bamd\b/i.test(option.name)) return "AMD";
+  if (/\bintel\b/i.test(option.name)) return "INTEL";
   return undefined;
 };
 const getRamSlots = (option?: Option) => {
@@ -216,6 +226,11 @@ const getConsumptionWatts = (option: Option | undefined) => getSpecNumber(option
   "tdp",
 ]);
 const getCompatibleSockets = (option: Option) => getSpec(option, ["compatibleSocket", "socket compatible", "sockets compatibles", "socket"]);
+const getSocketList = (value?: string) => {
+  if (!value) return [];
+  const matches = value.match(/AM[45]|S\d{4}|(?:LGA|SOCKET)\s*\d{4}|\b(?:1150|1151|1155|1200|1700|1851|2066|3647)\b/gi) || [];
+  return matches.map((socket) => normalizePlatform(socket)).filter((socket): socket is string => Boolean(socket));
+};
 const getFormFactor = (option: Option) => getSpec(option, ["formFactor", "formato"]);
 const hasIntegratedGraphics = (option?: Option) => {
   if (!option) return false;
@@ -621,15 +636,20 @@ const ArmarPc = () => {
   const isCompatible = (group: Group, option: Option) => {
     if (group.key === "memory") {
       const motherboardMemory = selectedMotherboard && getMemoryType(selectedMotherboard);
+      const processorFamily = getPlatformFamily(getPlatform(selectedProcessor));
+      const memoryFamily = getMemoryNamedFamily(option);
       return selectedMemorySlots.length < maxMemorySlots
-        && (!motherboardMemory || !getMemoryType(option) || getMemoryType(option) === motherboardMemory);
+        && (!motherboardMemory || !getMemoryType(option) || getMemoryType(option) === motherboardMemory)
+        && (!processorFamily || !memoryFamily || processorFamily === memoryFamily);
     }
 
     if (group.key !== "motherboard" && group.key !== "processor") {
       if (group.key === "graphics" && option.name === "Graficos integrados") return hasIntegratedGraphics(selectedProcessor);
       if (group.key === "cooling" && selectedProcessor) {
         const compatibleSockets = getCompatibleSockets(option);
-        return !compatibleSockets || !getPlatform(selectedProcessor) || compatibleSockets.toUpperCase().includes(getPlatform(selectedProcessor) as string);
+        const processorPlatform = getPlatform(selectedProcessor);
+        const coolingPlatforms = getSocketList(compatibleSockets);
+        return !compatibleSockets || !processorPlatform || !coolingPlatforms.length || coolingPlatforms.includes(processorPlatform);
       }
       if (group.key === "storage" && selectedMotherboard) {
         const interfaceName = getSpec(option, ["interface", "interfaz"]) || getOptionText(option);
@@ -677,10 +697,7 @@ const ArmarPc = () => {
     if (!relatedOption) return true;
     const optionPlatform = getPlatform(option);
     const relatedPlatform = getPlatform(relatedOption);
-    const optionBrand = getBrand(option);
-    const relatedBrand = getBrand(relatedOption);
     if (optionPlatform && relatedPlatform && optionPlatform !== relatedPlatform) return false;
-    if (optionBrand && relatedBrand && optionBrand !== relatedBrand) return false;
     return true;
   };
   const orderedOptions = currentGroup
@@ -760,7 +777,7 @@ const ArmarPc = () => {
     setCheckoutOpen(true);
   };
   return (
-    <main className="pc-builder relative min-h-screen overflow-hidden bg-white text-slate-900">
+    <main className="pc-builder relative min-h-screen overflow-x-hidden bg-white text-slate-900">
       <div className="pointer-events-none absolute left-[39%] top-1/2 hidden h-[900px] w-[900px] -translate-y-1/2 rounded-full border border-dashed border-red-200/60 xl:block" />
       <div className="pointer-events-none absolute left-[35%] top-1/2 hidden h-[650px] w-[650px] -translate-y-1/2 rounded-full border border-red-100 xl:block" />
       <div className="relative z-10 mx-auto flex min-h-screen max-w-[1600px] flex-col px-5 py-5 sm:px-8 lg:px-10">
@@ -1240,11 +1257,13 @@ const ArmarPc = () => {
                   disabled={!compatible}
                   onClick={() => {
                     if (currentGroup.key === "memory") {
+                      const reachesLimit = selectedMemorySlots.length + 1 >= maxMemorySlots;
                       setSelectedMemorySlots((slots) => {
                         if (slots.length >= maxMemorySlots) return slots;
                         return [...slots, index];
                       });
                       setSelected((value) => ({ ...value, memory: index }));
+                      if (reachesLimit) setOpenGroup(null);
                       return;
                     }
                     setSelected((value) => {
@@ -1265,10 +1284,10 @@ const ArmarPc = () => {
                     });
                     setOpenGroup(null);
                   }}
-                  className={`group flex w-full min-h-32 items-stretch justify-between gap-3 overflow-hidden rounded-xl border p-3 text-left transition-all duration-200 ${compatible ? "border-red-100 bg-white hover:-translate-y-1 hover:border-secondary hover:bg-red-50 hover:shadow-lg hover:shadow-red-100" : "cursor-not-allowed border-red-100 bg-red-50 opacity-40"} ${selected[currentGroup.key] === index || (currentGroup.key === "memory" && selectedMemorySlots.includes(index)) ? "border-secondary bg-red-50" : ""}`}
+                  className={`group flex w-full min-w-0 min-h-32 items-stretch justify-between gap-2 overflow-hidden rounded-xl border p-3 text-left transition-all duration-200 ${compatible ? "border-red-100 bg-white hover:-translate-y-1 hover:border-secondary hover:bg-red-50 hover:shadow-lg hover:shadow-red-100" : "cursor-not-allowed border-red-100 bg-red-50 opacity-40"} ${selected[currentGroup.key] === index || (currentGroup.key === "memory" && selectedMemorySlots.includes(index)) ? "border-secondary bg-red-50" : ""}`}
                 >
-                  <span className="flex min-w-0 flex-1 items-stretch gap-3">
-                    <span className="component-image-slot">
+                  <span className="flex min-w-0 flex-1 items-stretch gap-2 sm:gap-3">
+                    <span className="component-image-slot shrink-0">
                       <img
                         src={option.image}
                         alt={`Imagen de ${option.name}`}
@@ -1279,8 +1298,8 @@ const ArmarPc = () => {
                       />
                     </span>
                     <span className="flex min-w-0 flex-1 flex-col justify-center">
-                      <span className="block font-semibold">{option.name}</span>
-                      {option.detail && <span className="mt-1 block text-sm text-slate-400">{option.detail}</span>}
+                      <span className="block break-words font-semibold">{option.name}</span>
+                      {option.detail && <span className="mt-1 block break-words text-sm text-slate-400">{option.detail}</span>}
                       {option.precio !== undefined && (
                         <>
                           <span className="mt-2 block text-sm font-bold text-emerald-700">Precio: {formatPrice(parsePrice(option.precio))}</span>

@@ -306,17 +306,38 @@ export const StockClient = () => {
                           <Card key={p.id} className="overflow-hidden transition hover:shadow-xl">
                             <div className="relative aspect-square w-full overflow-hidden bg-slate-900">
                               <ProductGallery images={imagenes} name={nombreDisplay} showThumbnails={isNotebook} />
-                              {hasSpecifications && (
+                              {(hasSpecifications || isPcArmada) && (
                                 <Dialog>
                                   <DialogTrigger asChild>
                                     <button
                                       type="button"
-                                      aria-label={`Ver especificaciones de ${nombreDisplay}`}
+                                      aria-label={isPcArmada ? `Ver componentes de ${nombreDisplay}` : `Ver especificaciones de ${nombreDisplay}`}
                                       className="absolute right-3 top-3 z-10 grid size-9 place-items-center rounded-full border border-white/80 bg-white/95 text-slate-700 shadow-md transition hover:bg-white"
                                     >
                                       <Info className="size-4" />
                                     </button>
                                   </DialogTrigger>
+                                  {isPcArmada ? (
+                                    <DialogContent className="w-[calc(100vw-1rem)] max-h-[calc(100dvh-1rem)] max-w-3xl overflow-y-auto rounded-2xl border-slate-200 bg-slate-50 p-0 sm:w-[calc(100vw-2rem)] sm:rounded-3xl">
+                                      <DialogHeader className="bg-gradient-to-br from-slate-950 via-blue-950 to-red-950 px-5 py-6 text-white sm:px-7 sm:py-7">
+                                        <DialogTitle className="pr-6 text-left text-xl leading-tight text-white sm:text-2xl">{nombreDisplay}</DialogTitle>
+                                      </DialogHeader>
+                                      {p.componentes?.length ? (
+                                        <div className="grid gap-3 p-5 sm:grid-cols-2 sm:p-7">
+                                          {p.componentes.map((component, componentIndex) => (
+                                            <div key={`${component.key}-${componentIndex}`} className="flex items-center gap-3 rounded-xl border border-blue-100 bg-white p-3 shadow-sm">
+                                              {component.imagen && <img src={resolveEquipmentImage(component.imagen)} alt={component.nombre} className="h-16 w-16 rounded object-contain" loading="lazy" />}
+                                              <div className="min-w-0">
+                                                <p className="text-xs font-semibold uppercase text-red-600">{component.key === "memory" ? `x${component.cantidad || 1} ${component.label}` : component.label}</p>
+                                                <p className="break-words font-semibold text-slate-900">{component.nombre}</p>
+                                                <p className="text-sm text-slate-600">{component.detalle}</p>
+                                              </div>
+                                            </div>
+                                          ))}
+                                        </div>
+                                      ) : <p className="p-5 text-sm text-slate-600 sm:p-7">Componentes a confirmar.</p>}
+                                    </DialogContent>
+                                  ) : (
                                   <DialogContent className="w-[calc(100vw-1rem)] max-h-[calc(100dvh-1rem)] max-w-3xl overflow-y-auto rounded-2xl border-slate-200 bg-slate-50 p-0 sm:w-[calc(100vw-2rem)] sm:rounded-3xl">
                                     <div className="bg-gradient-to-br from-slate-950 via-blue-950 to-red-950 px-5 py-6 text-white sm:px-7 sm:py-7">
                                       <DialogHeader>
@@ -347,6 +368,7 @@ export const StockClient = () => {
                                     )}
                                     </div>
                                   </DialogContent>
+                                  )}
                                 </Dialog>
                               )}
                               <div className="absolute bottom-0 left-0 w-full bg-slate-950/80 p-3 backdrop-blur-sm sm:p-4">
@@ -379,46 +401,6 @@ export const StockClient = () => {
                                 </div>
 
                                 <div className="flex w-full flex-col gap-2 sm:w-auto sm:min-w-[150px]">
-                                  {isPcArmada && (
-                                    <Dialog>
-                                      <DialogTrigger className="w-full rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100">
-                                        Ver componentes
-                                      </DialogTrigger>
-                                      <DialogContent className="w-[calc(100vw-1rem)] max-h-[calc(100dvh-1rem)] max-w-3xl overflow-y-auto p-4 sm:w-[calc(100vw-2rem)] sm:p-6">
-                                        <DialogHeader>
-                                          <DialogTitle>{nombreDisplay}</DialogTitle>
-                                        </DialogHeader>
-                                        {p.componentes?.length ? (
-                                          <div className="grid gap-3 border-t border-slate-200 pt-4 sm:grid-cols-2">
-                                            {p.componentes.map((component, componentIndex) => (
-                                              <div key={`${component.key}-${componentIndex}`} className="flex items-center gap-3 rounded-lg border border-slate-200 p-3">
-                                                {component.imagen && (
-                                                  <img
-                                                    src={resolveEquipmentImage(component.imagen)}
-                                                    alt={component.nombre}
-                                                    className="h-16 w-16 rounded object-contain"
-                                                    loading="lazy"
-                                                  />
-                                                )}
-                                                <div>
-                                                  <p className="text-xs font-semibold uppercase text-slate-500">
-                                                    {component.key === "memory" ? `x${component.cantidad || 1} ${component.label}` : component.label}
-                                                  </p>
-                                                  <p className="font-semibold text-slate-900">{component.nombre}</p>
-                                                  <p className="text-sm text-slate-600">{component.detalle}</p>
-                                                </div>
-                                              </div>
-                                            ))}
-                                          </div>
-                                        ) : (
-                                          <p className="border-t border-slate-200 pt-4 text-sm text-slate-600">
-                                            Componentes a confirmar.
-                                          </p>
-                                        )}
-                                      </DialogContent>
-                                    </Dialog>
-                                  )}
-
                                          {/*
                                           <div className="mt-6 rounded-xl border-2 border-amber-400 bg-amber-50 px-5 py-4 text-center shadow-sm">
                                             <p className="text-xs font-bold uppercase tracking-[0.2em] text-amber-700">

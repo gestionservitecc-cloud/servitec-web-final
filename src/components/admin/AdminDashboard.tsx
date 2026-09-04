@@ -249,7 +249,7 @@ export function AdminDashboard({ persistent }: { persistent: boolean }) {
 
   return (
     <>
-      <div className="mx-auto max-w-6xl space-y-6 px-4 py-6 sm:px-6">
+      <div className="mx-auto w-full min-w-0 max-w-6xl space-y-6 overflow-x-hidden px-4 py-6 sm:px-6">
         {/* Header */}
         <header className="flex flex-col gap-4 rounded-3xl border border-white/10 bg-white/[0.03] p-4 shadow-xl sm:flex-row sm:items-center sm:justify-between sm:p-5">
           <div className="flex min-w-0 items-center gap-3">
