@@ -336,6 +336,7 @@ export function AdminDashboard({ persistent }: { persistent: boolean }) {
           persistent={persistent}
           onEdit={setEditComponente}
           onOpenBulk={() => setBulkOpen(true)}
+          onRequestConfirm={setConfirmState}
           priceRules={componentPriceRules}
           setPriceRules={setComponentPriceRules}
         />
@@ -570,6 +571,7 @@ function DashboardTab({
 }) {
   const { saving, saved, error, dirty, run } = useSaver(productos, saveProductos);
   const [filter, setFilter] = useState("");
+  const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set());
   const [mostrarTodosMovimientos, setMostrarTodosMovimientos] = useState(false);
   const [visibleMovimientos, setVisibleMovimientos] = useState(5);
 
@@ -596,6 +598,24 @@ function DashboardTab({
       `${p.nombre} ${p.categoria}`.toLowerCase().includes(filter.toLowerCase()),
     )
     .sort((a, b) => a.nombre.localeCompare(b.nombre, "es"));
+  const allVisibleProductsSelected = visible.length > 0 && visible.every((product) => selectedProducts.has(product.id));
+  const toggleProduct = (id: string) => setSelectedProducts((current) => {
+    const next = new Set(current);
+    if (next.has(id)) next.delete(id); else next.add(id);
+    return next;
+  });
+  const deleteSelectedProducts = () => {
+    if (!selectedProducts.size) return;
+    onRequestConfirm?.({
+      open: true,
+      title: `¿Eliminar ${selectedProducts.size} producto(s)?`,
+      description: "Se eliminarán los productos seleccionados del inventario.",
+      onConfirm: () => {
+        setProductos((current) => current.filter((product) => !selectedProducts.has(product.id)));
+        setSelectedProducts(new Set());
+      },
+    });
+  };
 
   return (
     <div className="space-y-6">
@@ -773,10 +793,19 @@ function DashboardTab({
           />
         </div>
 
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+          <label className="flex min-h-10 cursor-pointer items-center gap-2 text-sm font-semibold text-slate-700">
+            <input type="checkbox" checked={allVisibleProductsSelected} onChange={() => setSelectedProducts((current) => allVisibleProductsSelected ? new Set([...current].filter((id) => !visible.some((product) => product.id === id))) : new Set([...current, ...visible.map((product) => product.id)]))} className="size-4 accent-sky-600" />
+            Seleccionar visibles
+          </label>
+          {selectedProducts.size > 0 && <button type="button" onClick={deleteSelectedProducts} className="min-h-10 rounded-lg bg-rose-600 px-3 py-2 text-sm font-bold text-white transition hover:bg-rose-700">Eliminar seleccionados ({selectedProducts.size})</button>}
+        </div>
+
         <div className="overflow-x-auto">
           <table className="min-w-[720px] w-full text-sm">
             <thead className="border-b text-left text-xs uppercase text-slate-400">
               <tr>
+                <th className="w-10 py-2"><span className="sr-only">Seleccionar</span></th>
                 <th className="py-2 pr-3">Producto</th>
                 <th className="px-3 py-2">Categoría</th>
                 <th className="px-3 py-2 text-orange-600">COSTO</th>
@@ -789,6 +818,7 @@ function DashboardTab({
             <tbody className="divide-y">
               {visible.map((p) => (
                 <tr key={p.id} className="hover:bg-slate-50">
+                  <td className="py-2"><input type="checkbox" checked={selectedProducts.has(p.id)} onChange={() => toggleProduct(p.id)} aria-label={`Seleccionar ${p.nombre}`} className="size-4 accent-sky-600" /></td>
                   <td className="py-2 pr-3">
                     <div className="flex items-center gap-2">
                       {p.imagen && (
@@ -842,7 +872,7 @@ function DashboardTab({
               ))}
               {visible.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="py-8 text-center text-slate-400">
+                  <td colSpan={8} className="py-8 text-center text-slate-400">
                     Sin resultados
                   </td>
                 </tr>
@@ -1193,6 +1223,7 @@ function ComponentesTab({
   const [applyingMargin, setApplyingMargin] = useState(false);
   const [marginMessage, setMarginMessage] = useState("");
   const [showMarginRules, setShowMarginRules] = useState(true);
+  const [selectedComponents, setSelectedComponents] = useState<Set<string>>(new Set());
   const ruleCategory = category === "all" ? null : category;
   const visible = useMemo(() => catalogDataKeys.flatMap((key) =>
     (category === "all" || category === key ? catalog[key] || [] : [])
@@ -1200,6 +1231,37 @@ function ComponentesTab({
   ).filter(({ component }) =>
     `${component.nombre} ${component.marca} ${component.modelo}`.toLowerCase().includes(filter.toLowerCase()),
   ), [catalog, category, filter]);
+  const componentSelectionKey = (key: ComponentCatalogKey, id: string) => `${key}:${id}`;
+  const allVisibleComponentsSelected = visible.length > 0 && visible.every(({ key, component }) => selectedComponents.has(componentSelectionKey(key, component.id)));
+  const toggleComponent = (key: ComponentCatalogKey, id: string) => setSelectedComponents((current) => {
+    const next = new Set(current);
+    const selectionKey = componentSelectionKey(key, id);
+    if (next.has(selectionKey)) next.delete(selectionKey); else next.add(selectionKey);
+    return next;
+  });
+  const deleteSelectedComponents = () => {
+    if (!selectedComponents.size) return;
+    onRequestConfirm?.({
+      open: true,
+      title: `¿Eliminar ${selectedComponents.size} componente(s)?`,
+      description: "Se eliminarán los componentes seleccionados del catálogo.",
+      onConfirm: async () => {
+        const next = Object.fromEntries(catalogDataKeys.map((key) => [
+          key,
+          (catalog[key] || []).filter((component) => !selectedComponents.has(componentSelectionKey(key, component.id))),
+        ])) as ComponentCatalog;
+        setCatalog(next);
+        setSelectedComponents(new Set());
+        if (persistent) {
+          try {
+            await saveComponentCatalog(next, priceRules);
+          } catch {
+            setCatalog(catalog);
+          }
+        }
+      },
+    });
+  };
 
   const create = () => {
     const key = category === "all" ? catalogDataKeys[0] : category;
@@ -1328,14 +1390,23 @@ function ComponentesTab({
           {marginMessage && <p className="mt-3 text-xs font-semibold text-slate-600">{marginMessage}</p>}
         </div>}
 
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+          <label className="flex min-h-10 cursor-pointer items-center gap-2 text-sm font-semibold text-slate-700">
+            <input type="checkbox" checked={allVisibleComponentsSelected} onChange={() => setSelectedComponents((current) => allVisibleComponentsSelected ? new Set([...current].filter((id) => !visible.some(({ key, component }) => componentSelectionKey(key, component.id) === id))) : new Set([...current, ...visible.map(({ key, component }) => componentSelectionKey(key, component.id))]))} className="size-4 accent-sky-600" />
+            Seleccionar visibles
+          </label>
+          {selectedComponents.size > 0 && <button type="button" onClick={deleteSelectedComponents} className="min-h-10 rounded-lg bg-rose-600 px-3 py-2 text-sm font-bold text-white transition hover:bg-rose-700">Eliminar seleccionados ({selectedComponents.size})</button>}
+        </div>
+
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="border-b text-left text-xs uppercase text-slate-400">
-              <tr><th className="px-3 py-2">COMPONENTE</th><th className="px-3 py-2">CATEGORÍA</th><th className="px-3 py-2 text-orange-600">COSTO</th><th className="px-3 py-2 text-emerald-700">PRECIO EFT</th><th className="px-3 py-2 text-rose-700">CRÉDITO</th><th className="px-3 py-2" /></tr>
+              <tr><th className="w-10 px-3 py-2"><span className="sr-only">Seleccionar</span></th><th className="px-3 py-2">COMPONENTE</th><th className="px-3 py-2">CATEGORÍA</th><th className="px-3 py-2 text-orange-600">COSTO</th><th className="px-3 py-2 text-emerald-700">PRECIO EFT</th><th className="px-3 py-2 text-rose-700">CRÉDITO</th><th className="px-3 py-2" /></tr>
             </thead>
             <tbody className="divide-y">
               {visible.map(({ key, component }) => (
                 <tr key={`${key}-${component.id}`} className="hover:bg-slate-50">
+                  <td className="px-3 py-2"><input type="checkbox" checked={selectedComponents.has(componentSelectionKey(key, component.id))} onChange={() => toggleComponent(key, component.id)} aria-label={`Seleccionar ${component.nombre}`} className="size-4 accent-sky-600" /></td>
                   <td className="px-3 py-2"><div className="flex items-center gap-2">{component.imagen && <img src={component.imagen} alt="" className="size-9 rounded border object-contain" />}{component.nombre}</div></td>
                   <td className="px-3 py-2 text-slate-500">{componentCatalogLabels[key].toUpperCase()}</td>
                   <td className="px-3 py-2 font-semibold text-orange-600">{money(Number(component.precioCosto ?? component.precio))}</td>

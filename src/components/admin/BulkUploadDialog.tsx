@@ -169,7 +169,7 @@ export default function BulkUploadDialog({ onClose, onUploaded, persistent, init
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <p className="text-sm font-semibold text-slate-800">Imagenes de componentes</p>
-                <p className="mt-1 text-xs text-slate-600">Se asignan por orden de nombre: imagen 1 al componente 1, imagen 2 al componente 2.</p>
+                <p className="mt-1 text-xs text-slate-600">Se vinculan por numero: foto1 al componente con ID 1, foto2 al ID 2. Si el archivo no tiene numero, se usa su posicion.</p>
               </div>
               <label className="cursor-pointer rounded-lg bg-sky-600 px-3 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-sky-700">
                 Seleccionar imagenes

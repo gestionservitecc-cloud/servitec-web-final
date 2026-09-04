@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button";
 import {
   catalogProductImage,
   loadComponentCatalog,
-  matchesMonitorProduct,
   matchesProductKeywords,
+  matchesMonitorProduct,
+  normalizeCatalogText,
   type CatalogProduct,
 } from "@/lib/pc-catalog";
 import { calculateInstallmentPrice, calculateNationalPrice, parsePrice } from "@/lib/utils";
@@ -48,7 +49,7 @@ type ComponentKey =
   | "case"
   | "cooling";
 type ExtraKey =
-  "monitor" | "headphones" | "mouse" | "keyboard";
+  "monitor" | "headphones" | "mouse" | "mousepad" | "keyboard";
 type Option = {
   name: string;
   detail: string;
@@ -187,6 +188,18 @@ const mapProduct = (product: CatalogProduct): Option => ({
   platform: normalizePlatform(product.nombre.match(/AM[45]|S\d{4}|LGA\s?\d+/i)?.[0]),
   memoryType: product.nombre.match(/DDR[45]/i)?.[0].toUpperCase(),
 });
+
+const classifyPeripheral = (productName: string): ExtraKey | null => {
+  const normalized = normalizeCatalogText(productName);
+  // Keep monitor detection aligned with the existing catalog rules.
+  if (matchesMonitorProduct(productName)) return "monitor";
+  // Check mouse pads before mouse because "mousepad" contains "mouse".
+  if (/(mousepad|mouse pad|alfombrilla|pad gamer)/.test(normalized)) return "mousepad";
+  if (matchesProductKeywords(productName, ["auricular", "auriculares", "headset", "earbuds", "earphone"])) return "headphones";
+  if (matchesProductKeywords(productName, ["teclado", "keyboard"])) return "keyboard";
+  if (matchesProductKeywords(productName, ["mouse", "raton"])) return "mouse";
+  return null;
+};
 
 const groups: Group[] = [
   {
@@ -340,6 +353,15 @@ const extras: Extra[] = [
     },
   },
   {
+    key: "mousepad",
+    label: "Mouse pad",
+    icon: Mouse,
+    option: {
+      name: "Mouse pad gamer",
+      detail: "Superficie antideslizante",
+    },
+  },
+  {
     key: "keyboard",
     label: "Teclado",
     icon: Keyboard,
@@ -425,23 +447,17 @@ const ArmarPc = () => {
       }));
       setCatalogGroups(loadedGroups);
       const peripheralProducts = productMap.peripherals ?? [];
-      const monitorProducts = peripheralProducts.filter((product) => matchesMonitorProduct(product.nombre));
-      const accessoryMatchers: Record<ExtraKey, (productName: string) => boolean> = {
-        monitor: matchesMonitorProduct,
-        headphones: (productName) => matchesProductKeywords(productName, ["auricular", "auriculares", "headset"]),
-        mouse: (productName) => matchesProductKeywords(productName, ["mouse", "raton"]),
-        keyboard: (productName) => matchesProductKeywords(productName, ["teclado", "keyboard"]),
-      };
+      const monitorProducts = peripheralProducts.filter((product) => classifyPeripheral(product.nombre) === "monitor");
       const loadedExtras = extras.flatMap((extra) => {
         const source = extra.key === "monitor"
           ? monitorProducts[0]
-          : peripheralProducts.find((product) => accessoryMatchers[extra.key](product.nombre));
+          : peripheralProducts.find((product) => classifyPeripheral(product.nombre) === extra.key);
         return source ? [{ ...extra, option: mapProduct(source) }] : [];
       });
       setCatalogExtras(loadedExtras);
-      const peripheralOptions = Object.entries(accessoryMatchers).map(([key, matcher]) => [
+      const peripheralOptions = extras.map(({ key }) => [
         key,
-        ((key === "monitor" ? monitorProducts : peripheralProducts.filter((product) => matcher(product.nombre))))
+        peripheralProducts.filter((product) => classifyPeripheral(product.nombre) === key)
           .map((product) => mapProduct(product)),
       ]);
       setCatalogExtraOptions(Object.fromEntries(peripheralOptions) as Partial<Record<ExtraKey, Option[]>>);

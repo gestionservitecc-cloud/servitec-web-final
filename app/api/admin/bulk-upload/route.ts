@@ -150,7 +150,7 @@ export async function POST(req: Request) {
     }
 
     const imageFiles = form.getAll("images").filter((value): value is File => value instanceof File && value.size > 0);
-    let uploadedImageUrls: string[] = [];
+    const uploadedImageUrls: Record<number, string> = {};
     if (imageFiles.length > 0) {
       if (collection !== "componentes") {
         return NextResponse.json({ error: "Las imÃ¡genes masivas solo corresponden a componentes." }, { status: 400 });
@@ -161,13 +161,15 @@ export async function POST(req: Request) {
       const category = csvCategories[0] || requestedCategory;
       const folder = folders[category];
       if (!folder) return NextResponse.json({ error: "SeleccionÃ¡ una categorÃ­a vÃ¡lida." }, { status: 400 });
-      uploadedImageUrls = await Promise.all(imageFiles.map(async (file, index) => {
+      await Promise.all(imageFiles.map(async (file, index) => {
         if (!file.type.startsWith("image/")) throw new Error(`El archivo ${file.name} no es una imagen.`);
         if (file.size > 8 * 1024 * 1024) throw new Error(`La imagen ${file.name} supera los 8 MB.`);
         const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "");
         const pathname = `componentes/${folder}/imagenes/${String(index + 1).padStart(4, "0")}-${Date.now()}.${ext}`;
         await put(pathname, file, { access: "private", contentType: file.type, addRandomSuffix: false, allowOverwrite: true });
-        return `/api/assets/${pathname}`;
+        const filenameNumber = file.name.match(/(?:foto|image|img)[ _-]?(\d+)/i)?.[1];
+        const sourceNumber = Number(filenameNumber || index + 1);
+        uploadedImageUrls[sourceNumber] = `/api/assets/${pathname}`;
       }));
     }
 
@@ -200,7 +202,8 @@ export async function POST(req: Request) {
         const raw = (replaced as any[]).map((it, index) => {
           const original = it.precioCosto ?? it.precio ?? it.price ?? 0;
           const { stock: _stock, ...catalogItem } = it;
-          const image = uploadedImageUrls[index];
+          const idNumber = String(it.id || "").match(/(?:^|[-_])(\d+)(?:[-_]|$)/)?.[1];
+          const image = uploadedImageUrls[Number(idNumber || index + 1)];
           return {
             ...catalogItem,
             id: it.id,
