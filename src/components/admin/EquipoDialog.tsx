@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Plus, StickyNote, Trash2 } from "lucide-react";
 import {
   Dialog,
@@ -27,10 +27,10 @@ import type { Equipo, EquipoComponente } from "@/lib/types";
 import {
   componentCatalogLabels,
   componentCatalogKeys,
-  loadComponentCatalog,
   type CatalogProduct,
   type ComponentCatalogKey,
 } from "@/lib/pc-catalog";
+import type { ComponentCatalog } from "@/lib/component-catalog";
 import { normalizeCatalogText } from "@/lib/pc-catalog";
 import { CATEGORIAS_EQUIPO, SPEC_FIELDS } from "./lib";
 import { ImageField } from "./ImageField";
@@ -38,10 +38,12 @@ import { calculateInstallmentPrice, normalizeStockCategoryValue } from "@/lib/ut
 
 export function EquipoDialog({
   equipo,
+  componentCatalog,
   onSave,
   onClose,
 }: {
   equipo: Equipo;
+  componentCatalog: ComponentCatalog;
   onSave: (e: Equipo) => void;
   onClose: () => void;
 }) {
@@ -120,6 +122,7 @@ export function EquipoDialog({
 
           {isPc ? (
             <ComponentesEditor
+              catalog={componentCatalog}
               value={draft.componentes}
               onChange={(v) => set("componentes", v)}
             />
@@ -346,11 +349,12 @@ export function EquipoDialog({
 
         </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
+        <DialogFooter className="grid grid-cols-2 gap-2 sm:flex sm:justify-end">
+          <Button className="w-full" variant="outline" onClick={onClose}>
             Cancelar
           </Button>
           <Button
+            className="w-full"
             onClick={() => {
               const normalized = {
                 ...draft,
@@ -403,7 +407,7 @@ function PrivateNotesButton({
           {value.trim() ? "Editar nota privada" : "Agregar nota privada"}
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-md p-4 sm:p-6">
+      <DialogContent className="w-[calc(100vw-1rem)] max-h-[calc(100dvh-1rem)] max-w-md overflow-y-auto p-4 sm:p-6">
         <DialogHeader>
           <DialogTitle>Nota privada</DialogTitle>
         </DialogHeader>
@@ -415,7 +419,7 @@ function PrivateNotesButton({
         />
         <DialogFooter>
           <DialogClose asChild>
-            <Button type="button">Listo</Button>
+            <Button className="w-full sm:w-auto" type="button">Listo</Button>
           </DialogClose>
         </DialogFooter>
       </DialogContent>
@@ -424,25 +428,16 @@ function PrivateNotesButton({
 }
 
 function ComponentesEditor({
+  catalog,
   value,
   onChange,
 }: {
+  catalog: ComponentCatalog;
   value: EquipoComponente[];
   onChange: (v: EquipoComponente[]) => void;
 }) {
-  const [catalog, setCatalog] = useState<Partial<Record<ComponentCatalogKey, CatalogProduct[]>>>({});
   const [addKey, setAddKey] = useState<ComponentCatalogKey>(componentCatalogKeys[0]);
   const [componentFilter, setComponentFilter] = useState("");
-
-  useEffect(() => {
-    let active = true;
-    loadComponentCatalog().then((loaded) => {
-      if (active) setCatalog(loaded);
-    });
-    return () => {
-      active = false;
-    };
-  }, []);
 
   const filteredComponents = useMemo(() => {
     const query = normalizeCatalogText(componentFilter);
@@ -468,17 +463,22 @@ function ComponentesEditor({
     ]);
   };
 
+  const selectedCount = value.reduce((total, component) => total + (Number(component.cantidad) || 1), 0);
+
   return (
     <div className="rounded-lg border p-3">
-      <p className="text-sm font-medium">Componentes de la PC</p>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-sm font-bold text-slate-900">Componentes de la PC</p>
+        <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">{selectedCount} seleccionado{selectedCount === 1 ? "" : "s"}</span>
+      </div>
       <div className="mt-3 space-y-2">
         {value.map((c, i) => (
-          <div key={i} className="flex items-center gap-2 rounded-md border p-2">
+          <div key={i} className="flex min-w-0 flex-wrap items-center gap-2 rounded-xl border border-slate-200 bg-white p-2 shadow-sm">
             {c.imagen && (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={c.imagen} alt="" className="size-10 shrink-0 rounded object-contain" />
+              <img src={c.imagen} alt="" className="size-10 shrink-0 rounded border border-slate-100 bg-white object-contain" />
             )}
-            <div className="min-w-0 flex-1">
+            <div className="min-w-0 flex-1 basis-32">
               <p className="truncate text-xs font-semibold uppercase text-muted-foreground">
                 {c.label}
               </p>
@@ -486,7 +486,7 @@ function ComponentesEditor({
             </div>
             <Input
               type="number"
-              className="h-8 w-16"
+              className="h-10 w-16"
               value={c.cantidad || 1}
               onChange={(e) => {
                 const next = [...value];
@@ -498,7 +498,7 @@ function ComponentesEditor({
               type="button"
               variant="ghost"
               size="icon"
-              className="size-8 shrink-0 text-destructive"
+              className="size-10 shrink-0 text-destructive"
               onClick={() => onChange(value.filter((_, k) => k !== i))}
             >
               <Trash2 className="size-4" />
@@ -507,7 +507,35 @@ function ComponentesEditor({
         ))}
       </div>
 
-      <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+      <div className="mt-4 rounded-xl border border-sky-200 bg-sky-50/70 p-3 sm:p-4">
+        <p className="mb-2 text-xs font-bold uppercase tracking-wide text-sky-800">Categoría interna</p>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+          {componentCatalogKeys.map((key) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => { setAddKey(key); setComponentFilter(""); }}
+              className={`min-h-11 rounded-lg border px-2 py-2 text-left text-xs font-bold transition ${addKey === key ? "border-sky-600 bg-sky-600 text-white shadow-sm" : "border-slate-200 bg-white text-slate-700 hover:border-sky-300 hover:bg-sky-50"}`}
+            >
+              <span className="block truncate">{componentCatalogLabels[key].toUpperCase()}</span>
+              <span className={`mt-0.5 block text-[11px] font-medium ${addKey === key ? "text-sky-100" : "text-slate-500"}`}>{catalog[key]?.length || 0} disponibles</span>
+            </button>
+          ))}
+        </div>
+        <Input className="mt-3 h-11 bg-white" value={componentFilter} onChange={(event) => setComponentFilter(event.target.value)} placeholder="Buscar en esta categoría..." />
+        <div className="mt-3 grid max-h-64 gap-2 overflow-y-auto pr-1 sm:grid-cols-2">
+          {filteredComponents.map((component) => (
+            <button key={component.id} type="button" onClick={() => addFromCatalog(addKey, component.nombre)} className="flex min-h-12 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-left text-sm transition hover:border-sky-400 hover:bg-sky-50">
+              {component.imagen && <img src={component.imagen} alt="" className="size-8 shrink-0 rounded object-contain" />}
+              <span className="min-w-0 truncate">{component.nombre}</span>
+              <Plus className="ml-auto size-4 shrink-0 text-sky-600" />
+            </button>
+          ))}
+          {filteredComponents.length === 0 && <p className="col-span-full rounded-lg border border-dashed border-slate-300 bg-white/70 px-3 py-4 text-center text-xs text-slate-500">No hay componentes cargados en esta categoría.</p>}
+        </div>
+      </div>
+
+      <div className="hidden mt-3 flex flex-col gap-2 sm:flex-row">
         <Select value={addKey} onValueChange={(value) => setAddKey(value as ComponentCatalogKey)}>
           <SelectTrigger className="w-full sm:w-40">
             <SelectValue />

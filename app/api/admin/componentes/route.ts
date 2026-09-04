@@ -1,145 +1,92 @@
 import { get, put } from "@vercel/blob";
 import { NextResponse } from "next/server";
 import { isAuthed } from "@/lib/auth";
-import { catalogDataKeys, normalizeCatalogProduct, type ComponentCatalogKey } from "@/lib/component-catalog";
-import { getComponentes, saveComponentes } from "@/lib/store";
-import type { ComponenteAdmin } from "@/lib/types";
-
-const folders: Record<ComponentCatalogKey, string> = {
-  motherboard: "MOTHERBOARD",
-  processor: "PROCESADOR",
-  memory: "RAM",
-  storage: "DISCO",
-  graphics: "GRAFICA",
-  power: "FUENTE",
-  case: "GABINETE",
-  cooling: "COOLER",
-  peripherals: "PERIFERICO",
-};
+import {
+  catalogBlobJsonPath,
+  catalogDataKeys,
+  normalizeCatalogProduct,
+  type CatalogProduct,
+  type ComponentCatalog,
+  type ComponentCatalogKey,
+} from "@/lib/component-catalog";
 
 export const dynamic = "force-dynamic";
+const PRICE_RULES_PATH = "servitec-data/component-price-rules.json";
+type PriceRule = { min: number; max?: number | null; pct: number };
+type PriceRules = Partial<Record<ComponentCatalogKey, PriceRule[]>>;
 
-async function getCatalogCategory(category: ComponentCatalogKey) {
-  const candidates = [`componentes/${folders[category]}/productos.json`, `${folders[category]}/productos.json`];
-  for (const pathname of candidates) {
-    const blob = await get(pathname, { access: "private" }).catch(() => null);
-    if (!blob) continue;
-    const payload = await new Response(blob.stream).json();
-    const rows = Array.isArray(payload) ? payload : Array.isArray(payload?.productos) ? payload.productos : [];
-    return rows.map((row: Record<string, unknown>, index: number) => normalizeCatalogProduct(row, category, index));
-  }
-  return [];
+const applyRules = (price: number, rules: PriceRule[] = []) => {
+  const match = rules.find((rule) => price >= (rule.min || 0) && (rule.max == null || price < rule.max));
+  return match ? Math.round(price + (price * (match.pct || 0)) / 100) : Math.round(price);
+};
+
+async function readPriceRules(): Promise<PriceRules> {
+  const blob = await get(PRICE_RULES_PATH, { access: "private" }).catch(() => null);
+  if (!blob) return {};
+  const payload = await new Response(blob.stream).json().catch(() => ({}));
+  return payload && typeof payload === "object" ? payload as PriceRules : {};
 }
 
-export async function GET(request: Request) {
+async function readCategory(category: ComponentCatalogKey): Promise<CatalogProduct[]> {
+  const blob = await get(catalogBlobJsonPath(category), { access: "private" }).catch(() => null);
+  if (!blob) return [];
+  const payload = await new Response(blob.stream).json().catch(() => []);
+  const rows = Array.isArray(payload)
+    ? payload
+    : Array.isArray(payload?.productos)
+      ? payload.productos
+      : [];
+  return rows.map((row, index) => normalizeCatalogProduct(row, category, index));
+}
+
+export async function GET() {
   if (!(await isAuthed())) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
-  const category = new URL(request.url).searchParams.get("categoria") as ComponentCatalogKey | null;
-  if (!category || !catalogDataKeys.includes(category)) return NextResponse.json({ error: "Categoría inválida" }, { status: 400 });
-  const [catalog, overrides] = await Promise.all([getCatalogCategory(category), getComponentes()]);
-  const custom = overrides.filter((item) => item.categoria === category);
-  const customIds = new Set(custom.map((item) => item.id));
-  return NextResponse.json([
-    ...catalog.filter((item) => !customIds.has(item.id)),
-    ...custom,
+  const [entries, priceRules] = await Promise.all([
+    Promise.all(catalogDataKeys.map(async (key) => [key, await readCategory(key)] as const)),
+    readPriceRules(),
   ]);
+  return NextResponse.json({ catalog: Object.fromEntries(entries) as ComponentCatalog, priceRules });
 }
 
 export async function PUT(request: Request) {
   if (!(await isAuthed())) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+    return NextResponse.json({ error: "Falta configurar Vercel Blob." }, { status: 503 });
+  }
+
   try {
-    const item = (await request.json()) as ComponenteAdmin;
-    if (!item?.id || !item.nombre?.trim() || !item.categoria) throw new Error("Datos incompletos");
-    const current = await getComponentes();
-    const existing = current.find((component) => component.id === item.id);
-    const catalogEntries = await Promise.all(catalogDataKeys.map(async (key) => ({
-      key,
-      items: await getCatalogCategory(key),
-    })));
-    const catalogMatch = catalogEntries
-      .flatMap(({ key, items }) => items.map((component) => ({ key, component })))
-      .find(({ component }) => component.id === item.id);
-    if (!existing && catalogMatch) {
-      const nextItem: ComponenteAdmin = {
-        ...item,
-        categoria: catalogMatch.key,
-        precio: catalogMatch.component.precio,
-        originalCatalogPrice: catalogMatch.component.precio,
-        esNuevo: false,
-      };
-      await saveComponentes([...current.filter((component) => component.id !== item.id), nextItem]);
-      // Try to persist into the catalog productos.json for that category (non-fatal)
-      try {
-        const folder = folders[catalogMatch.key];
-        const pathname = `componentes/${folder}/productos.json`;
-        const blob = await get(pathname, { access: "private" }).catch(() => null);
-        const payload = blob ? await new Response(blob.stream).json() : [];
-        const rows = Array.isArray(payload) ? payload : Array.isArray(payload?.productos) ? payload.productos : [];
-        const raw = {
-          id: nextItem.id,
-          nombre: nextItem.nombre,
-          precio: nextItem.precio,
-          imagen: nextItem.imagen,
-          categoria: folder,
+    const body = await request.json() as { catalog?: Partial<ComponentCatalog>; priceRules?: PriceRules };
+    const catalog = body.catalog || {};
+    const priceRules = body.priceRules || {};
+    await Promise.all(catalogDataKeys.map(async (key) => {
+      const items = Array.isArray(catalog[key]) ? catalog[key] : [];
+      const normalizedItems = items.map((item) => {
+        const cost = Number(item.precioCosto ?? item.precio) || 0;
+        return {
+          ...item,
+          precioCosto: cost,
+          precio: applyRules(cost, priceRules[key]),
+          categoria: key,
         };
-        const replaced = rows.filter((r: any) => String(r.id) !== String(nextItem.id));
-        replaced.push(raw);
-        await put(pathname, JSON.stringify(replaced, null, 2), {
-          access: "private",
-          addRandomSuffix: false,
-          allowOverwrite: true,
-          contentType: "application/json",
-        }).catch(() => null);
-      } catch {
-        // ignore
-      }
-      return NextResponse.json(nextItem);
-    }
-    const nextItem: ComponenteAdmin = {
-      ...item,
-      categoria: existing ? existing.categoria : item.categoria,
-      precio: existing ? existing.precio : Number(item.precio) || 0,
-      originalCatalogPrice: existing?.originalCatalogPrice,
-      esNuevo: existing?.esNuevo ?? Boolean(item.esNuevo),
-    };
-
-    if (existing) {
-      // Preserve the original ordering when updating an existing component
-      const updated = current.map((component) => (component.id === item.id ? nextItem : component));
-      await saveComponentes(updated);
-    } else {
-      // New override — append to the list
-      await saveComponentes([...current.filter((component) => component.id !== item.id), nextItem]);
-    }
-
-    // Try to persist the component into the catalog productos.json for its category (non-fatal)
-    try {
-      const targetCategory = nextItem.categoria as ComponentCatalogKey;
-      const folder = folders[targetCategory];
-      const pathname = `componentes/${folder}/productos.json`;
-      const blob = await get(pathname, { access: "private" }).catch(() => null);
-      const payload = blob ? await new Response(blob.stream).json() : [];
-      const rows = Array.isArray(payload) ? payload : Array.isArray(payload?.productos) ? payload.productos : [];
-      const raw = {
-        id: nextItem.id,
-        nombre: nextItem.nombre,
-        precio: nextItem.precio,
-        imagen: nextItem.imagen,
-        categoria: folder,
-      };
-      const replaced = rows.filter((r: any) => String(r.id) !== String(nextItem.id));
-      replaced.push(raw);
-      await put(pathname, JSON.stringify(replaced, null, 2), {
+      });
+      await put(catalogBlobJsonPath(key), JSON.stringify(normalizedItems, null, 2), {
         access: "private",
         addRandomSuffix: false,
         allowOverwrite: true,
         contentType: "application/json",
-      }).catch(() => null);
-    } catch {
-      // ignore
-    }
-
-    return NextResponse.json(nextItem);
+      });
+    }));
+    await put(PRICE_RULES_PATH, JSON.stringify(priceRules, null, 2), {
+      access: "private",
+      addRandomSuffix: false,
+      allowOverwrite: true,
+      contentType: "application/json",
+    });
+    return NextResponse.json({ ok: true });
   } catch (error) {
-    return NextResponse.json({ error: error instanceof Error ? error.message : "No se pudo guardar" }, { status: 400 });
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "No se pudieron guardar los componentes." },
+      { status: 500 },
+    );
   }
 }

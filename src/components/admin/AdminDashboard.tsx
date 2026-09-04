@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -16,9 +16,10 @@ import {
   Star,
   Trash2,
 } from "lucide-react";
-import type { ComponenteAdmin, Equipo, Producto } from "@/lib/types";
+import type { Equipo, Producto } from "@/lib/types";
 import { getAssetUrl } from "@/lib/asset-url";
 import {
+  calculateInstallmentPrice,
   normalizeCsvProductName,
   normalizeImportedCategory,
   normalizeStockCategoryValue,
@@ -29,19 +30,49 @@ import {
   emptyEquipo,
   emptyProducto,
   newId,
+  saveComponentCatalog,
   saveEquipos,
   saveProductos,
-  uploadImage,
 } from "./lib";
+import type { ComponentPriceRules } from "./lib";
+import CategoryPriceRules from "./CategoryPriceRules";
 import { EquipoDialog } from "./EquipoDialog";
+import BulkUploadDialog from "./BulkUploadDialog";
 import { ProductoDialog } from "./ProductoDialog";
+import { ImageField } from "./ImageField";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import {
+  catalogDataKeys,
+  componentCatalogLabels,
+  normalizeCatalogProduct,
+  type CatalogProduct,
+  type ComponentCatalog,
+  type ComponentCatalogKey,
+} from "@/lib/component-catalog";
 import { ComponenteDialog } from "./ComponenteDialog";
-import { componentCatalogLabels, componentCatalogKeys, type ComponentCatalogKey } from "@/lib/component-catalog";
 
 const money = (n: number) =>
   `$ ${Math.round(Number(n) || 0).toLocaleString("es-AR")}`;
 const catLabel = (v: string) =>
   CATEGORIAS_EQUIPO.find((c) => c.value === v)?.label || v;
+
+const componentKeyFromValue = (value: unknown): ComponentCatalogKey | null => {
+  const normalized = String(value ?? "").trim().toLowerCase();
+  const folders: Record<ComponentCatalogKey, string> = {
+    motherboard: "motherboard",
+    processor: "procesador",
+    memory: "ram",
+    storage: "disco",
+    graphics: "grafica",
+    power: "fuente",
+    case: "gabinete",
+    cooling: "cooler",
+    peripherals: "periferico",
+  };
+  return catalogDataKeys.find((key) =>
+    key === normalized || folders[key] === normalized || componentCatalogLabels[key].toLowerCase() === normalized,
+  ) || null;
+};
 
 type Segment = "dashboard" | "stock" | "componentes";
 
@@ -77,6 +108,14 @@ const getCurrentAdminUser = () => {
   }
 };
 
+type ConfirmRequest = {
+  open: boolean;
+  title: string;
+  description?: string;
+  loading?: boolean;
+  onConfirm: () => Promise<void> | void;
+};
+
 const readStoredMovements = (): InventoryMovement[] => {
   if (typeof window === "undefined") return [];
   try {
@@ -106,12 +145,23 @@ export function AdminDashboard({ persistent }: { persistent: boolean }) {
   const [segment, setSegment] = useState<Segment>("dashboard");
   const [equipos, setEquipos] = useState<Equipo[]>([]);
   const [productos, setProductos] = useState<Producto[]>([]);
+  const [componentCatalog, setComponentCatalog] = useState<ComponentCatalog>(() =>
+    Object.fromEntries(catalogDataKeys.map((key) => [key, []])) as ComponentCatalog,
+  );
+  const [componentPriceRules, setComponentPriceRules] = useState<ComponentPriceRules>({});
   const [movimientos, setMovimientos] = useState<InventoryMovement[]>(readStoredMovements);
   const [loading, setLoading] = useState(true);
-  const [blueRate, setBlueRate] = useState({ compra: 0, venta: 0 });
   const [editEquipo, setEditEquipo] = useState<Equipo | null>(null);
   const [editProducto, setEditProducto] = useState<Producto | null>(null);
-  const [editComponente, setEditComponente] = useState<ComponenteAdmin | null>(null);
+  const [editComponente, setEditComponente] = useState<CatalogProduct | null>(null);
+  const [bulkOpen, setBulkOpen] = useState(false);
+  const [confirmState, setConfirmState] = useState<{
+    open: boolean;
+    title: string;
+    description?: string;
+    loading?: boolean;
+    onConfirm: () => Promise<void> | void;
+  } | null>(null);
 
   const addMovement = (movement: Omit<InventoryMovement, "id" | "fecha">) => {
     setMovimientos((cur) => {
@@ -130,35 +180,24 @@ export function AdminDashboard({ persistent }: { persistent: boolean }) {
 
   useEffect(() => {
     let alive = true;
-    const updateBlueRate = () => {
-      fetch("/api/dolar-blue", { cache: "no-store" })
-        .then((r) => (r.ok ? r.json() : null))
-        .then((quote) => {
-          if (!alive || !quote || (!Number(quote.compra) && !Number(quote.venta))) return;
-          setBlueRate({
-            compra: Number(quote.compra || 0),
-            venta: Number(quote.venta || 0),
-          });
-        })
-        .catch(() => undefined);
-    };
-
-    updateBlueRate();
-    const blueRateInterval = window.setInterval(updateBlueRate, 5 * 60 * 1000);
-
     Promise.all([
       fetch("/api/admin/equipos").then((r) => (r.ok ? r.json() : [])),
       fetch("/api/admin/productos").then((r) => (r.ok ? r.json() : [])),
+      fetch("/api/admin/componentes").then((r) => (r.ok ? r.json() : {})),
     ])
-      .then(([e, p]) => {
+      .then(([e, p, c]) => {
         setEquipos(Array.isArray(e) ? e : []);
         setProductos(Array.isArray(p) ? p : []);
+        if (c && typeof c === "object") {
+          const response = c as { catalog?: ComponentCatalog; priceRules?: ComponentPriceRules };
+          setComponentCatalog(response.catalog || c as ComponentCatalog);
+          setComponentPriceRules(response.priceRules || {});
+        }
       })
       .finally(() => setLoading(false));
 
     return () => {
       alive = false;
-      window.clearInterval(blueRateInterval);
     };
   }, []);
 
@@ -176,6 +215,7 @@ export function AdminDashboard({ persistent }: { persistent: boolean }) {
   }
 
   return (
+    <>
     <div className="mx-auto max-w-6xl space-y-6 px-4 py-6 sm:px-6">
       {/* Header */}
       <header className="flex flex-col gap-4 rounded-3xl border border-white/10 bg-white/[0.03] p-4 shadow-xl sm:flex-row sm:items-center sm:justify-between sm:p-5">
@@ -195,17 +235,6 @@ export function AdminDashboard({ persistent }: { persistent: boolean }) {
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <div className="min-w-0 flex-1 rounded-xl border border-emerald-400/30 bg-emerald-500/10 px-3 py-2 text-left sm:flex-none sm:text-right">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-200/80">
-              Dólar blue
-            </div>
-            <div className="mt-1 text-sm font-bold text-emerald-300">
-              Compra: ${Number(blueRate.compra || 0).toLocaleString("es-AR", { maximumFractionDigits: 2 })}
-            </div>
-            <div className="text-xs text-emerald-200">
-              Venta: ${Number(blueRate.venta || 0).toLocaleString("es-AR", { maximumFractionDigits: 2 })}
-            </div>
-          </div>
           <div className="flex w-full items-center gap-2 sm:w-auto">
             <Link
               href="/"
@@ -242,7 +271,7 @@ export function AdminDashboard({ persistent }: { persistent: boolean }) {
             {
               id: "componentes",
               label: "Componentes",
-              description: "Catálogo por categoría",
+              description: "Armá tu PC y tienda",
               icon: Boxes,
             },
           ] as const
@@ -250,9 +279,9 @@ export function AdminDashboard({ persistent }: { persistent: boolean }) {
           <button
             key={id}
             onClick={() => setSegment(id)}
-            className={`flex min-w-0 items-center gap-3 rounded-2xl px-3 py-3 text-left transition sm:px-4 ${
+            className={`flex min-h-16 min-w-0 items-center gap-3 rounded-2xl border border-transparent px-3 py-3 text-left transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300 sm:px-4 ${
               segment === id
-                ? "bg-white text-slate-950 shadow-lg"
+                ? "border-white/20 bg-white text-slate-950 shadow-lg"
                 : "text-white/60 hover:bg-white/10 hover:text-white"
             }`}
           >
@@ -289,6 +318,8 @@ export function AdminDashboard({ persistent }: { persistent: boolean }) {
           onEdit={setEditProducto}
           movimientos={movimientos}
           addMovement={addMovement}
+          onOpenBulk={() => setBulkOpen(true)}
+          onRequestConfirm={setConfirmState}
         />
       ) : segment === "stock" ? (
         <StockTab
@@ -296,11 +327,37 @@ export function AdminDashboard({ persistent }: { persistent: boolean }) {
           setEquipos={setEquipos}
           persistent={persistent}
           onEdit={setEditEquipo}
+          onRequestConfirm={setConfirmState}
         />
       ) : (
         <ComponentesTab
+          catalog={componentCatalog}
+          setCatalog={setComponentCatalog}
           persistent={persistent}
           onEdit={setEditComponente}
+          onOpenBulk={() => setBulkOpen(true)}
+          priceRules={componentPriceRules}
+          setPriceRules={setComponentPriceRules}
+        />
+      )}
+
+      {bulkOpen && (
+        <BulkUploadDialog
+          persistent={persistent}
+          priceRules={componentPriceRules}
+          onClose={() => setBulkOpen(false)}
+          onUploaded={() => {
+            setBulkOpen(false);
+            void fetch("/api/admin/componentes")
+              .then((response) => (response.ok ? response.json() : null))
+              .then((catalog) => {
+                if (catalog && typeof catalog === "object") {
+                  const response = catalog as { catalog?: ComponentCatalog; priceRules?: ComponentPriceRules };
+                  setComponentCatalog(response.catalog || catalog as ComponentCatalog);
+                  setComponentPriceRules(response.priceRules || {});
+                }
+              });
+          }}
         />
       )}
 
@@ -308,6 +365,7 @@ export function AdminDashboard({ persistent }: { persistent: boolean }) {
         <EquipoDialog
           key={editEquipo.id}
           equipo={editEquipo}
+          componentCatalog={componentCatalog}
           onClose={() => setEditEquipo(null)}
           onSave={async (saved) => {
             if (persistent) {
@@ -361,39 +419,55 @@ export function AdminDashboard({ persistent }: { persistent: boolean }) {
 
       {editComponente && (
         <ComponenteDialog
-          key={editComponente.id}
+          key={`${editComponente.categoria}-${editComponente.id}`}
           componente={editComponente}
           onClose={() => setEditComponente(null)}
           onSave={async (saved) => {
-            if (persistent) {
-              const response = await fetch("/api/admin/componentes", {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(saved),
-              });
-              if (!response.ok) throw new Error("No se pudo guardar el componente.");
-              window.dispatchEvent(new Event("componentesUpdated"));
-              setEditComponente(null);
-            } else {
-              try {
-                const key = "servitec-admin-componentes-local";
-                const raw = window.localStorage.getItem(key) || "[]";
-                const arr = Array.isArray(JSON.parse(raw)) ? (JSON.parse(raw) as ComponenteAdmin[]) : [];
-                const exists = arr.some((c) => c.id === saved.id);
-                const next = exists ? arr.map((c) => (c.id === saved.id ? saved : c)) : [...arr, saved];
-                window.localStorage.setItem(key, JSON.stringify(next));
-                // notify ComponentesTab to reload
-                window.dispatchEvent(new Event("componentesUpdated"));
-                setEditComponente(null);
-              } catch (err) {
-                console.error("local save componentes", err);
-                throw err;
-              }
+            const category = componentKeyFromValue(saved.categoria) || componentKeyFromValue(editComponente.categoria) || "motherboard";
+            const savedForCatalog = { ...saved, categoria: category };
+            const sortByPrice = (items: CatalogProduct[]) => [...items].sort((a, b) => {
+              const priceDifference = (Number(a.precio) || 0) - (Number(b.precio) || 0);
+              return priceDifference || a.nombre.localeCompare(b.nombre, "es");
+            });
+            const next = {
+              ...componentCatalog,
+              [category]: sortByPrice((componentCatalog[category] || []).some((item) => item.id === saved.id)
+                ? componentCatalog[category].map((item) => (item.id === saved.id ? savedForCatalog : item))
+                : [...(componentCatalog[category] || []), savedForCatalog]),
+            };
+            if (persistent) await saveComponentCatalog(next, componentPriceRules);
+            setComponentCatalog(next);
+            setEditComponente(null);
+          }}
+        />
+      )}
+
+      {/* Componentes admin removed — recreate with new prompt when ready */}
+      {/* Bulk upload moved to a dedicated page: /admin/bulk-upload */}
+
+      {confirmState && (
+        <ConfirmDialog
+          open={Boolean(confirmState.open)}
+          title={confirmState.title}
+          description={confirmState.description}
+          loading={Boolean(confirmState.loading)}
+          onOpenChange={(v) => {
+            if (!v) setConfirmState(null);
+            else setConfirmState((s) => (s ? { ...s, open: v } : s));
+          }}
+          onConfirm={async () => {
+            if (!confirmState) return;
+            setConfirmState((s) => (s ? { ...s, loading: true } : s));
+            try {
+              await confirmState.onConfirm();
+            } finally {
+              setConfirmState(null);
             }
           }}
         />
       )}
     </div>
+    </>
   );
 }
 
@@ -401,11 +475,12 @@ export function AdminDashboard({ persistent }: { persistent: boolean }) {
 
 function StatCard({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-5 shadow-lg">
+    <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-white/[0.12] to-white/[0.04] p-5 shadow-xl shadow-black/10">
+      <div aria-hidden className="absolute -right-8 -top-10 size-28 rounded-full bg-sky-400/10 blur-2xl" />
       <p className="text-xs font-semibold uppercase tracking-[0.15em] text-white/45">
         {label}
       </p>
-      <p className="mt-2 text-2xl font-bold">{value}</p>
+      <p className="relative mt-2 text-2xl font-bold tracking-tight">{value}</p>
     </div>
   );
 }
@@ -436,7 +511,7 @@ function SaveButton({
       <button
         onClick={onSave}
         disabled={!dirty || saving || !persistent}
-        className="inline-flex items-center gap-2 rounded-lg bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-40"
+        className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40"
       >
         {saving && <Loader2 className="size-4 animate-spin" />}
         {saving ? "Guardando…" : dirty ? "Guardar cambios" : "Sin cambios"}
@@ -468,121 +543,9 @@ function useSaver<T>(data: T, save: (d: T) => Promise<unknown>) {
   return { saving, saved, error, dirty, run };
 }
 
-const panel = "rounded-3xl border border-white/10 bg-white p-5 text-slate-900 shadow-2xl sm:p-6";
+const panel = "rounded-3xl border border-slate-200/80 bg-white/95 p-5 text-slate-900 shadow-[0_18px_60px_-28px_rgba(15,23,42,0.45)] backdrop-blur sm:p-6";
 const input =
-  "w-full rounded-lg border border-slate-300 bg-white p-3 text-sm outline-none focus:border-slate-900";
-
-function ComponentesTab({
-  persistent,
-  onEdit,
-}: {
-  persistent: boolean;
-  onEdit: (component: ComponenteAdmin) => void;
-}) {
-  const [category, setCategory] = useState<ComponentCatalogKey>("motherboard");
-  const [components, setComponents] = useState<ComponenteAdmin[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState("");
-
-  const loadCategory = async (nextCategory = category) => {
-    setLoading(true);
-    try {
-      const response = await fetch(`/api/admin/componentes?categoria=${nextCategory}`, { cache: "no-store" });
-      const data = response.ok ? await response.json() : [];
-      let list = Array.isArray(data) ? data : [];
-      try {
-        const raw = window.localStorage.getItem("servitec-admin-componentes-local") || "[]";
-        const localOverrides = Array.isArray(JSON.parse(raw)) ? (JSON.parse(raw) as ComponenteAdmin[]) : [];
-        const custom = localOverrides.filter((c) => String(c.categoria || "").toLowerCase().includes(String(nextCategory || "").toLowerCase()));
-        if (custom.length > 0) {
-          const overrideMap = new Map(custom.map((c) => [c.id, c]));
-          // Replace originals with overrides (preserve original positions), then append any new custom items
-          const replaced = (list as ComponenteAdmin[]).map((item) => overrideMap.get(item.id) || item);
-          const originalsIds = new Set((list as ComponenteAdmin[]).map((i) => i.id));
-          const extras = custom.filter((c) => !originalsIds.has(c.id));
-          list = [...replaced, ...extras];
-        }
-      } catch (err) {
-        // ignore local overrides parsing errors
-      }
-      // Order components by precio ascendente (menor a mayor)
-      list = (list as ComponenteAdmin[]).slice().sort((a, b) => (Number(a.precio) || 0) - (Number(b.precio) || 0));
-      setComponents(list);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    void loadCategory();
-    const handler = () => loadCategory();
-    window.addEventListener("componentesUpdated", handler);
-    return () => window.removeEventListener("componentesUpdated", handler);
-  }, [category]);
-
-  const visible = components.filter((component) =>
-    component.nombre.toLowerCase().includes(filter.toLowerCase()),
-  );
-
-  const addNew = () => onEdit({
-    id: newId(),
-    nombre: "",
-    categoria: category,
-    precio: 0,
-    precioCosto: 0,
-    stock: 0,
-    imagen: "",
-    esNuevo: true,
-  });
-
-  return (
-    <section className={`${panel} space-y-5 p-4 sm:p-6`}>
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h2 className="text-lg font-semibold">Gestión de componentes</h2>
-          <p className="text-xs text-slate-500">Editá datos e imágenes. El precio de los componentes existentes no se puede modificar.</p>
-        </div>
-        <button type="button" onClick={addNew} className="flex items-center gap-2 rounded-xl bg-slate-950 px-4 py-2 text-sm font-semibold text-white">
-          <Plus className="size-4" /> Nuevo componente
-        </button>
-      </div>
-
-      <div className="flex gap-2 overflow-x-auto pb-1">
-        {componentCatalogKeys.map((key) => (
-          <button key={key} type="button" onClick={() => { setCategory(key); setFilter(""); }} className={`whitespace-nowrap rounded-xl px-3 py-2 text-xs font-semibold ${category === key ? "bg-slate-950 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}>
-            {componentCatalogLabels[key]}
-          </button>
-        ))}
-      </div>
-
-      <div className="relative">
-        <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
-        <input className={`${input} pl-9`} placeholder={`Buscar en ${componentCatalogLabels[category]}…`} value={filter} onChange={(event) => setFilter(event.target.value)} />
-      </div>
-
-      {loading ? <p className="py-10 text-center text-sm text-slate-500">Cargando componentes…</p> : (
-        <div className="max-h-[620px] overflow-auto">
-          <table className="min-w-[640px] w-full text-sm">
-            <thead className="sticky top-0 border-b bg-white text-left text-xs uppercase text-slate-400">
-              <tr><th className="py-2 pr-3">Componente</th><th className="px-3 py-2">Precio base</th><th className="px-3 py-2">Stock</th><th className="px-3 py-2" /></tr>
-            </thead>
-            <tbody className="divide-y">
-              {visible.map((component) => (
-                <tr key={component.id} className="hover:bg-slate-50">
-                  <td className="py-2 pr-3"><div className="flex items-center gap-2">{component.imagen && <img src={component.imagen} alt="" className="size-10 rounded border bg-white object-contain" />}<span className="line-clamp-2 font-medium">{component.nombre}</span></div></td>
-                  <td className="px-3 py-2 font-semibold">{money(component.precio)}</td>
-                  <td className="px-3 py-2">{component.stock}</td>
-                  <td className="px-3 py-2 text-right"><button type="button" onClick={() => onEdit(component)} className="rounded p-1.5 text-slate-500 hover:bg-slate-100" aria-label={`Editar ${component.nombre}`}><Pencil className="size-4" /></button></td>
-                </tr>
-              ))}
-              {visible.length === 0 && <tr><td colSpan={4} className="py-10 text-center text-slate-400">Sin resultados</td></tr>}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </section>
-  );
-}
+  "w-full rounded-xl border border-slate-300 bg-white p-3 text-sm outline-none transition placeholder:text-slate-400 hover:border-slate-400 focus:border-sky-500 focus:ring-4 focus:ring-sky-500/10";
 
 /* ---------------------------- DASHBOARD ---------------------------- */
 
@@ -593,6 +556,8 @@ function DashboardTab({
   onEdit,
   movimientos,
   addMovement,
+  onOpenBulk,
+  onRequestConfirm,
 }: {
   productos: Producto[];
   setProductos: React.Dispatch<React.SetStateAction<Producto[]>>;
@@ -600,6 +565,8 @@ function DashboardTab({
   onEdit: (p: Producto) => void;
   movimientos: InventoryMovement[];
   addMovement: (movement: Omit<InventoryMovement, "id" | "fecha">) => void;
+  onOpenBulk: () => void;
+  onRequestConfirm?: (req: ConfirmRequest) => void;
 }) {
   const { saving, saved, error, dirty, run } = useSaver(productos, saveProductos);
   const [filter, setFilter] = useState("");
@@ -635,7 +602,7 @@ function DashboardTab({
       <div className="grid gap-4 sm:grid-cols-3">
         <StatCard label="Unidades totales" value={stockTotal} />
         <StatCard label="Valor inventario" value={money(valorInventario)} />
-        <StatCard label="Rol actual" value="admin" />
+        <StatCard label="Rol actual" value="ADMIN" />
       </div>
 
       <AddProductoForm
@@ -645,135 +612,138 @@ function DashboardTab({
         onMovement={(movement) => addMovement(movement)}
       />
 
-      <BulkStockImport
-        productos={productos}
-        persistent={persistent}
-        onImport={async (next) => {
-          const map = new Map(productos.map((p) => [normalizeCsvProductName(p.nombre), p]));
-          const importedNames = new Set<string>();
-          let creados = 0;
-          let actualizados = 0;
-          let marcadosSinStock = 0;
+      <div className="grid gap-6 lg:grid-cols-2">
+        <BulkStockImport
+          productos={productos}
+          persistent={persistent}
+          onImport={async (next) => {
+            // retain previous import behavior when invoked programmatically
+            const map = new Map(productos.map((p) => [normalizeCsvProductName(p.nombre), p]));
+            const importedNames = new Set<string>();
+            let creados = 0;
+            let actualizados = 0;
+            let marcadosSinStock = 0;
 
-          for (const producto of next) {
-            const key = normalizeCsvProductName(producto.nombre);
-            const existing = map.get(key);
-            const anterior = Number(existing?.stock) || 0;
-            const nuevo = Number(producto.stock) || 0;
-            const merged = existing
-              ? { ...existing, ...producto, id: existing.id, imagen: existing.imagen || producto.imagen }
-              : producto;
+            for (const producto of next) {
+              const key = normalizeCsvProductName(producto.nombre);
+              const existing = map.get(key);
+              const anterior = Number(existing?.stock) || 0;
+              const nuevo = Number(producto.stock) || 0;
+              const merged = existing
+                ? { ...existing, ...producto, id: existing.id, imagen: existing.imagen || producto.imagen }
+                : producto;
 
-            map.set(key, merged);
-            importedNames.add(key);
-            if (existing) actualizados += 1;
-            else creados += 1;
+              map.set(key, merged);
+              importedNames.add(key);
+              if (existing) actualizados += 1;
+              else creados += 1;
 
-            if (anterior !== nuevo) {
+              if (anterior !== nuevo) {
+                addMovement({
+                  tipo: nuevo > anterior ? "entrada" : "salida",
+                  producto: producto.nombre,
+                  cantidad: Math.abs(nuevo - anterior),
+                  anterior,
+                  nuevo,
+                  usuario: getCurrentAdminUser(),
+                  origen: "importacion_csv",
+                });
+              }
+            }
+
+            for (const producto of productos) {
+              const key = normalizeCsvProductName(producto.nombre);
+              if (importedNames.has(key) || shouldIgnoreCsvProduct(producto.nombre)) continue;
+              const anterior = Number(producto.stock) || 0;
+              if (anterior === 0) continue;
+              map.set(key, { ...producto, stock: 0 });
+              marcadosSinStock += 1;
               addMovement({
-                tipo: nuevo > anterior ? "entrada" : "salida",
+                tipo: "salida",
                 producto: producto.nombre,
-                cantidad: Math.abs(nuevo - anterior),
+                cantidad: anterior,
                 anterior,
-                nuevo,
+                nuevo: 0,
                 usuario: getCurrentAdminUser(),
                 origen: "importacion_csv",
               });
             }
-          }
 
-          for (const producto of productos) {
-            const key = normalizeCsvProductName(producto.nombre);
-            if (importedNames.has(key) || shouldIgnoreCsvProduct(producto.nombre)) continue;
-            const anterior = Number(producto.stock) || 0;
-            if (anterior === 0) continue;
-            map.set(key, { ...producto, stock: 0 });
-            marcadosSinStock += 1;
-            addMovement({
-              tipo: "salida",
-              producto: producto.nombre,
-              cantidad: anterior,
-              anterior,
-              nuevo: 0,
-              usuario: getCurrentAdminUser(),
-              origen: "importacion_csv",
-            });
-          }
+            const finalProductos = Array.from(map.values());
+            await saveProductos(finalProductos);
+            setProductos(finalProductos);
+            return { creados, actualizados, marcadosSinStock };
+          }}
+        />
 
-          const finalProductos = Array.from(map.values());
-          await saveProductos(finalProductos);
-          setProductos(finalProductos);
-          return { creados, actualizados, marcadosSinStock };
-        }}
-      />
-
-      <section className={panel}>
-        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h2 className="text-lg font-semibold">Historial de movimientos</h2>
-            <p className="text-xs text-slate-500">
-              {movimientos.length === 0
-                ? "Sin movimientos recientes"
-                : `Último movimiento de ${movimientos.length} registrado(s)`}
-            </p>
-          </div>
-          {movimientos.length > 1 && (
-            <button
-              type="button"
-              onClick={() => setMostrarTodosMovimientos((prev) => !prev)}
-              className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-100"
-            >
-              {mostrarTodosMovimientos ? "Mostrar solo el último" : "Ver historial completo"}
-            </button>
-          )}
-        </div>
-
-        {movimientos.length === 0 && <p className="text-sm text-slate-500">No hay movimientos registrados.</p>}
-
-        <div className={`${mostrarTodosMovimientos ? "max-h-[380px] overflow-y-auto pr-2" : ""} space-y-3`}>
-          {(mostrarTodosMovimientos ? movimientos : movimientos.slice(0, 1)).map((movimiento) => {
-            const meta = getMovementMeta(movimiento.tipo);
-            return (
-              <div
-                key={movimiento.id}
-                className="flex flex-col gap-2 rounded-xl border border-slate-200 bg-slate-50/80 p-4 sm:flex-row sm:items-center sm:justify-between"
+        <section className={panel}>
+          <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 className="text-lg font-semibold">Historial de movimientos</h2>
+              <p className="text-xs text-slate-500">
+                {movimientos.length === 0
+                  ? "Sin movimientos recientes"
+                  : `Último movimiento de ${movimientos.length} registrado(s)`}
+              </p>
+            </div>
+            {movimientos.length > 1 && (
+              <button
+                type="button"
+                onClick={() => setMostrarTodosMovimientos((prev) => !prev)}
+                className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-100"
               >
-                <div className="min-w-0">
-                  <p className="font-medium">
-                    <span className={meta.color}>{meta.label}</span> - {movimiento.producto}
-                  </p>
-                  <p className="text-xs text-slate-500 sm:text-sm">
-                    {movimiento.usuario} • {movimiento.origen}
-                  </p>
-                </div>
-                <div className="text-left sm:text-right">
-                  <p className="text-sm font-semibold sm:text-base">{movimiento.cantidad} unidades</p>
-                  <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">
-                    {new Date(movimiento.fecha).toLocaleString("es-AR", {
-                      day: "2-digit",
-                      month: "2-digit",
-                      year: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </p>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {mostrarTodosMovimientos && visibleMovimientos < movimientos.length && (
-          <div className="mt-6 flex justify-center">
-            <button
-              onClick={() => setVisibleMovimientos((prev) => prev + 5)}
-              className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-medium transition hover:bg-slate-100"
-            >
-              Cargar más movimientos
-            </button>
+                {mostrarTodosMovimientos ? "Mostrar solo el último" : "Ver historial completo"}
+              </button>
+            )}
           </div>
-        )}
-      </section>
+
+          {movimientos.length === 0 && <p className="text-sm text-slate-500">No hay movimientos registrados.</p>}
+
+          <div className={`${mostrarTodosMovimientos ? "max-h-[380px] overflow-y-auto pr-2" : ""} space-y-3`}>
+            {(mostrarTodosMovimientos ? movimientos : movimientos.slice(0, 1)).map((movimiento) => {
+              const meta = getMovementMeta(movimiento.tipo);
+              return (
+                <div
+                  key={movimiento.id}
+                  className="flex flex-col gap-2 rounded-xl border border-slate-200 bg-slate-50/80 p-4 sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <div className="min-w-0">
+                    <p className="font-medium">
+                      <span className={meta.color}>{meta.label}</span> - {movimiento.producto}
+                    </p>
+                    <p className="text-xs text-slate-500 sm:text-sm">
+                      {movimiento.usuario} • {movimiento.origen}
+                    </p>
+                  </div>
+                  <div className="text-left sm:text-right">
+                    <p className="text-sm font-semibold sm:text-base">{movimiento.cantidad} unidades</p>
+                    <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">
+                      {new Date(movimiento.fecha).toLocaleString("es-AR", {
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {mostrarTodosMovimientos && visibleMovimientos < movimientos.length && (
+            <div className="mt-6 flex justify-center">
+              <button
+                onClick={() => setVisibleMovimientos((prev) => prev + 5)}
+                className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-medium transition hover:bg-slate-100"
+              >
+                Cargar más movimientos
+              </button>
+            </div>
+          )}
+        </section>
+      </div>
 
       <section className={panel}>
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
@@ -809,8 +779,9 @@ function DashboardTab({
               <tr>
                 <th className="py-2 pr-3">Producto</th>
                 <th className="px-3 py-2">Categoría</th>
-                <th className="px-3 py-2">Costo</th>
-                <th className="px-3 py-2">Precio</th>
+                <th className="px-3 py-2 text-orange-600">COSTO</th>
+                <th className="px-3 py-2 text-emerald-700">PRECIO EFT</th>
+                <th className="px-3 py-2 text-rose-700">CRÉDITO</th>
                 <th className="px-3 py-2">Unidades</th>
                 <th className="px-3 py-2"></th>
               </tr>
@@ -832,8 +803,9 @@ function DashboardTab({
                     </div>
                   </td>
                   <td className="px-3 py-2 text-slate-500">{p.categoria}</td>
-                  <td className="px-3 py-2 text-slate-500">{money(p.precioCosto)}</td>
-                  <td className="px-3 py-2 font-semibold">{money(p.precio)}</td>
+                  <td className="px-3 py-2 font-semibold text-orange-600">{money(p.precioCosto)}</td>
+                  <td className="px-3 py-2 font-semibold text-emerald-700">{money(p.precio)}</td>
+                  <td className="px-3 py-2 font-semibold text-rose-700">{money(calculateInstallmentPrice(p.precio))}</td>
                   <td className="px-3 py-2">
                     <span className={p.stock <= 0 ? "font-bold text-rose-600" : ""}>
                       {p.stock}
@@ -849,10 +821,16 @@ function DashboardTab({
                         <Pencil className="size-4" />
                       </button>
                       <button
-                        onClick={() => {
-                          if (confirm(`¿Eliminar "${p.nombre}"?`))
-                            setProductos((cur) => cur.filter((x) => x.id !== p.id));
-                        }}
+                        onClick={() =>
+                          onRequestConfirm?.({
+                            open: true,
+                            title: `¿Eliminar "${p.nombre}"?`,
+                            description: "Se eliminará este producto del inventario.",
+                            onConfirm: () => {
+                              setProductos((cur) => cur.filter((x) => x.id !== p.id));
+                            },
+                          })
+                        }
                         className="rounded p-1.5 text-rose-600 hover:bg-rose-50"
                         aria-label="Eliminar"
                       >
@@ -888,7 +866,6 @@ function AddProductoForm({
   onAdd: (p: Producto) => void;
   onMovement: (movement: Omit<InventoryMovement, "id" | "fecha">) => void;
 }) {
-  const fileRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState(emptyProducto());
   const [uploading, setUploading] = useState(false);
   const [msg, setMsg] = useState("");
@@ -902,20 +879,8 @@ function AddProductoForm({
     e.preventDefault();
     if (!persistent) return;
     setMsg("");
-    let imagen = form.imagen;
-    const file = fileRef.current?.files?.[0];
-    if (file) {
-      try {
-        setUploading(true);
-        imagen = await uploadImage(file);
-      } catch (err) {
-        setMsg(err instanceof Error ? err.message : "Error al subir la imagen");
-        setUploading(false);
-        return;
-      }
-      setUploading(false);
-    }
-    const producto = { ...form, id: newId(), imagen };
+    setUploading(true);
+    const producto = { ...form, id: newId(), imagen: form.imagen };
     onAdd(producto);
     onMovement({
       tipo: "entrada",
@@ -927,7 +892,7 @@ function AddProductoForm({
       origen: "alta_manual",
     });
     setForm(emptyProducto());
-    if (fileRef.current) fileRef.current.value = "";
+    setUploading(false);
     setMsg("Producto agregado. Acordate de Guardar cambios.");
   };
 
@@ -943,19 +908,19 @@ function AddProductoForm({
             onChange={(e) => setForm((f) => ({ ...f, nombre: e.target.value }))}
             required
           />
-          <input
+          <select
             className={input}
-            list="add-cat-list"
-            placeholder="Seleccionar categoría"
             value={form.categoria}
             onChange={(e) => setForm((f) => ({ ...f, categoria: e.target.value }))}
             required
-          />
-          <datalist id="add-cat-list">
+          >
+            <option value="">Seleccionar categoría</option>
             {categorias.map((c) => (
-              <option key={c} value={c} />
+              <option key={c} value={c}>
+                {c}
+              </option>
             ))}
-          </datalist>
+          </select>
           <input
             className={input}
             type="number"
@@ -986,7 +951,9 @@ function AddProductoForm({
           />
         </div>
 
-        <input ref={fileRef} type="file" accept="image/*" className="text-sm" />
+        <div className="sm:col-span-2">
+          <ImageField values={form.imagen ? [form.imagen] : []} onChange={(values) => setForm((f) => ({ ...f, imagen: values[0] || "" }))} />
+        </div>
 
         <div className="flex flex-wrap items-center gap-4">
           <button
@@ -1021,10 +988,10 @@ function BulkStockImport({
   const [mensaje, setMensaje] = useState("");
 
   const exportarCsv = () => {
-    const headers = ["Name", "Description", "Category", "Cost", "Price", "Quantity", "DeletedAt"];
+    // Export format matches the import parser: Name, Category, Cost, Price, Quantity, DeletedAt
+    const headers = ["Name", "Category", "Cost", "Price", "Quantity", "DeletedAt"];
     const rows = productos.map((producto) => [
       producto.nombre,
-      "",
       producto.categoria,
       String(producto.precioCosto ?? 0),
       String(producto.precio ?? 0),
@@ -1182,7 +1149,7 @@ function BulkStockImport({
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="text-lg font-semibold">Carga de Inventario</h2>
-          <p className="text-xs text-slate-500">Actualiza los accesorios mediante un archivo CSV.</p>
+          <p className="text-xs text-slate-500">Exportá el inventario en el formato compatible con la importación.</p>
         </div>
         <button
           type="button"
@@ -1193,25 +1160,196 @@ function BulkStockImport({
         </button>
       </div>
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <input
-          type="file"
-          accept=".csv,text/csv"
-          onChange={(e) => setArchivoCsv(e.target.files?.[0] || null)}
-          className="min-w-0 flex-1 text-sm"
-        />
-        <button
-          type="button"
-          onClick={importar}
-          disabled={!archivoCsv || importando || !persistent}
-          className="rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {importando ? "Importando…" : "Importar CSV"}
-        </button>
-      </div>
-
       {mensaje && <p className="mt-3 text-xs text-slate-500">{mensaje}</p>}
     </section>
+  );
+}
+
+/* --------------------------- COMPONENTES -------------------------- */
+
+function ComponentesTab({
+  catalog,
+  setCatalog,
+  persistent,
+  onEdit,
+  onOpenBulk,
+  onRequestConfirm,
+  priceRules,
+  setPriceRules,
+}: {
+  catalog: ComponentCatalog;
+  setCatalog: React.Dispatch<React.SetStateAction<ComponentCatalog>>;
+  persistent: boolean;
+  onEdit: (component: CatalogProduct) => void;
+  onOpenBulk: () => void;
+  onRequestConfirm?: (req: ConfirmRequest) => void;
+  priceRules: ComponentPriceRules;
+  setPriceRules: React.Dispatch<React.SetStateAction<ComponentPriceRules>>;
+}) {
+  const pricingState = { catalog, priceRules };
+  const { saving, saved, error, dirty, run } = useSaver(pricingState, (next) => saveComponentCatalog(next.catalog, next.priceRules));
+  const [filter, setFilter] = useState("");
+  const [category, setCategory] = useState<ComponentCatalogKey | "all">("all");
+  const [applyingMargin, setApplyingMargin] = useState(false);
+  const [marginMessage, setMarginMessage] = useState("");
+  const [showMarginRules, setShowMarginRules] = useState(true);
+  const ruleCategory = category === "all" ? null : category;
+  const visible = useMemo(() => catalogDataKeys.flatMap((key) =>
+    (category === "all" || category === key ? catalog[key] || [] : [])
+      .map((component) => ({ key, component })),
+  ).filter(({ component }) =>
+    `${component.nombre} ${component.marca} ${component.modelo}`.toLowerCase().includes(filter.toLowerCase()),
+  ), [catalog, category, filter]);
+
+  const create = () => {
+    const key = category === "all" ? catalogDataKeys[0] : category;
+    onEdit(normalizeCatalogProduct({ id: newId(), nombre: "", precio: 0, precioCosto: 0, stock: 0, imagen: "", categoria: key }, key, 0));
+  };
+
+  const remove = (key: ComponentCatalogKey, id: string) => {
+    const component = catalog[key]?.find((item) => item.id === id);
+    if (!component) return;
+    const deleteComponent = async () => {
+      const next = { ...catalog, [key]: catalog[key].filter((item) => item.id !== id) };
+      setCatalog(next);
+      if (persistent) {
+        try {
+          await saveComponentCatalog(next, priceRules);
+        } catch {
+          setCatalog(catalog);
+        }
+      }
+    };
+    onRequestConfirm?.({
+      open: true,
+      title: "Eliminar componente",
+      description: `Se eliminará “${component.nombre}” del catálogo. Esta acción no se puede deshacer.`,
+      onConfirm: deleteComponent,
+    });
+  };
+
+  const applyMargin = async () => {
+    if (!ruleCategory) {
+      setMarginMessage("Selecciona una categoria para aplicar el margen.");
+      return;
+    }
+    const rules = priceRules[ruleCategory] || [];
+    const nextCategory = (catalog[ruleCategory] || []).map((component) => {
+      const cost = Number(component.precioCosto ?? component.precio) || 0;
+      const rule = rules.find((item) => cost >= (item.min || 0) && (item.max == null || cost < item.max));
+      const price = rule ? Math.round(cost + (cost * (Number(rule.pct) || 0)) / 100) : Math.round(cost);
+      return { ...component, precioCosto: cost, precio: price };
+    });
+    const next = { ...catalog, [ruleCategory]: nextCategory };
+    setApplyingMargin(true);
+    setMarginMessage("");
+    try {
+      if (persistent) await saveComponentCatalog(next, priceRules);
+      setCatalog(next);
+      setMarginMessage(`Margen aplicado en ${componentCatalogLabels[ruleCategory].toUpperCase()}.`);
+    } catch (e) {
+      setMarginMessage(e instanceof Error ? e.message : "No se pudo aplicar el margen.");
+    } finally {
+      setApplyingMargin(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="grid gap-4 sm:grid-cols-3">
+        <StatCard label="Componentes" value={catalogDataKeys.reduce((sum, key) => sum + (catalog[key]?.length || 0), 0)} />
+        <StatCard label="Categorías" value={catalogDataKeys.filter((key) => (catalog[key]?.length || 0) > 0).length} />
+        <StatCard label="Origen" value="Vercel Blob" />
+      </div>
+
+      <section className={panel}>
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 className="text-lg font-semibold">Componentes</h2>
+            <p className="text-xs text-slate-500">Catálogo compartido por Armá tu PC y la tienda de componentes.</p>
+          </div>
+          <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:gap-3">
+            <button onClick={create} className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 sm:flex-none sm:px-4">
+              <Plus className="size-4" /> Nuevo componente
+            </button>
+            <button onClick={onOpenBulk} className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 sm:flex-none sm:px-4">
+              Carga masiva
+            </button>
+            <SaveButton dirty={dirty} saving={saving} saved={saved} error={error} onSave={run} persistent={persistent} />
+          </div>
+        </div>
+
+        <div className="mb-4 grid gap-3 sm:grid-cols-[1fr_260px]">
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+            <input className={`${input} pl-9`} placeholder="Buscar componente..." value={filter} onChange={(event) => setFilter(event.target.value)} />
+          </div>
+          <select className={input} value={category} onChange={(event) => setCategory(event.target.value as ComponentCatalogKey | "all")}>
+            <option value="all">Todas las categorías</option>
+            {catalogDataKeys.map((key) => <option key={key} value={key}>{componentCatalogLabels[key].toUpperCase()}</option>)}
+          </select>
+        </div>
+
+        <div className="mb-2 flex justify-end">
+          <button
+            type="button"
+            onClick={() => setShowMarginRules((visible) => !visible)}
+            className="min-h-10 rounded-lg border border-amber-300 bg-white px-3 py-2 text-xs font-bold text-amber-800 transition hover:bg-amber-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+            aria-expanded={showMarginRules}
+          >
+            {showMarginRules ? "Ocultar margen" : "Mostrar margen"}
+          </button>
+        </div>
+        {showMarginRules && <div className="mb-5 rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 via-white to-sky-50 p-4 shadow-sm">
+          <div className="mb-3">
+            <h3 className="text-sm font-semibold">Margen por rango</h3>
+            <p className="text-xs text-slate-500">Se aplica al costo cargado y define el efectivo/transferencia de esta categoría.</p>
+          </div>
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+            <span className="text-xs font-semibold text-slate-600">Los cambios se calculan desde el costo.</span>
+            <button
+              type="button"
+              onClick={() => void applyMargin()}
+              disabled={!ruleCategory || applyingMargin || !persistent}
+              className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {applyingMargin && <Loader2 className="size-4 animate-spin" />}
+              {applyingMargin ? "Aplicando..." : "Aplicar margen"}
+            </button>
+          </div>
+          {ruleCategory ? (
+            <CategoryPriceRules
+              rules={priceRules[ruleCategory] || []}
+              onChange={(rules) => setPriceRules((current) => ({ ...current, [ruleCategory]: rules }))}
+            />
+          ) : (
+            <p className="rounded-lg border border-dashed border-slate-300 bg-white/70 px-3 py-3 text-sm text-slate-600">Selecciona una categoria para editar y aplicar sus rangos.</p>
+          )}
+          {marginMessage && <p className="mt-3 text-xs font-semibold text-slate-600">{marginMessage}</p>}
+        </div>}
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="border-b text-left text-xs uppercase text-slate-400">
+              <tr><th className="px-3 py-2">COMPONENTE</th><th className="px-3 py-2">CATEGORÍA</th><th className="px-3 py-2 text-orange-600">COSTO</th><th className="px-3 py-2 text-emerald-700">PRECIO EFT</th><th className="px-3 py-2 text-rose-700">CRÉDITO</th><th className="px-3 py-2" /></tr>
+            </thead>
+            <tbody className="divide-y">
+              {visible.map(({ key, component }) => (
+                <tr key={`${key}-${component.id}`} className="hover:bg-slate-50">
+                  <td className="px-3 py-2"><div className="flex items-center gap-2">{component.imagen && <img src={component.imagen} alt="" className="size-9 rounded border object-contain" />}{component.nombre}</div></td>
+                  <td className="px-3 py-2 text-slate-500">{componentCatalogLabels[key].toUpperCase()}</td>
+                  <td className="px-3 py-2 font-semibold text-orange-600">{money(Number(component.precioCosto ?? component.precio))}</td>
+                  <td className="px-3 py-2 font-semibold text-emerald-700">{money(component.precio)}</td>
+                  <td className="px-3 py-2 font-semibold text-rose-700">{money(calculateInstallmentPrice(Number(component.precio) || 0))}</td>
+                  <td className="px-3 py-2 text-right"><button onClick={() => onEdit(component)} className="mr-2 rounded border p-2 hover:bg-slate-100" aria-label="Editar"><Pencil className="size-4" /></button><button onClick={() => void remove(key, component.id)} className="rounded border p-2 text-rose-600 hover:bg-rose-50" aria-label="Eliminar"><Trash2 className="size-4" /></button></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {visible.length === 0 && <p className="py-10 text-center text-sm text-slate-500">No hay componentes cargados en Blob.</p>}
+        </div>
+      </section>
+    </div>
   );
 }
 
@@ -1222,11 +1360,13 @@ function StockTab({
   setEquipos,
   persistent,
   onEdit,
+  onRequestConfirm,
 }: {
   equipos: Equipo[];
   setEquipos: React.Dispatch<React.SetStateAction<Equipo[]>>;
   persistent: boolean;
   onEdit: (e: Equipo) => void;
+  onRequestConfirm?: (req: ConfirmRequest) => void;
 }) {
   const { saving, saved, error, dirty, run } = useSaver(equipos, saveEquipos);
   const [filter, setFilter] = useState("");
@@ -1420,26 +1560,30 @@ function StockTab({
                               <Pencil className="size-4" />
                             </button>
                             <button
-                              onClick={() => {
-                                if (!confirm(`¿Eliminar "${e.nombre}"?`)) return;
-                                if (persistent) {
-                                  const next = equipos
-                                    .filter((x) => x.id !== e.id)
-                                    .map((item, i) => ({ ...item, orden: typeof item.orden === "number" ? item.orden : i }));
-                                  (async () => {
-                                    try {
-                                      await saveEquipos(next);
-                                      window.dispatchEvent(new Event("equiposUpdated"));
-                                      setEquipos(next);
-                                    } catch (err) {
-                                      console.error("delete equipo", err);
-                                      alert("No se pudo eliminar el equipo.");
+                              onClick={() =>
+                                onRequestConfirm?.({
+                                  open: true,
+                                  title: `¿Eliminar "${e.nombre}"?`,
+                                  description: "Se eliminará este equipo.",
+                                  onConfirm: async () => {
+                                    if (persistent) {
+                                      const next = equipos
+                                        .filter((x) => x.id !== e.id)
+                                        .map((item, i) => ({ ...item, orden: typeof item.orden === "number" ? item.orden : i }));
+                                      try {
+                                        await saveEquipos(next);
+                                        window.dispatchEvent(new Event("equiposUpdated"));
+                                        setEquipos(next);
+                                      } catch (err) {
+                                        console.error("delete equipo", err);
+                                        alert("No se pudo eliminar el equipo.");
+                                      }
+                                    } else {
+                                      setEquipos((cur) => cur.filter((x) => x.id !== e.id));
                                     }
-                                  })();
-                                } else {
-                                  setEquipos((cur) => cur.filter((x) => x.id !== e.id));
-                                }
-                              }}
+                                  },
+                                })
+                              }
                               className="rounded p-1.5 text-rose-600 hover:bg-rose-50"
                               aria-label="Eliminar"
                             >

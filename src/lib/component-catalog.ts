@@ -133,7 +133,7 @@ const IMAGE_FOLDER_BY_KEY: Record<ComponentCatalogKey, string> = {
   peripherals: "periferico_img",
 };
 
-export const catalogDataKeys = [...componentCatalogKeys, "peripherals"] as ComponentKey[];
+export const catalogDataKeys = componentCatalogKeys as ComponentKey[];
 const DATA_FOLDER_BY_KEY: Record<ComponentKey, string> = FOLDER_BY_KEY;
 
 export function catalogBlobFolderPath(category: ComponentKey): string {
@@ -213,7 +213,9 @@ export function normalizeCatalogProduct(raw: Record<string, unknown>, category: 
     .filter((image): image is string => typeof image === "string" && image.trim().length > 0)
   const images = (imageValues.length > 0 ? imageValues : [defaultCatalogImagePath(category, index)])
     .map((image) => getAssetUrl(resolveCatalogImagePath(image, category)));
-  const priceValue = raw.precio ?? raw.price ?? 0;
+  const costValue = raw.precioCosto ?? raw.precio ?? raw.price ?? 0;
+  const priceValue = raw.precio ?? raw.price ?? raw.precioCosto ?? 0;
+  const cost = typeof costValue === "string" ? Number(costValue.replace(/[^0-9.,-]/g, "").replace(",", ".")) : Number(costValue);
   const price = typeof priceValue === "string" ? Number(priceValue.replace(/[^0-9.,-]/g, "").replace(",", ".")) : Number(priceValue);
   const categoryValue = firstString(raw.categoria, raw.category) || DATA_FOLDER_BY_KEY[category];
   const tagValues = Array.isArray(raw.tags) ? raw.tags : [raw.tags, raw.tipo, raw.socket, raw.compatibilidad, raw.compatibleCon];
@@ -233,6 +235,7 @@ export function normalizeCatalogProduct(raw: Record<string, unknown>, category: 
     categoria: categoryValue,
     marca: brand,
     modelo: model,
+    precioCosto: Number.isFinite(cost) ? cost : 0,
     precio: Number.isFinite(price) ? price : 0,
     imagen: images[0] || "",
     imagenes: images,
@@ -312,8 +315,8 @@ export async function loadCatalogFromBlob(): Promise<ComponentCatalog> {
 
     let data: unknown = [];
     for (const url of candidates) {
-      const response = await fetch(url, { next: { revalidate: 300 } });
-      if (!response.ok) continue;
+      const response = await fetch(url, { next: { revalidate: 300 } }).catch(() => null);
+      if (!response?.ok) continue;
       data = await response.json();
       break;
     }

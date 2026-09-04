@@ -1,6 +1,9 @@
 "use client";
 
 import type { Equipo, Producto } from "@/lib/types";
+import type { ComponentCatalog } from "@/lib/component-catalog";
+import type { PriceRule } from "./CategoryPriceRules";
+export type ComponentPriceRules = Partial<Record<keyof ComponentCatalog, PriceRule[]>>;
 
 export async function uploadImage(file: File): Promise<string> {
   const fd = new FormData();
@@ -30,6 +33,17 @@ export async function saveProductos(productos: Producto[]) {
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.error || "No se pudo guardar.");
+  return data;
+}
+
+export async function saveComponentCatalog(catalog: ComponentCatalog, priceRules: ComponentPriceRules = {}) {
+  const res = await fetch("/api/admin/componentes", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ catalog, priceRules }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || "No se pudieron guardar los componentes.");
   return data;
 }
 

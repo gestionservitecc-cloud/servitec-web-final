@@ -5,13 +5,12 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Info, Minus, Plus, Search, ShoppingCart, Trash2, X } from "lucide-react";
 import { calculateInstallmentPrice, calculateNationalPrice } from "@/lib/utils";
-import { resolveBlueReferenceFactor } from "@/lib/blue-rate";
 import {
   catalogProductImage,
   componentCatalogLabels,
   componentSpecificationFields,
   hasCatalogPrice,
-  loadComponentCatalog,
+  type CatalogProduct,
   type ComponentCatalogKey,
 } from "@/lib/pc-catalog";
 import { Button } from "@/components/ui/button";
@@ -80,7 +79,6 @@ export function TiendaClient() {
   };
   const [carritoAbierto, setCarritoAbierto] = useState(false);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
-  const [blueRate, setBlueRate] = useState({ compra: 0, venta: 0, base: 0 });
 
   useEffect(() => {
     window.localStorage.setItem(CART_KEY, JSON.stringify(carrito));
@@ -89,33 +87,16 @@ export function TiendaClient() {
   useEffect(() => {
     let alive = true;
     if (tipo === "componentes") {
-      const updateBlueRate = () => {
-        fetch("/api/dolar-blue", { cache: "no-store" })
-          .then((response) => (response.ok ? response.json() : null))
-          .then((quote) => {
-            if (!alive || !quote) return;
-            if (quote.compra || quote.venta || quote.base) {
-              setBlueRate({
-                compra: Number(quote.compra || quote.base || 0),
-                venta: Number(quote.venta || 0),
-                base: Number(quote.base || quote.compra || 0),
-              });
-            }
-          })
-          .catch(() => undefined);
-      };
-
-      updateBlueRate();
-      const blueRateInterval = window.setInterval(updateBlueRate, 5 * 60 * 1000);
-
-      loadComponentCatalog()
-        .then((catalog) => {
+      fetch("/api/componentes")
+        .then((response) => (response.ok ? response.json() : Promise.reject(new Error("No se pudo cargar el catálogo."))))
+        .then((response: { catalog?: Record<string, CatalogProduct[]> }) => {
           if (!alive) return;
+          const catalog = response.catalog || {};
           const items = Object.entries(catalog).flatMap(([key, products]) =>
-            products
+            key === "peripherals" ? [] : products
               .filter((product) => hasCatalogPrice(product.precio))
               .map((p, i) => ({
-                id: `${key}-${i}-${p.nombre}`,
+                id: p.id || `${key}-${i}-${p.nombre}`,
                 nombre: p.nombre,
                 categoria: componentCatalogLabels[key as ComponentCatalogKey],
                 componentKey: key as ComponentCatalogKey,
@@ -131,7 +112,6 @@ export function TiendaClient() {
         .finally(() => alive && setLoading(false));
       return () => {
         alive = false;
-        window.clearInterval(blueRateInterval);
       };
     }
 
@@ -147,14 +127,13 @@ export function TiendaClient() {
     };
   }, [tipo]);
 
-  const componentPriceFactor = resolveBlueReferenceFactor(blueRate.base, blueRate.venta);
   const base = useMemo(
     () => tipo === "componentes"
       ? componentes
           .filter((product) => hasCatalogPrice(product.precio))
-          .map((product) => ({ ...product, precio: Math.round(product.precio * componentPriceFactor * 1.08) }))
+          .map((product) => ({ ...product, precio: Math.round(product.precio * 1.08) }))
       : productos,
-    [componentPriceFactor, componentes, productos, tipo],
+    [componentes, productos, tipo],
   );
   const activeCategoriaFiltro = categoriaFiltro.tipo === tipo ? categoriaFiltro.value : "";
 
@@ -177,14 +156,22 @@ export function TiendaClient() {
     return list;
   }, [base, busqueda, orden, activeCategoriaFiltro]);
 
-  const grupos = useMemo(() => {
+  const grupos: [string, Producto[]][] = useMemo(() => {
     const map = new Map<string, Producto[]>();
     filtrados.forEach((p) => {
       const arr = map.get(p.categoria) ?? [];
       arr.push(p);
       map.set(p.categoria, arr);
     });
-    return [...map];
+    // Ensure motherboard category renders items ordered from menor a mayor precio
+    const entries = [...map];
+    const motherboardLabel = componentCatalogLabels.motherboard;
+    return entries.map(([categoria, items]) => {
+      if (categoria === motherboardLabel) {
+        return [categoria, items.slice().sort((a, b) => a.precio - b.precio)];
+      }
+      return [categoria, items];
+    });
   }, [filtrados]);
 
   const totalArticulos = carrito.reduce((t, i) => t + i.cantidad, 0);

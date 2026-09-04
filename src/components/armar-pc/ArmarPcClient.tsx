@@ -11,7 +11,6 @@ import {
   type CatalogProduct,
 } from "@/lib/pc-catalog";
 import { calculateInstallmentPrice, calculateNationalPrice, parsePrice } from "@/lib/utils";
-import { resolveBlueReferenceFactor } from "@/lib/blue-rate";
 import { getAssetUrl } from "@/lib/asset-url";
 import type { Equipo } from "@/lib/types";
 import {
@@ -165,8 +164,6 @@ const normalizePlatform = (value?: string) => {
 
 const getPlatform = (option: Option) => normalizePlatform(option.platform ?? `${option.name} ${option.detail}`.match(/AM[45]|S\d{4}|LGA\s?\d+/i)?.[0]);
 const getMemoryType = (option: Option) => option.memoryType ?? `${option.name} ${option.detail}`.match(/DDR[45]/i)?.[0].toUpperCase();
-const powerBundleOptionName = "Fuente + Gabinete (Próximo Paso)";
-const legacyPowerBundleOptionName = "Gabinete + Fuente (Próximo Paso)";
 const hasIntegratedGraphics = (option?: Option) => {
   if (!option) return false;
   const description = `${option.name} ${option.detail}`;
@@ -280,10 +277,6 @@ const groups: Group[] = [
         name: "Fuente 750 W 80+ Bronze",
         detail: "750 W - Margen extra para placa de video",
       },
-      {
-        name: powerBundleOptionName,
-        detail: "Lo definimos en el próximo paso para seguir con la cotización.",
-      },
     ],
   },
   {
@@ -368,13 +361,12 @@ const ArmarPc = () => {
   const [infoPc, setInfoPc] = useState<PresetPc | null>(null);
   const [activePresetIndex, setActivePresetIndex] = useState(0);
   const [openExtra, setOpenExtra] = useState<ExtraKey | null>(null);
-  const [catalogGroups, setCatalogGroups] = useState(groups);
-  const [catalogExtras, setCatalogExtras] = useState(extras);
+  const [catalogGroups, setCatalogGroups] = useState(() => groups.map((group) => ({ ...group, options: [] })));
+  const [catalogExtras, setCatalogExtras] = useState<Extra[]>([]);
   const [catalogExtraOptions, setCatalogExtraOptions] = useState<Partial<Record<ExtraKey, Option[]>>>({});
   const [editablePresets, setEditablePresets] = useState<Record<string, SavedPreset>>({});
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<"efectivo" | "tarjeta" | null>(null);
-  const [blueRate, setBlueRate] = useState({ compra: 0, venta: 0, base: 0 });
 
   const availablePcs = useMemo(
     () => Object.entries(editablePresets)
@@ -425,49 +417,11 @@ const ArmarPc = () => {
   }, []);
 
   useEffect(() => {
-    let alive = true;
-    const updateBlueRate = () => {
-      fetch("/api/dolar-blue", { cache: "no-store" })
-        .then((response) => (response.ok ? response.json() : null))
-        .then((quote) => {
-          if (!alive || !quote || !Number(quote.venta)) return;
-          setBlueRate({
-            compra: Number(quote.compra || 0),
-            venta: Number(quote.venta),
-            base: Number(quote.base || quote.venta),
-          });
-        })
-        .catch(() => undefined);
-    };
-
-    updateBlueRate();
-    const blueRateInterval = window.setInterval(updateBlueRate, 5 * 60 * 1000);
-    return () => {
-      alive = false;
-      window.clearInterval(blueRateInterval);
-    };
-  }, []);
-
-  useEffect(() => {
     const loadCatalog = async () => {
       const productMap = await loadComponentCatalog() as unknown as Record<string, CatalogProduct[]>;
       const loadedGroups = groups.map((group) => ({
         ...group,
-        options: (() => {
-          const remoteOptions = productMap[group.key]?.map((product) => mapProduct(product));
-          const options = remoteOptions?.length ? remoteOptions : group.options;
-          if (group.key !== "power") return options;
-          const bundleOption = group.options.find((option) => option.name === powerBundleOptionName);
-          const coolerImage = productMap.cooling
-            ?.find((product) => product.nombre === "Usar Cooler CPU incluido en el procesador Intel");
-          const bundleWithImage = bundleOption
-            ? { ...bundleOption, image: coolerImage ? mapProduct(coolerImage).image : bundleOption.image }
-            : undefined;
-          const withoutBundle = options.filter((option) =>
-            option.name !== powerBundleOptionName && option.name !== legacyPowerBundleOptionName,
-          );
-          return bundleWithImage ? [bundleWithImage, ...withoutBundle] : options;
-        })(),
+        options: productMap[group.key]?.map((product) => mapProduct(product)) ?? [],
       }));
       setCatalogGroups(loadedGroups);
       const peripheralProducts = productMap.peripherals ?? [];
@@ -478,11 +432,11 @@ const ArmarPc = () => {
         mouse: (productName) => matchesProductKeywords(productName, ["mouse", "raton"]),
         keyboard: (productName) => matchesProductKeywords(productName, ["teclado", "keyboard"]),
       };
-      const loadedExtras = extras.map((extra) => {
+      const loadedExtras = extras.flatMap((extra) => {
         const source = extra.key === "monitor"
           ? monitorProducts[0]
           : peripheralProducts.find((product) => accessoryMatchers[extra.key](product.nombre));
-        return source ? { ...extra, option: mapProduct(source) } : extra;
+        return source ? [{ ...extra, option: mapProduct(source) }] : [];
       });
       setCatalogExtras(loadedExtras);
       const peripheralOptions = Object.entries(accessoryMatchers).map(([key, matcher]) => [
@@ -494,16 +448,15 @@ const ArmarPc = () => {
     };
     void loadCatalog();
   }, []);
-  const armComponentPriceFactor = resolveBlueReferenceFactor(blueRate.base, blueRate.venta);
   const pricedCatalogGroups = useMemo(
     () => catalogGroups.map((group) => ({
       ...group,
       options: group.options.map((option) => ({
         ...option,
-        precio: option.precio === undefined ? undefined : Number((parsePrice(option.precio) * armComponentPriceFactor).toFixed(2)),
+        precio: option.precio === undefined ? undefined : parsePrice(option.precio),
       })),
     })),
-    [armComponentPriceFactor, catalogGroups],
+    [catalogGroups],
   );
   const selectedGroups = pricedCatalogGroups.filter(
     (group) => selected[group.key] !== undefined,
@@ -559,10 +512,7 @@ const ArmarPc = () => {
   const selectedProcessor = catalogGroups.find((group) => group.key === "processor")?.options[selected.processor ?? 0];
   const requiresDedicatedGraphics = selectedProcessor !== undefined && !hasIntegratedGraphics(selectedProcessor);
   const requiredGroups = orderedGroups.filter((group) => group.key !== "graphics" || requiresDedicatedGraphics);
-  const isPowerBundleSelected = selected.power !== undefined
-    && [powerBundleOptionName, legacyPowerBundleOptionName].includes(catalogGroups.find((group) => group.key === "power")?.options[selected.power]?.name || "");
   const isComponentSelectionComplete = requiredGroups.every((group) => {
-    if (group.key === "case" && isPowerBundleSelected) return true;
     return selected[group.key] !== undefined;
   });
   const graphicsSummary = selected.graphics !== undefined

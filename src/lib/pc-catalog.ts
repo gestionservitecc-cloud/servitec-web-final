@@ -26,15 +26,17 @@ let catalogCache: Record<ComponentCatalogKey, CatalogProduct[]> | null = null;
 export async function loadComponentCatalog(): Promise<Record<ComponentCatalogKey, CatalogProduct[]>> {
   if (catalogCache) return catalogCache;
   if (typeof window !== "undefined") {
-    try {
-      const response = await fetch("/api/catalog", { cache: "no-store" });
-      if (response.ok) catalogCache = await response.json();
-    } catch {
-      // Existing UI fallback options remain available when Blob is unavailable.
+    const response = await fetch("/api/componentes", { cache: "no-store" }).catch(() => null);
+    if (response?.ok) {
+      const payload = await response.json().catch(() => ({}));
+      const catalog = payload?.catalog;
+      if (catalog && typeof catalog === "object") {
+        catalogCache = catalog as Record<ComponentCatalogKey, CatalogProduct[]>;
+        return catalogCache;
+      }
     }
-  } else {
-    catalogCache = await loadCatalogFromBlob();
   }
+  catalogCache = await loadCatalogFromBlob();
   catalogCache ||= emptyCatalog();
   return catalogCache;
 }

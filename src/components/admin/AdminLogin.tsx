@@ -39,7 +39,7 @@ export function AdminLogin({ configured }: { configured: boolean }) {
   };
 
   return (
-    <div className="grid min-h-screen place-items-center px-4">
+    <div className="grid min-h-[100dvh] place-items-center px-4 py-6 sm:px-6">
       <div className="w-full max-w-sm">
         <div className="mb-6 flex items-center justify-center gap-3">
           <div className="grid size-11 place-items-center rounded-xl border border-white/15 bg-white/10 p-1.5">
@@ -53,7 +53,7 @@ export function AdminLogin({ configured }: { configured: boolean }) {
 
         <form
           onSubmit={submit}
-          className="space-y-4 rounded-3xl border border-white/10 bg-white/[0.04] p-6 shadow-2xl sm:p-8"
+          className="space-y-5 rounded-3xl border border-white/10 bg-gradient-to-br from-white/[0.10] to-white/[0.03] p-5 shadow-2xl shadow-black/30 backdrop-blur sm:p-8"
         >
           <div className="flex items-center gap-2">
             <span className="grid size-9 place-items-center rounded-lg bg-primary/20 text-primary">
@@ -82,7 +82,7 @@ export function AdminLogin({ configured }: { configured: boolean }) {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="w-full rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-primary"
+                  className="min-h-11 w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-sm text-white outline-none transition placeholder:text-white/30 hover:border-white/30 focus:border-primary focus:ring-4 focus:ring-primary/15"
                 />
               </div>
 
@@ -97,7 +97,7 @@ export function AdminLogin({ configured }: { configured: boolean }) {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="w-full rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-primary"
+                  className="min-h-11 w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-sm text-white outline-none transition placeholder:text-white/30 hover:border-white/30 focus:border-primary focus:ring-4 focus:ring-primary/15"
                 />
               </div>
 
@@ -110,7 +110,7 @@ export function AdminLogin({ configured }: { configured: boolean }) {
               <button
                 type="submit"
                 disabled={loading}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90 disabled:opacity-50"
+                className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/20 transition hover:-translate-y-0.5 hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 disabled:opacity-50"
               >
                 {loading && <Loader2 className="size-4 animate-spin" />}
                 {loading ? "Ingresando…" : "Ingresar"}

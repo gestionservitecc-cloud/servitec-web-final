@@ -95,11 +95,11 @@ export function ProductoDialog({
           </div>
         </div>
 
-        <DialogFooter className="flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-          <Button variant="outline" onClick={onClose}>
+        <DialogFooter className="grid grid-cols-2 gap-2 sm:flex sm:justify-end">
+          <Button className="w-full" variant="outline" onClick={onClose}>
             Cancelar
           </Button>
-          <Button onClick={() => onSave(draft)} disabled={!draft.nombre.trim()}>
+          <Button className="w-full" onClick={() => onSave(draft)} disabled={!draft.nombre.trim()}>
             Guardar
           </Button>
         </DialogFooter>
