@@ -317,7 +317,7 @@ export function TiendaClient() {
                       key={p.id}
                       className="group flex flex-col overflow-hidden rounded-2xl border bg-card shadow-soft transition-all hover:-translate-y-1 hover:shadow-soft-lg"
                     >
-                      <div className="relative grid aspect-square place-items-center bg-white p-4">
+                      <div className="relative flex aspect-square w-full items-center justify-center overflow-hidden bg-white p-4 sm:p-5">
                         {tipo === "componentes" && p.componentKey && (
                           <Dialog>
                             <DialogTrigger asChild>
@@ -358,7 +358,7 @@ export function TiendaClient() {
                               event.currentTarget.onerror = null;
                               event.currentTarget.src = "/api/assets/placeholder.svg";
                             }}
-                            className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-105"
+                            className="block max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-105"
                           />
                         ) : (
                           <ShoppingCart className="size-8 text-muted-foreground/40" />
