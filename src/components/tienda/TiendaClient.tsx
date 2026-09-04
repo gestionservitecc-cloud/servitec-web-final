@@ -345,6 +345,9 @@ export function TiendaClient() {
                                   ) : null)}
                                   {!Object.values(p.specs || {}).some(Boolean) && <p className="rounded-xl border border-dashed border-blue-200 bg-white px-4 py-5 text-center text-sm text-slate-500">Las especificaciones todavía no fueron cargadas.</p>}
                                 </div>
+                                <div className="mt-6 rounded-xl border border-red-200 bg-gradient-to-r from-red-50 via-white to-blue-50 px-4 py-4 text-center shadow-sm">
+                                  <p className="text-base font-black uppercase tracking-[0.18em] text-red-700 sm:text-lg">GARANTIA OFICIAL</p>
+                                </div>
                               </div>
                             </DialogContent>
                           </Dialog>

@@ -141,11 +141,11 @@ export async function POST(req: Request) {
       .map((item) => categoryKeyFromValue(item?.categoria ?? item?.category))
       .filter(Boolean))];
     if (collection === "componentes" && csvCategories.length > 1) {
-      return NextResponse.json({ error: "El CSV contiene mÃ¡s de una categorÃ­a de componentes." }, { status: 400 });
+      return NextResponse.json({ error: "El CSV contiene más de una categoría de componentes." }, { status: 400 });
     }
     if (collection === "componentes" && csvCategories[0] && requestedCategory && csvCategories[0] !== requestedCategory) {
       return NextResponse.json({
-        error: `La categorÃ­a seleccionada es ${requestedCategory.toUpperCase()}, pero el CSV indica ${csvCategories[0].toUpperCase()}. No se realizaron cambios.`,
+        error: `La categoría seleccionada es ${requestedCategory.toUpperCase()}, pero el CSV indica ${csvCategories[0].toUpperCase()}. No se realizaron cambios.`,
       }, { status: 400 });
     }
 
@@ -153,14 +153,14 @@ export async function POST(req: Request) {
     const uploadedImageUrls: Record<number, string> = {};
     if (imageFiles.length > 0) {
       if (collection !== "componentes") {
-        return NextResponse.json({ error: "Las imÃ¡genes masivas solo corresponden a componentes." }, { status: 400 });
+        return NextResponse.json({ error: "Las imágenes masivas solo corresponden a componentes." }, { status: 400 });
       }
       if (!process.env.BLOB_READ_WRITE_TOKEN) {
-        return NextResponse.json({ error: "Falta configurar Vercel Blob para subir imÃ¡genes." }, { status: 503 });
+        return NextResponse.json({ error: "Falta configurar Vercel Blob para subir imágenes." }, { status: 503 });
       }
       const category = csvCategories[0] || requestedCategory;
       const folder = folders[category];
-      if (!folder) return NextResponse.json({ error: "SeleccionÃ¡ una categorÃ­a vÃ¡lida." }, { status: 400 });
+      if (!folder) return NextResponse.json({ error: "Seleccioná una categoría válida." }, { status: 400 });
       await Promise.all(imageFiles.map(async (file, index) => {
         if (!file.type.startsWith("image/")) throw new Error(`El archivo ${file.name} no es una imagen.`);
         if (file.size > 8 * 1024 * 1024) throw new Error(`La imagen ${file.name} supera los 8 MB.`);

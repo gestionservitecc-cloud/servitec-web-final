@@ -257,7 +257,7 @@ export function EquipoDialog({
               />
               {draft.promo && <p className="mt-1 text-[11px] text-red-500">3/6 cuotas: ${draft.promo ? calculateInstallmentPrice(Number(draft.promo)).toLocaleString("es-AR") : "0"}</p>}
             </Field>
-            <Field label="CondiciÃ³n">
+            <Field label="Condición">
               <Select
                 value={draft.condition}
                 onValueChange={(v) => set("condition", v)}

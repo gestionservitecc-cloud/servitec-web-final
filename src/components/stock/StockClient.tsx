@@ -301,6 +301,7 @@ export const StockClient = () => {
                           ...Object.entries(p.specs || {}).filter(([key, value]) => value && !knownSpecKeys.has(key)),
                         ];
                         const hasSpecifications = specificationsWithExtras.length > 0 || Boolean(p.warranty);
+                        const hasOfficialWarranty = /sellado|nuevo/i.test(p.condition || "");
 
                         return (
                           <Card key={p.id} className="overflow-hidden transition hover:shadow-xl">
@@ -336,6 +337,7 @@ export const StockClient = () => {
                                           ))}
                                         </div>
                                       ) : <p className="p-5 text-sm text-slate-600 sm:p-7">Componentes a confirmar.</p>}
+                                      {hasOfficialWarranty && <div className="mx-5 mb-5 rounded-xl border border-red-200 bg-gradient-to-r from-red-50 via-white to-blue-50 px-4 py-4 text-center shadow-sm sm:mx-7 sm:mb-7"><p className="text-base font-black uppercase tracking-[0.18em] text-red-700 sm:text-lg">GARANTIA OFICIAL</p></div>}
                                     </DialogContent>
                                   ) : (
                                   <DialogContent className="w-[calc(100vw-1rem)] max-h-[calc(100dvh-1rem)] max-w-3xl overflow-y-auto rounded-2xl border-slate-200 bg-slate-50 p-0 sm:w-[calc(100vw-2rem)] sm:rounded-3xl">
@@ -361,11 +363,12 @@ export const StockClient = () => {
                                       <div className="mt-5 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-4 shadow-sm">
                                         <BadgeCheck className="mt-0.5 size-5 shrink-0 text-red-600" />
                                         <div>
-                                        <p className="text-xs font-bold uppercase tracking-[0.2em] text-amber-700">GarantÃ­a</p>
+                                        <p className="text-xs font-bold uppercase tracking-[0.2em] text-amber-700">Garantía</p>
                                         <p className="mt-1 text-base font-extrabold text-red-700 sm:text-lg">{p.warranty}</p>
                                         </div>
                                       </div>
                                     )}
+                                    {hasOfficialWarranty && <div className="mt-6 rounded-xl border border-red-200 bg-gradient-to-r from-red-50 via-white to-blue-50 px-4 py-4 text-center shadow-sm"><p className="text-base font-black uppercase tracking-[0.18em] text-red-700 sm:text-lg">GARANTIA OFICIAL</p></div>}
                                     </div>
                                   </DialogContent>
                                   )}
