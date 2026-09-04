@@ -311,9 +311,21 @@
   }
 }
 
+.pc-builder .power-water-flow {
+  background-image: linear-gradient(110deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.38) 42%, rgba(255, 255, 255, 0.08) 78%);
+  background-size: 220% 100%;
+  animation: power-water-flow 1.8s linear infinite;
+}
+
+@keyframes power-water-flow {
+  from { background-position: 120% 0; }
+  to { background-position: -120% 0; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .pc-builder .preset-type { animation: none; }
   .animate-in-up { animation: none; }
+  .pc-builder .power-water-flow { animation: none; }
   html { scroll-behavior: auto; }
 }
 

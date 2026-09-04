@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { BadgeCheck, Info, SlidersHorizontal } from "lucide-react";
 import { PageHero } from "@/components/site/PageHero";
 import { stockCategories } from "@/components/site/site-config";
 import { Card, CardContent } from "@/components/ui/card";
@@ -48,6 +49,7 @@ interface EquipoStock {
   imagen?: string;
   imagenes?: string[];
   componentes?: Array<{ key: string; label: string; nombre: string; detalle: string; imagen: string; cantidad?: number }>;
+  specs?: Record<string, string>;
   image?: string;
   original: number;
   promo: number;
@@ -120,6 +122,7 @@ const toStockShape = (e: Equipo): EquipoStock => ({
   imagenes: e.imagenes || [],
   imagen: e.imagenes?.[0] || "",
   componentes: e.componentes,
+  specs: e.specs,
   original: Number(e.original || calculateInstallmentPrice(Number(e.promo || e.original || 0))),
   promo: Number(e.promo || e.original || 0),
   almacenamiento: e.specs?.almacenamiento || "",
@@ -287,12 +290,65 @@ export const StockClient = () => {
                           ["Batería", p.bateria],
                           ["Origen", p.origen],
                         ].filter(([, value]) => value);
-                        const hasSpecifications = specifications.length > 0 || Boolean(p.warranty);
+                        const knownSpecKeys = new Set([
+                          "upc", "procesador", "ram", "placaVideo", "almacenamiento", "pantalla", "generacion",
+                          "resolucion", "unidadOptica", "conectividad", "distribucionTeclado", "tecladoRetroiluminado",
+                          "sistema", "lectorOptico", "lectorTarjetas", "webcam", "usb", "rj45", "wifi", "bluetooth",
+                          "vga", "hdmi", "audio", "bateria", "origen",
+                        ]);
+                        const specificationsWithExtras = [
+                          ...specifications,
+                          ...Object.entries(p.specs || {}).filter(([key, value]) => value && !knownSpecKeys.has(key)),
+                        ];
+                        const hasSpecifications = specificationsWithExtras.length > 0 || Boolean(p.warranty);
 
                         return (
                           <Card key={p.id} className="overflow-hidden transition hover:shadow-xl">
                             <div className="relative aspect-square w-full overflow-hidden bg-slate-900">
                               <ProductGallery images={imagenes} name={nombreDisplay} showThumbnails={isNotebook} />
+                              {hasSpecifications && (
+                                <Dialog>
+                                  <DialogTrigger asChild>
+                                    <button
+                                      type="button"
+                                      aria-label={`Ver especificaciones de ${nombreDisplay}`}
+                                      className="absolute right-3 top-3 z-10 grid size-9 place-items-center rounded-full border border-white/80 bg-white/95 text-slate-700 shadow-md transition hover:bg-white"
+                                    >
+                                      <Info className="size-4" />
+                                    </button>
+                                  </DialogTrigger>
+                                  <DialogContent className="w-[calc(100vw-1rem)] max-h-[calc(100dvh-1rem)] max-w-3xl overflow-y-auto rounded-2xl border-slate-200 bg-slate-50 p-0 sm:w-[calc(100vw-2rem)] sm:rounded-3xl">
+                                    <div className="bg-gradient-to-br from-slate-950 via-blue-950 to-red-950 px-5 py-6 text-white sm:px-7 sm:py-7">
+                                      <DialogHeader>
+                                        <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-blue-200">
+                                          <SlidersHorizontal className="size-4" /> Ficha tecnica
+                                        </div>
+                                        <DialogTitle className="pr-6 text-left text-xl leading-tight text-white sm:text-2xl">{nombreDisplay}</DialogTitle>
+                                        <p className="mt-2 text-left text-sm text-slate-300">Conocé los detalles principales de este equipo antes de consultarnos.</p>
+                                      </DialogHeader>
+                                    </div>
+                                    <div className="p-5 sm:p-7">
+                                    <div className="grid gap-3 sm:grid-cols-2">
+                                      {specificationsWithExtras.map(([label, value]) => (
+                                        <div key={String(label)} className="rounded-xl border border-blue-100 bg-white px-4 py-3 shadow-sm">
+                                          <p className="text-[11px] font-bold uppercase tracking-wide text-red-600">{label}</p>
+                                          <p className="mt-1 break-words text-sm font-semibold leading-relaxed text-slate-900">{value}</p>
+                                        </div>
+                                      ))}
+                                    </div>
+                                    {p.warranty && (
+                                      <div className="mt-5 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-4 shadow-sm">
+                                        <BadgeCheck className="mt-0.5 size-5 shrink-0 text-red-600" />
+                                        <div>
+                                        <p className="text-xs font-bold uppercase tracking-[0.2em] text-amber-700">GarantÃ­a</p>
+                                        <p className="mt-1 text-base font-extrabold text-red-700 sm:text-lg">{p.warranty}</p>
+                                        </div>
+                                      </div>
+                                    )}
+                                    </div>
+                                  </DialogContent>
+                                </Dialog>
+                              )}
                               <div className="absolute bottom-0 left-0 w-full bg-slate-950/80 p-3 backdrop-blur-sm sm:p-4">
                                 <p className="mb-2 break-words text-sm font-semibold text-white">{nombreDisplay}</p>
                               </div>
@@ -328,7 +384,7 @@ export const StockClient = () => {
                                       <DialogTrigger className="w-full rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100">
                                         Ver componentes
                                       </DialogTrigger>
-                                      <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto p-4 sm:p-6">
+                                      <DialogContent className="w-[calc(100vw-1rem)] max-h-[calc(100dvh-1rem)] max-w-3xl overflow-y-auto p-4 sm:w-[calc(100vw-2rem)] sm:p-6">
                                         <DialogHeader>
                                           <DialogTitle>{nombreDisplay}</DialogTitle>
                                         </DialogHeader>
@@ -363,24 +419,7 @@ export const StockClient = () => {
                                     </Dialog>
                                   )}
 
-                                  {!isPcArmada && hasSpecifications && (
-                                    <Dialog>
-                                      <DialogTrigger className="w-full rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100">
-                                        Especificaciones
-                                      </DialogTrigger>
-                                      <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto p-4 sm:p-6">
-                                        <DialogHeader>
-                                          <DialogTitle>{nombreDisplay}</DialogTitle>
-                                        </DialogHeader>
-                                        <div className="grid gap-x-8 gap-y-3 border-t border-slate-200 pt-4 sm:grid-cols-2">
-                                          {specifications.map(([label, value]) => (
-                                            <p key={String(label)} className="text-sm text-slate-600">
-                                              <span className="font-semibold text-slate-900">{label}:</span>{" "}
-                                              {value}
-                                            </p>
-                                          ))}
-                                        </div>
-                                        {p.warranty && (
+                                         {/*
                                           <div className="mt-6 rounded-xl border-2 border-amber-400 bg-amber-50 px-5 py-4 text-center shadow-sm">
                                             <p className="text-xs font-bold uppercase tracking-[0.2em] text-amber-700">
                                               Garantía
@@ -392,9 +431,9 @@ export const StockClient = () => {
                                         )}
                                       </DialogContent>
                                     </Dialog>
-                                  )}
+                                           */}
 
-                                  <a
+                                   <a
                                     href={`https://wa.me/5491124873190?text=${encodeURIComponent(mensaje)}`}
                                     target="_blank"
                                     rel="noopener noreferrer"

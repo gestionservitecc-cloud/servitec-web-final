@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Info, Minus, Plus, Search, ShoppingCart, Trash2, X } from "lucide-react";
+import { Info, Minus, Plus, Search, ShoppingCart, SlidersHorizontal, Trash2, X } from "lucide-react";
 import { calculateInstallmentPrice, calculateNationalPrice } from "@/lib/utils";
 import {
   catalogProductImage,
@@ -325,13 +325,26 @@ export function TiendaClient() {
                                 <Info className="size-4" />
                               </Button>
                             </DialogTrigger>
-                            <DialogContent className="max-h-[85vh] max-w-lg overflow-y-auto p-4 sm:p-6">
-                              <DialogHeader><DialogTitle>{p.nombre}</DialogTitle></DialogHeader>
-                              <div className="grid gap-3 border-t pt-4 sm:grid-cols-2">
-                                {componentSpecificationFields(p.componentKey, p.nombre).map((field) => p.specs?.[field.key] ? (
-                                  <p key={field.key} className="text-sm text-slate-600"><span className="font-semibold text-slate-900">{field.label}:</span> {p.specs[field.key]}</p>
-                                ) : null)}
-                                {!Object.values(p.specs || {}).some(Boolean) && <p className="text-sm text-muted-foreground">Especificaciones no cargadas.</p>}
+                            <DialogContent className="w-[calc(100vw-1rem)] max-h-[calc(100dvh-1rem)] max-w-3xl overflow-y-auto rounded-2xl border-slate-200 bg-slate-50 p-0 sm:w-[calc(100vw-2rem)] sm:rounded-3xl">
+                              <div className="bg-gradient-to-br from-slate-950 via-blue-950 to-red-950 px-5 py-6 text-white sm:px-7 sm:py-7">
+                                <DialogHeader>
+                                  <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-blue-200">
+                                    <SlidersHorizontal className="size-4" /> Ficha tecnica
+                                  </div>
+                                  <DialogTitle className="pr-6 text-left text-xl leading-tight text-white sm:text-2xl">{p.nombre}</DialogTitle>
+                                  <p className="mt-2 text-left text-sm text-blue-100">Conocé los detalles principales de este componente.</p>
+                                </DialogHeader>
+                              </div>
+                              <div className="p-5 sm:p-7">
+                                <div className="grid gap-3 sm:grid-cols-2">
+                                  {componentSpecificationFields(p.componentKey, p.nombre).map((field) => p.specs?.[field.key] ? (
+                                    <div key={field.key} className="rounded-xl border border-blue-100 bg-white px-4 py-3 shadow-sm">
+                                      <p className="text-[11px] font-bold uppercase tracking-wide text-red-600">{field.label}</p>
+                                      <p className="mt-1 break-words text-sm font-semibold leading-relaxed text-slate-900">{p.specs[field.key]}</p>
+                                    </div>
+                                  ) : null)}
+                                  {!Object.values(p.specs || {}).some(Boolean) && <p className="rounded-xl border border-dashed border-blue-200 bg-white px-4 py-5 text-center text-sm text-slate-500">Las especificaciones todavía no fueron cargadas.</p>}
+                                </div>
                               </div>
                             </DialogContent>
                           </Dialog>

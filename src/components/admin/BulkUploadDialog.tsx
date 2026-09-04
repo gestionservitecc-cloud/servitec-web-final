@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { componentCatalogKeys, componentCatalogLabels, type ComponentCatalogKey } from "@/lib/component-catalog";
 import CategoryPriceRules, { type PriceRule } from "./CategoryPriceRules";
 
@@ -11,10 +11,17 @@ export default function BulkUploadDialog({ onClose, onUploaded, persistent, init
   const [rulesByCategory, setRulesByCategory] = useState<PriceRules>(initialPriceRules || {});
   const [dataFile, setDataFile] = useState<File | null>(null);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [imagePreviewUrls, setImagePreviewUrls] = useState<Record<string, string>>({});
   const [parsedPreview, setParsedPreview] = useState<any[] | null>(null);
   const [step, setStep] = useState<"select" | "preview" | "confirm">("select");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    const urls = Object.fromEntries(imageFiles.map((file) => [file.name, URL.createObjectURL(file)]));
+    setImagePreviewUrls(urls);
+    return () => Object.values(urls).forEach((url) => URL.revokeObjectURL(url));
+  }, [imageFiles]);
 
   const submit = async () => {
     if (!dataFile) return setMessage("Seleccioná un archivo .csv");
@@ -138,6 +145,17 @@ export default function BulkUploadDialog({ onClose, onUploaded, persistent, init
     setImageFiles(sorted);
   };
 
+  const previewImageFor = (item: any, index: number) => {
+    const itemId = String(item?.id || "");
+    const itemNumber = itemId.match(/(?:^|[-_])(\d+)(?:[-_]|$)/)?.[1] || String(index + 1);
+    const file = imageFiles.find((candidate) => {
+      const source = `${candidate.name} ${(candidate as File & { webkitRelativePath?: string }).webkitRelativePath || ""}`;
+      const number = source.match(/(?:foto|image|img)[ _-]?(\d+)/i)?.[1] || source.match(/(?:^|[\\/_-])(\d+)(?:[\\/_-]|\.)/)?.[1];
+      return number === itemNumber;
+    }) || imageFiles[index];
+    return file ? imagePreviewUrls[file.name] : "";
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" aria-busy={loading}>
       <div className="flex max-h-[calc(100dvh-1rem)] w-[calc(100vw-1rem)] max-w-2xl flex-col rounded-2xl bg-white p-4 shadow-2xl sm:max-h-[90vh] sm:p-6">
@@ -219,6 +237,9 @@ export default function BulkUploadDialog({ onClose, onUploaded, persistent, init
                   const finalPrice = cost + increase;
                   return (
                     <div key={i} className="flex gap-3 rounded-md border p-3">
+                      <div className="grid size-20 shrink-0 place-items-center overflow-hidden rounded-lg border border-slate-200 bg-slate-50">
+                        {previewImageFor(it, i) ? <img src={previewImageFor(it, i)} alt="" className="h-full w-full object-contain" /> : <span className="px-2 text-center text-[10px] text-slate-400">Sin imagen</span>}
+                      </div>
                       <div className="flex flex-1 flex-col justify-between">
                         <div>
                           <div className="font-medium text-rose-600">{it.nombre || it.title || it.name}</div>

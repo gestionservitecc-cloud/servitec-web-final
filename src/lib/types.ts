@@ -43,6 +43,7 @@ export interface EquipoSpecs {
   audio?: string;
   origen?: string;
   upc?: string;
+  [key: string]: string | undefined;
 }
 
 export interface Equipo {
@@ -63,6 +64,14 @@ export interface Equipo {
   imagenes: string[];
   specs: EquipoSpecs;
   componentes: EquipoComponente[];
+  stock?: number;
+  precioCosto?: number;
+  originalCatalogPrice?: number;
+  esNuevo?: boolean;
+  monedaCosto?: "ARS" | "USD";
+  costoBaseUsd?: number;
+  cotizacionDolar?: number;
+  costoActualizadoEn?: string;
 }
 
 export interface Producto {

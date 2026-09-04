@@ -4,19 +4,17 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
-  ArrowDown,
-  ArrowUp,
   Boxes,
   Check,
+  DollarSign,
   LayoutDashboard,
   Loader2,
   Pencil,
   Plus,
   Search,
-  Star,
   Trash2,
 } from "lucide-react";
-import type { Equipo, Producto } from "@/lib/types";
+import type { Equipo, EquipoCategoria, Producto } from "@/lib/types";
 import { getAssetUrl } from "@/lib/asset-url";
 import {
   calculateInstallmentPrice,
@@ -32,9 +30,10 @@ import {
   newId,
   saveComponentCatalog,
   saveEquipos,
+  saveStockCatalog,
   saveProductos,
 } from "./lib";
-import type { ComponentPriceRules } from "./lib";
+import type { ComponentPriceRules, DollarQuote, PriceRule } from "./lib";
 import CategoryPriceRules from "./CategoryPriceRules";
 import { EquipoDialog } from "./EquipoDialog";
 import BulkUploadDialog from "./BulkUploadDialog";
@@ -50,14 +49,18 @@ import {
   type ComponentCatalogKey,
 } from "@/lib/component-catalog";
 import { ComponenteDialog } from "./ComponenteDialog";
+import NotebookBulkUpload from "./NotebookBulkUpload";
 
 const money = (n: number) =>
   `$ ${Math.round(Number(n) || 0).toLocaleString("es-AR")}`;
+const INITIAL_DOLLAR_QUOTE = 1545;
 const catLabel = (v: string) =>
   CATEGORIAS_EQUIPO.find((c) => c.value === v)?.label || v;
 
 const componentKeyFromValue = (value: unknown): ComponentCatalogKey | null => {
-  const normalized = String(value ?? "").trim().toLowerCase();
+  const normalized = String(value ?? "")
+    .trim()
+    .toLowerCase();
   const folders: Record<ComponentCatalogKey, string> = {
     motherboard: "motherboard",
     processor: "procesador",
@@ -69,9 +72,14 @@ const componentKeyFromValue = (value: unknown): ComponentCatalogKey | null => {
     cooling: "cooler",
     peripherals: "periferico",
   };
-  return catalogDataKeys.find((key) =>
-    key === normalized || folders[key] === normalized || componentCatalogLabels[key].toLowerCase() === normalized,
-  ) || null;
+  return (
+    catalogDataKeys.find(
+      (key) =>
+        key === normalized ||
+        folders[key] === normalized ||
+        componentCatalogLabels[key].toLowerCase() === normalized,
+    ) || null
+  );
 };
 
 type Segment = "dashboard" | "stock" | "componentes";
@@ -129,7 +137,10 @@ const readStoredMovements = (): InventoryMovement[] => {
 const writeStoredMovements = (movements: InventoryMovement[]) => {
   if (typeof window === "undefined") return;
   try {
-    window.localStorage.setItem(STORAGE_KEY_MOVEMENTS, JSON.stringify(movements));
+    window.localStorage.setItem(
+      STORAGE_KEY_MOVEMENTS,
+      JSON.stringify(movements),
+    );
   } catch {
     // no-op
   }
@@ -145,15 +156,25 @@ export function AdminDashboard({ persistent }: { persistent: boolean }) {
   const [segment, setSegment] = useState<Segment>("dashboard");
   const [equipos, setEquipos] = useState<Equipo[]>([]);
   const [productos, setProductos] = useState<Producto[]>([]);
-  const [componentCatalog, setComponentCatalog] = useState<ComponentCatalog>(() =>
-    Object.fromEntries(catalogDataKeys.map((key) => [key, []])) as ComponentCatalog,
+  const [componentCatalog, setComponentCatalog] = useState<ComponentCatalog>(
+    () =>
+      Object.fromEntries(
+        catalogDataKeys.map((key) => [key, []]),
+      ) as ComponentCatalog,
   );
-  const [componentPriceRules, setComponentPriceRules] = useState<ComponentPriceRules>({});
-  const [movimientos, setMovimientos] = useState<InventoryMovement[]>(readStoredMovements);
+  const [componentPriceRules, setComponentPriceRules] =
+    useState<ComponentPriceRules>({});
+  const [dollarQuote, setDollarQuote] = useState<DollarQuote | null>(null);
+  const [stockDollarQuote, setStockDollarQuote] = useState<DollarQuote | null>(null);
+  const [notebookPriceRules, setNotebookPriceRules] = useState<PriceRule[]>([]);
+  const [movimientos, setMovimientos] =
+    useState<InventoryMovement[]>(readStoredMovements);
   const [loading, setLoading] = useState(true);
   const [editEquipo, setEditEquipo] = useState<Equipo | null>(null);
   const [editProducto, setEditProducto] = useState<Producto | null>(null);
-  const [editComponente, setEditComponente] = useState<CatalogProduct | null>(null);
+  const [editComponente, setEditComponente] = useState<CatalogProduct | null>(
+    null,
+  );
   const [bulkOpen, setBulkOpen] = useState(false);
   const [confirmState, setConfirmState] = useState<{
     open: boolean;
@@ -181,17 +202,29 @@ export function AdminDashboard({ persistent }: { persistent: boolean }) {
   useEffect(() => {
     let alive = true;
     Promise.all([
-      fetch("/api/admin/equipos").then((r) => (r.ok ? r.json() : [])),
+      fetch("/api/admin/stock").then(async (r) => {
+        if (r.ok) return r.json();
+        const fallback = await fetch("/api/admin/equipos");
+        return fallback.ok ? fallback.json() : [];
+      }),
       fetch("/api/admin/productos").then((r) => (r.ok ? r.json() : [])),
       fetch("/api/admin/componentes").then((r) => (r.ok ? r.json() : {})),
     ])
       .then(([e, p, c]) => {
-        setEquipos(Array.isArray(e) ? e : []);
+        const stockResponse = e as { equipos?: Equipo[]; notebookPriceRules?: PriceRule[]; dollarQuote?: DollarQuote | null } | null;
+        setEquipos(Array.isArray(stockResponse?.equipos) ? stockResponse.equipos : Array.isArray(e) ? e : []);
+        setNotebookPriceRules(Array.isArray(stockResponse?.notebookPriceRules) ? stockResponse.notebookPriceRules : []);
+        setStockDollarQuote(stockResponse?.dollarQuote || null);
         setProductos(Array.isArray(p) ? p : []);
         if (c && typeof c === "object") {
-          const response = c as { catalog?: ComponentCatalog; priceRules?: ComponentPriceRules };
-          setComponentCatalog(response.catalog || c as ComponentCatalog);
+          const response = c as {
+            catalog?: ComponentCatalog;
+            priceRules?: ComponentPriceRules;
+            dollarQuote?: DollarQuote | null;
+          };
+          setComponentCatalog(response.catalog || (c as ComponentCatalog));
           setComponentPriceRules(response.priceRules || {});
+          setDollarQuote(response.dollarQuote || null);
         }
       })
       .finally(() => setLoading(false));
@@ -216,258 +249,289 @@ export function AdminDashboard({ persistent }: { persistent: boolean }) {
 
   return (
     <>
-    <div className="mx-auto max-w-6xl space-y-6 px-4 py-6 sm:px-6">
-      {/* Header */}
-      <header className="flex flex-col gap-4 rounded-3xl border border-white/10 bg-white/[0.03] p-4 shadow-xl sm:flex-row sm:items-center sm:justify-between sm:p-5">
-        <div className="flex min-w-0 items-center gap-3">
-          <div className="grid size-12 place-items-center rounded-xl border border-white/15 bg-white/10 p-2">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={getAssetUrl("logo.png")} alt="ServiTec" className="h-full w-full object-contain" />
+      <div className="mx-auto max-w-6xl space-y-6 px-4 py-6 sm:px-6">
+        {/* Header */}
+        <header className="flex flex-col gap-4 rounded-3xl border border-white/10 bg-white/[0.03] p-4 shadow-xl sm:flex-row sm:items-center sm:justify-between sm:p-5">
+          <div className="flex min-w-0 items-center gap-3">
+            <div className="grid size-12 place-items-center rounded-xl border border-white/15 bg-white/10 p-2">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={getAssetUrl("logo.png")}
+                alt="ServiTec"
+                className="h-full w-full object-contain"
+              />
+            </div>
+            <div>
+              <p className="text-2xl font-black leading-none tracking-tight">
+                <span className="text-white">Servi</span>
+                <span className="text-primary">Tec</span>
+              </p>
+              <p className="text-xs uppercase tracking-[0.22em] text-white/50">
+                Panel administrativo
+              </p>
+            </div>
           </div>
-          <div>
-            <p className="text-2xl font-black leading-none tracking-tight">
-              <span className="text-white">Servi</span>
-              <span className="text-primary">Tec</span>
-            </p>
-            <p className="text-xs uppercase tracking-[0.22em] text-white/50">
-              Panel administrativo
-            </p>
-          </div>
-        </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex w-full items-center gap-2 sm:w-auto">
-            <Link
-              href="/"
-              className="flex-1 rounded-xl border border-white/15 bg-white/10 px-3 py-2 text-center text-sm font-semibold text-white transition hover:bg-white/20 sm:flex-none sm:px-4"
-            >
-              Ir al inicio
-            </Link>
-            <button
-              onClick={logout}
-              className="flex-1 rounded-xl border border-rose-300/30 bg-rose-500/80 px-3 py-2 text-sm font-semibold text-white transition hover:bg-rose-500 sm:flex-none sm:px-4"
-            >
-              Cerrar sesión
-            </button>
-          </div>
-        </div>
-      </header>
-
-      {/* Tabs */}
-      <nav className="grid gap-2 rounded-3xl border border-white/10 bg-white/[0.03] p-2 shadow-xl sm:grid-cols-3">
-        {(
-          [
-            {
-              id: "dashboard",
-              label: "Dashboard",
-              description: "Inventario y resumen",
-              icon: LayoutDashboard,
-            },
-            {
-              id: "stock",
-              label: "STOCK",
-              description: "Nuevos y reacondicionados",
-              icon: Boxes,
-            },
-            {
-              id: "componentes",
-              label: "Componentes",
-              description: "Armá tu PC y tienda",
-              icon: Boxes,
-            },
-          ] as const
-        ).map(({ id, label, description, icon: Icon }) => (
-          <button
-            key={id}
-            onClick={() => setSegment(id)}
-            className={`flex min-h-16 min-w-0 items-center gap-3 rounded-2xl border border-transparent px-3 py-3 text-left transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300 sm:px-4 ${
-              segment === id
-                ? "border-white/20 bg-white text-slate-950 shadow-lg"
-                : "text-white/60 hover:bg-white/10 hover:text-white"
-            }`}
-          >
-            <Icon className="size-5 shrink-0" />
-            <span>
-              <span className="block truncate text-sm font-bold uppercase tracking-wide">
-                {label}
-              </span>
-              <span
-                className={`block truncate text-xs ${
-                  segment === id ? "text-slate-500" : "text-white/45"
-                }`}
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex w-full items-center gap-2 sm:w-auto">
+              <Link
+                href="/"
+                className="flex-1 rounded-xl border border-white/15 bg-white/10 px-3 py-2 text-center text-sm font-semibold text-white transition hover:bg-white/20 sm:flex-none sm:px-4"
               >
-                {description}
+                Ir al inicio
+              </Link>
+              <button
+                onClick={logout}
+                className="flex-1 rounded-xl border border-rose-300/30 bg-rose-500/80 px-3 py-2 text-sm font-semibold text-white transition hover:bg-rose-500 sm:flex-none sm:px-4"
+              >
+                Cerrar sesión
+              </button>
+            </div>
+          </div>
+        </header>
+
+        {/* Tabs */}
+        <nav className="grid gap-2 rounded-3xl border border-white/10 bg-white/[0.03] p-2 shadow-xl sm:grid-cols-3">
+          {(
+            [
+              {
+                id: "dashboard",
+                label: "Dashboard",
+                description: "Inventario y resumen",
+                icon: LayoutDashboard,
+              },
+              {
+                id: "stock",
+                label: "STOCK",
+                description: "Nuevos y reacondicionados",
+                icon: Boxes,
+              },
+              {
+                id: "componentes",
+                label: "Componentes",
+                description: "Armá tu PC y tienda",
+                icon: Boxes,
+              },
+            ] as const
+          ).map(({ id, label, description, icon: Icon }) => (
+            <button
+              key={id}
+              onClick={() => setSegment(id)}
+              className={`flex min-h-16 min-w-0 items-center gap-3 rounded-2xl border border-transparent px-3 py-3 text-left transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300 sm:px-4 ${
+                segment === id
+                  ? "border-white/20 bg-white text-slate-950 shadow-lg"
+                  : "text-white/60 hover:bg-white/10 hover:text-white"
+              }`}
+            >
+              <Icon className="size-5 shrink-0" />
+              <span>
+                <span className="block truncate text-sm font-bold uppercase tracking-wide">
+                  {label}
+                </span>
+                <span
+                  className={`block truncate text-xs ${
+                    segment === id ? "text-slate-500" : "text-white/45"
+                  }`}
+                >
+                  {description}
+                </span>
               </span>
-            </span>
-          </button>
-        ))}
-      </nav>
+            </button>
+          ))}
+        </nav>
 
-      {!persistent && (
-        <div className="rounded-2xl border border-amber-300/25 bg-amber-500/15 px-4 py-3 text-sm text-amber-100">
-          <strong className="font-semibold">Modo solo lectura.</strong> Conectá la
-          integración <strong>Vercel Blob</strong> al proyecto para guardar cambios
-          y subir imágenes.
-        </div>
-      )}
+        {!persistent && (
+          <div className="rounded-2xl border border-amber-300/25 bg-amber-500/15 px-4 py-3 text-sm text-amber-100">
+            <strong className="font-semibold">Modo solo lectura.</strong>{" "}
+            Conectá la integración <strong>Vercel Blob</strong> al proyecto para
+            guardar cambios y subir imágenes.
+          </div>
+        )}
 
-      {segment === "dashboard" ? (
-        <DashboardTab
-          productos={productos}
-          setProductos={setProductos}
-          persistent={persistent}
-          onEdit={setEditProducto}
-          movimientos={movimientos}
-          addMovement={addMovement}
-          onOpenBulk={() => setBulkOpen(true)}
-          onRequestConfirm={setConfirmState}
-        />
-      ) : segment === "stock" ? (
-        <StockTab
-          equipos={equipos}
-          setEquipos={setEquipos}
-          persistent={persistent}
-          onEdit={setEditEquipo}
-          onRequestConfirm={setConfirmState}
-        />
-      ) : (
-        <ComponentesTab
-          catalog={componentCatalog}
-          setCatalog={setComponentCatalog}
-          persistent={persistent}
-          onEdit={setEditComponente}
-          onOpenBulk={() => setBulkOpen(true)}
-          onRequestConfirm={setConfirmState}
-          priceRules={componentPriceRules}
-          setPriceRules={setComponentPriceRules}
-        />
-      )}
+        {segment === "dashboard" ? (
+          <DashboardTab
+            productos={productos}
+            setProductos={setProductos}
+            persistent={persistent}
+            onEdit={setEditProducto}
+            movimientos={movimientos}
+            addMovement={addMovement}
+            onOpenBulk={() => setBulkOpen(true)}
+            onRequestConfirm={setConfirmState}
+          />
+        ) : segment === "stock" ? (
+          <StockTab
+            equipos={equipos}
+            setEquipos={setEquipos}
+            persistent={persistent}
+            onEdit={setEditEquipo}
+            onRequestConfirm={setConfirmState}
+            notebookPriceRules={notebookPriceRules}
+            setNotebookPriceRules={setNotebookPriceRules}
+            dollarQuote={stockDollarQuote}
+            setDollarQuote={setStockDollarQuote}
+          />
+        ) : (
+          <ComponentesTab
+            catalog={componentCatalog}
+            setCatalog={setComponentCatalog}
+            persistent={persistent}
+            onEdit={setEditComponente}
+            onOpenBulk={() => setBulkOpen(true)}
+            onRequestConfirm={setConfirmState}
+            priceRules={componentPriceRules}
+            setPriceRules={setComponentPriceRules}
+            dollarQuote={dollarQuote}
+            setDollarQuote={setDollarQuote}
+          />
+        )}
 
-      {bulkOpen && (
-        <BulkUploadDialog
-          persistent={persistent}
-          priceRules={componentPriceRules}
-          onClose={() => setBulkOpen(false)}
-          onUploaded={() => {
-            setBulkOpen(false);
-            void fetch("/api/admin/componentes")
-              .then((response) => (response.ok ? response.json() : null))
-              .then((catalog) => {
-                if (catalog && typeof catalog === "object") {
-                  const response = catalog as { catalog?: ComponentCatalog; priceRules?: ComponentPriceRules };
-                  setComponentCatalog(response.catalog || catalog as ComponentCatalog);
-                  setComponentPriceRules(response.priceRules || {});
-                }
-              });
-          }}
-        />
-      )}
+        {bulkOpen && (
+          <BulkUploadDialog
+            persistent={persistent}
+            priceRules={componentPriceRules}
+            onClose={() => setBulkOpen(false)}
+            onUploaded={() => {
+              setBulkOpen(false);
+              void fetch("/api/admin/componentes")
+                .then((response) => (response.ok ? response.json() : null))
+                .then((catalog) => {
+                  if (catalog && typeof catalog === "object") {
+                    const response = catalog as {
+                      catalog?: ComponentCatalog;
+                      priceRules?: ComponentPriceRules;
+                      dollarQuote?: DollarQuote | null;
+                    };
+                    setComponentCatalog(
+                      response.catalog || (catalog as ComponentCatalog),
+                    );
+                    setComponentPriceRules(response.priceRules || {});
+                    setDollarQuote(response.dollarQuote || null);
+                  }
+                });
+            }}
+          />
+        )}
 
-      {editEquipo && (
-        <EquipoDialog
-          key={editEquipo.id}
-          equipo={editEquipo}
-          componentCatalog={componentCatalog}
-          onClose={() => setEditEquipo(null)}
-          onSave={async (saved) => {
-            if (persistent) {
-              const next = equipos.some((e) => e.id === saved.id)
-                ? equipos.map((e) => (e.id === saved.id ? saved : e))
-                : [...equipos, { ...saved, orden: equipos.length }];
-              await saveEquipos(next);
-              window.dispatchEvent(new Event("equiposUpdated"));
-              setEquipos(next);
-              setEditEquipo(null);
-            } else {
-              setEquipos((cur) => {
-                const exists = cur.some((e) => e.id === saved.id);
-                return exists
-                  ? cur.map((e) => (e.id === saved.id ? saved : e))
-                  : [...cur, { ...saved, orden: cur.length }];
-              });
-              setEditEquipo(null);
-            }
-          }}
-        />
-      )}
+        {editEquipo && (
+          <EquipoDialog
+            key={editEquipo.id}
+            equipo={editEquipo}
+            componentCatalog={componentCatalog}
+            onClose={() => setEditEquipo(null)}
+            onSave={async (saved) => {
+              if (persistent) {
+                const next = equipos.some((e) => e.id === saved.id)
+                  ? equipos.map((e) => (e.id === saved.id ? saved : e))
+                  : [...equipos, { ...saved, orden: equipos.length }];
+                await saveEquipos(next);
+                window.dispatchEvent(new Event("equiposUpdated"));
+                setEquipos(next);
+                setEditEquipo(null);
+              } else {
+                setEquipos((cur) => {
+                  const exists = cur.some((e) => e.id === saved.id);
+                  return exists
+                    ? cur.map((e) => (e.id === saved.id ? saved : e))
+                    : [...cur, { ...saved, orden: cur.length }];
+                });
+                setEditEquipo(null);
+              }
+            }}
+          />
+        )}
 
-      {editProducto && (
-        <ProductoDialog
-          key={editProducto.id}
-          producto={editProducto}
-          categorias={[...new Set(productos.map((p) => p.categoria))].sort()}
-          onClose={() => setEditProducto(null)}
-          onSave={async (saved) => {
-            if (persistent) {
-              const next = productos.some((p) => p.id === saved.id)
-                ? productos.map((p) => (p.id === saved.id ? saved : p))
-                : [...productos, saved];
-              await saveProductos(next);
-              // notify other clients / loaders
-              window.dispatchEvent(new Event("productosUpdated"));
-              setProductos(next);
-              setEditProducto(null);
-            } else {
-              setProductos((cur) =>
-                cur.some((p) => p.id === saved.id)
-                  ? cur.map((p) => (p.id === saved.id ? saved : p))
-                  : [...cur, saved],
-              );
-              setEditProducto(null);
-            }
-          }}
-        />
-      )}
+        {editProducto && (
+          <ProductoDialog
+            key={editProducto.id}
+            producto={editProducto}
+            categorias={[...new Set(productos.map((p) => p.categoria))].sort()}
+            onClose={() => setEditProducto(null)}
+            onSave={async (saved) => {
+              if (persistent) {
+                const next = productos.some((p) => p.id === saved.id)
+                  ? productos.map((p) => (p.id === saved.id ? saved : p))
+                  : [...productos, saved];
+                await saveProductos(next);
+                // notify other clients / loaders
+                window.dispatchEvent(new Event("productosUpdated"));
+                setProductos(next);
+                setEditProducto(null);
+              } else {
+                setProductos((cur) =>
+                  cur.some((p) => p.id === saved.id)
+                    ? cur.map((p) => (p.id === saved.id ? saved : p))
+                    : [...cur, saved],
+                );
+                setEditProducto(null);
+              }
+            }}
+          />
+        )}
 
-      {editComponente && (
-        <ComponenteDialog
-          key={`${editComponente.categoria}-${editComponente.id}`}
-          componente={editComponente}
-          onClose={() => setEditComponente(null)}
-          onSave={async (saved) => {
-            const category = componentKeyFromValue(saved.categoria) || componentKeyFromValue(editComponente.categoria) || "motherboard";
-            const savedForCatalog = { ...saved, categoria: category };
-            const sortByPrice = (items: CatalogProduct[]) => [...items].sort((a, b) => {
-              const priceDifference = (Number(a.precio) || 0) - (Number(b.precio) || 0);
-              return priceDifference || a.nombre.localeCompare(b.nombre, "es");
-            });
-            const next = {
-              ...componentCatalog,
-              [category]: sortByPrice((componentCatalog[category] || []).some((item) => item.id === saved.id)
-                ? componentCatalog[category].map((item) => (item.id === saved.id ? savedForCatalog : item))
-                : [...(componentCatalog[category] || []), savedForCatalog]),
-            };
-            if (persistent) await saveComponentCatalog(next, componentPriceRules);
-            setComponentCatalog(next);
-            setEditComponente(null);
-          }}
-        />
-      )}
+        {editComponente && (
+          <ComponenteDialog
+            key={`${editComponente.categoria}-${editComponente.id}`}
+            componente={editComponente}
+            onClose={() => setEditComponente(null)}
+            onSave={async (saved) => {
+              const category =
+                componentKeyFromValue(saved.categoria) ||
+                componentKeyFromValue(editComponente.categoria) ||
+                "motherboard";
+              const savedForCatalog = { ...saved, categoria: category };
+              const sortByPrice = (items: CatalogProduct[]) =>
+                [...items].sort((a, b) => {
+                  const priceDifference =
+                    (Number(a.precio) || 0) - (Number(b.precio) || 0);
+                  return (
+                    priceDifference || a.nombre.localeCompare(b.nombre, "es")
+                  );
+                });
+              const next = {
+                ...componentCatalog,
+                [category]: sortByPrice(
+                  (componentCatalog[category] || []).some(
+                    (item) => item.id === saved.id,
+                  )
+                    ? componentCatalog[category].map((item) =>
+                        item.id === saved.id ? savedForCatalog : item,
+                      )
+                    : [...(componentCatalog[category] || []), savedForCatalog],
+                ),
+              };
+              if (persistent)
+                await saveComponentCatalog(next, componentPriceRules);
+              setComponentCatalog(next);
+              setEditComponente(null);
+            }}
+          />
+        )}
 
-      {/* Componentes admin removed — recreate with new prompt when ready */}
-      {/* Bulk upload moved to a dedicated page: /admin/bulk-upload */}
+        {/* Componentes admin removed — recreate with new prompt when ready */}
+        {/* Bulk upload moved to a dedicated page: /admin/bulk-upload */}
 
-      {confirmState && (
-        <ConfirmDialog
-          open={Boolean(confirmState.open)}
-          title={confirmState.title}
-          description={confirmState.description}
-          loading={Boolean(confirmState.loading)}
-          onOpenChange={(v) => {
-            if (!v) setConfirmState(null);
-            else setConfirmState((s) => (s ? { ...s, open: v } : s));
-          }}
-          onConfirm={async () => {
-            if (!confirmState) return;
-            setConfirmState((s) => (s ? { ...s, loading: true } : s));
-            try {
-              await confirmState.onConfirm();
-            } finally {
-              setConfirmState(null);
-            }
-          }}
-        />
-      )}
-    </div>
+        {confirmState && (
+          <ConfirmDialog
+            open={Boolean(confirmState.open)}
+            title={confirmState.title}
+            description={confirmState.description}
+            loading={Boolean(confirmState.loading)}
+            onOpenChange={(v) => {
+              if (!v) setConfirmState(null);
+              else setConfirmState((s) => (s ? { ...s, open: v } : s));
+            }}
+            onConfirm={async () => {
+              if (!confirmState) return;
+              setConfirmState((s) => (s ? { ...s, loading: true } : s));
+              try {
+                await confirmState.onConfirm();
+              } finally {
+                setConfirmState(null);
+              }
+            }}
+          />
+        )}
+      </div>
     </>
   );
 }
@@ -477,7 +541,10 @@ export function AdminDashboard({ persistent }: { persistent: boolean }) {
 function StatCard({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-white/[0.12] to-white/[0.04] p-5 shadow-xl shadow-black/10">
-      <div aria-hidden className="absolute -right-8 -top-10 size-28 rounded-full bg-sky-400/10 blur-2xl" />
+      <div
+        aria-hidden
+        className="absolute -right-8 -top-10 size-28 rounded-full bg-sky-400/10 blur-2xl"
+      />
       <p className="text-xs font-semibold uppercase tracking-[0.15em] text-white/45">
         {label}
       </p>
@@ -492,6 +559,7 @@ function SaveButton({
   saved,
   error,
   onSave,
+  onRevert,
   persistent,
 }: {
   dirty: boolean;
@@ -499,15 +567,26 @@ function SaveButton({
   saved: boolean;
   error: string;
   onSave: () => void;
+  onRevert?: () => void;
   persistent: boolean;
 }) {
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex flex-wrap items-center justify-end gap-2 sm:gap-3">
       {error && <span className="text-sm text-rose-600">{error}</span>}
       {saved && !dirty && (
         <span className="flex items-center gap-1 text-sm text-emerald-600">
           <Check className="size-4" /> Guardado
         </span>
+      )}
+      {onRevert && (
+        <button
+          type="button"
+          onClick={onRevert}
+          disabled={!dirty || saving}
+          className="inline-flex min-h-11 items-center justify-center rounded-xl border border-amber-300 bg-white px-4 py-2.5 text-sm font-semibold text-amber-800 transition hover:bg-amber-50 disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          Revertir cambios
+        </button>
       )}
       <button
         onClick={onSave}
@@ -541,10 +620,18 @@ function useSaver<T>(data: T, save: (d: T) => Promise<unknown>) {
       setSaving(false);
     }
   };
-  return { saving, saved, error, dirty, run };
+  const revert = () => {
+    try {
+      return JSON.parse(baseline) as T;
+    } catch {
+      return data;
+    }
+  };
+  return { saving, saved, error, dirty, run, revert };
 }
 
-const panel = "rounded-3xl border border-slate-200/80 bg-white/95 p-5 text-slate-900 shadow-[0_18px_60px_-28px_rgba(15,23,42,0.45)] backdrop-blur sm:p-6";
+const panel =
+  "rounded-3xl border border-slate-200/80 bg-white/95 p-5 text-slate-900 shadow-[0_18px_60px_-28px_rgba(15,23,42,0.45)] backdrop-blur sm:p-6";
 const input =
   "w-full rounded-xl border border-slate-300 bg-white p-3 text-sm outline-none transition placeholder:text-slate-400 hover:border-slate-400 focus:border-sky-500 focus:ring-4 focus:ring-sky-500/10";
 
@@ -569,9 +656,14 @@ function DashboardTab({
   onOpenBulk: () => void;
   onRequestConfirm?: (req: ConfirmRequest) => void;
 }) {
-  const { saving, saved, error, dirty, run } = useSaver(productos, saveProductos);
+  const { saving, saved, error, dirty, run, revert } = useSaver(
+    productos,
+    saveProductos,
+  );
   const [filter, setFilter] = useState("");
-  const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set());
+  const [selectedProducts, setSelectedProducts] = useState<Set<string>>(
+    new Set(),
+  );
   const [mostrarTodosMovimientos, setMostrarTodosMovimientos] = useState(false);
   const [visibleMovimientos, setVisibleMovimientos] = useState(5);
 
@@ -598,12 +690,16 @@ function DashboardTab({
       `${p.nombre} ${p.categoria}`.toLowerCase().includes(filter.toLowerCase()),
     )
     .sort((a, b) => a.nombre.localeCompare(b.nombre, "es"));
-  const allVisibleProductsSelected = visible.length > 0 && visible.every((product) => selectedProducts.has(product.id));
-  const toggleProduct = (id: string) => setSelectedProducts((current) => {
-    const next = new Set(current);
-    if (next.has(id)) next.delete(id); else next.add(id);
-    return next;
-  });
+  const allVisibleProductsSelected =
+    visible.length > 0 &&
+    visible.every((product) => selectedProducts.has(product.id));
+  const toggleProduct = (id: string) =>
+    setSelectedProducts((current) => {
+      const next = new Set(current);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
   const deleteSelectedProducts = () => {
     if (!selectedProducts.size) return;
     onRequestConfirm?.({
@@ -611,7 +707,9 @@ function DashboardTab({
       title: `¿Eliminar ${selectedProducts.size} producto(s)?`,
       description: "Se eliminarán los productos seleccionados del inventario.",
       onConfirm: () => {
-        setProductos((current) => current.filter((product) => !selectedProducts.has(product.id)));
+        setProductos((current) =>
+          current.filter((product) => !selectedProducts.has(product.id)),
+        );
         setSelectedProducts(new Set());
       },
     });
@@ -638,7 +736,9 @@ function DashboardTab({
           persistent={persistent}
           onImport={async (next) => {
             // retain previous import behavior when invoked programmatically
-            const map = new Map(productos.map((p) => [normalizeCsvProductName(p.nombre), p]));
+            const map = new Map(
+              productos.map((p) => [normalizeCsvProductName(p.nombre), p]),
+            );
             const importedNames = new Set<string>();
             let creados = 0;
             let actualizados = 0;
@@ -650,7 +750,12 @@ function DashboardTab({
               const anterior = Number(existing?.stock) || 0;
               const nuevo = Number(producto.stock) || 0;
               const merged = existing
-                ? { ...existing, ...producto, id: existing.id, imagen: existing.imagen || producto.imagen }
+                ? {
+                    ...existing,
+                    ...producto,
+                    id: existing.id,
+                    imagen: existing.imagen || producto.imagen,
+                  }
                 : producto;
 
               map.set(key, merged);
@@ -673,7 +778,11 @@ function DashboardTab({
 
             for (const producto of productos) {
               const key = normalizeCsvProductName(producto.nombre);
-              if (importedNames.has(key) || shouldIgnoreCsvProduct(producto.nombre)) continue;
+              if (
+                importedNames.has(key) ||
+                shouldIgnoreCsvProduct(producto.nombre)
+              )
+                continue;
               const anterior = Number(producto.stock) || 0;
               if (anterior === 0) continue;
               map.set(key, { ...producto, stock: 0 });
@@ -699,7 +808,9 @@ function DashboardTab({
         <section className={panel}>
           <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h2 className="text-lg font-semibold">Historial de movimientos</h2>
+              <h2 className="text-lg font-semibold">
+                Historial de movimientos
+              </h2>
               <p className="text-xs text-slate-500">
                 {movimientos.length === 0
                   ? "Sin movimientos recientes"
@@ -712,15 +823,26 @@ function DashboardTab({
                 onClick={() => setMostrarTodosMovimientos((prev) => !prev)}
                 className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-100"
               >
-                {mostrarTodosMovimientos ? "Mostrar solo el último" : "Ver historial completo"}
+                {mostrarTodosMovimientos
+                  ? "Mostrar solo el último"
+                  : "Ver historial completo"}
               </button>
             )}
           </div>
 
-          {movimientos.length === 0 && <p className="text-sm text-slate-500">No hay movimientos registrados.</p>}
+          {movimientos.length === 0 && (
+            <p className="text-sm text-slate-500">
+              No hay movimientos registrados.
+            </p>
+          )}
 
-          <div className={`${mostrarTodosMovimientos ? "max-h-[380px] overflow-y-auto pr-2" : ""} space-y-3`}>
-            {(mostrarTodosMovimientos ? movimientos : movimientos.slice(0, 1)).map((movimiento) => {
+          <div
+            className={`${mostrarTodosMovimientos ? "max-h-[380px] overflow-y-auto pr-2" : ""} space-y-3`}
+          >
+            {(mostrarTodosMovimientos
+              ? movimientos
+              : movimientos.slice(0, 1)
+            ).map((movimiento) => {
               const meta = getMovementMeta(movimiento.tipo);
               return (
                 <div
@@ -729,14 +851,17 @@ function DashboardTab({
                 >
                   <div className="min-w-0">
                     <p className="font-medium">
-                      <span className={meta.color}>{meta.label}</span> - {movimiento.producto}
+                      <span className={meta.color}>{meta.label}</span> -{" "}
+                      {movimiento.producto}
                     </p>
                     <p className="text-xs text-slate-500 sm:text-sm">
                       {movimiento.usuario} • {movimiento.origen}
                     </p>
                   </div>
                   <div className="text-left sm:text-right">
-                    <p className="text-sm font-semibold sm:text-base">{movimiento.cantidad} unidades</p>
+                    <p className="text-sm font-semibold sm:text-base">
+                      {movimiento.cantidad} unidades
+                    </p>
                     <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">
                       {new Date(movimiento.fecha).toLocaleString("es-AR", {
                         day: "2-digit",
@@ -752,16 +877,17 @@ function DashboardTab({
             })}
           </div>
 
-          {mostrarTodosMovimientos && visibleMovimientos < movimientos.length && (
-            <div className="mt-6 flex justify-center">
-              <button
-                onClick={() => setVisibleMovimientos((prev) => prev + 5)}
-                className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-medium transition hover:bg-slate-100"
-              >
-                Cargar más movimientos
-              </button>
-            </div>
-          )}
+          {mostrarTodosMovimientos &&
+            visibleMovimientos < movimientos.length && (
+              <div className="mt-6 flex justify-center">
+                <button
+                  onClick={() => setVisibleMovimientos((prev) => prev + 5)}
+                  className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-medium transition hover:bg-slate-100"
+                >
+                  Cargar más movimientos
+                </button>
+              </div>
+            )}
         </section>
       </div>
 
@@ -779,11 +905,12 @@ function DashboardTab({
             saved={saved}
             error={error}
             onSave={run}
+            onRevert={() => setProductos(revert())}
             persistent={persistent}
           />
         </div>
 
-        <div className="relative mb-3">
+        <div className="hidden">
           <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
           <input
             className={`${input} pl-9`}
@@ -795,17 +922,45 @@ function DashboardTab({
 
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
           <label className="flex min-h-10 cursor-pointer items-center gap-2 text-sm font-semibold text-slate-700">
-            <input type="checkbox" checked={allVisibleProductsSelected} onChange={() => setSelectedProducts((current) => allVisibleProductsSelected ? new Set([...current].filter((id) => !visible.some((product) => product.id === id))) : new Set([...current, ...visible.map((product) => product.id)]))} className="size-4 accent-sky-600" />
+            <input
+              type="checkbox"
+              checked={allVisibleProductsSelected}
+              onChange={() =>
+                setSelectedProducts((current) =>
+                  allVisibleProductsSelected
+                    ? new Set(
+                        [...current].filter(
+                          (id) => !visible.some((product) => product.id === id),
+                        ),
+                      )
+                    : new Set([
+                        ...current,
+                        ...visible.map((product) => product.id),
+                      ]),
+                )
+              }
+              className="size-4 accent-sky-600"
+            />
             Seleccionar visibles
           </label>
-          {selectedProducts.size > 0 && <button type="button" onClick={deleteSelectedProducts} className="min-h-10 rounded-lg bg-rose-600 px-3 py-2 text-sm font-bold text-white transition hover:bg-rose-700">Eliminar seleccionados ({selectedProducts.size})</button>}
+          {selectedProducts.size > 0 && (
+            <button
+              type="button"
+              onClick={deleteSelectedProducts}
+              className="min-h-10 rounded-lg bg-rose-600 px-3 py-2 text-sm font-bold text-white transition hover:bg-rose-700"
+            >
+              Eliminar seleccionados ({selectedProducts.size})
+            </button>
+          )}
         </div>
 
         <div className="overflow-x-auto">
           <table className="min-w-[720px] w-full text-sm">
             <thead className="border-b text-left text-xs uppercase text-slate-400">
               <tr>
-                <th className="w-10 py-2"><span className="sr-only">Seleccionar</span></th>
+                <th className="w-10 py-2">
+                  <span className="sr-only">Seleccionar</span>
+                </th>
                 <th className="py-2 pr-3">Producto</th>
                 <th className="px-3 py-2">Categoría</th>
                 <th className="px-3 py-2 text-orange-600">COSTO</th>
@@ -818,7 +973,15 @@ function DashboardTab({
             <tbody className="divide-y">
               {visible.map((p) => (
                 <tr key={p.id} className="hover:bg-slate-50">
-                  <td className="py-2"><input type="checkbox" checked={selectedProducts.has(p.id)} onChange={() => toggleProduct(p.id)} aria-label={`Seleccionar ${p.nombre}`} className="size-4 accent-sky-600" /></td>
+                  <td className="py-2">
+                    <input
+                      type="checkbox"
+                      checked={selectedProducts.has(p.id)}
+                      onChange={() => toggleProduct(p.id)}
+                      aria-label={`Seleccionar ${p.nombre}`}
+                      className="size-4 accent-sky-600"
+                    />
+                  </td>
                   <td className="py-2 pr-3">
                     <div className="flex items-center gap-2">
                       {p.imagen && (
@@ -829,15 +992,25 @@ function DashboardTab({
                           className="size-9 shrink-0 rounded border bg-white object-contain"
                         />
                       )}
-                      <span className="line-clamp-1 font-medium">{p.nombre}</span>
+                      <span className="line-clamp-1 font-medium">
+                        {p.nombre}
+                      </span>
                     </div>
                   </td>
                   <td className="px-3 py-2 text-slate-500">{p.categoria}</td>
-                  <td className="px-3 py-2 font-semibold text-orange-600">{money(p.precioCosto)}</td>
-                  <td className="px-3 py-2 font-semibold text-emerald-700">{money(p.precio)}</td>
-                  <td className="px-3 py-2 font-semibold text-rose-700">{money(calculateInstallmentPrice(p.precio))}</td>
+                  <td className="px-3 py-2 font-semibold text-orange-600">
+                    {money(p.precioCosto)}
+                  </td>
+                  <td className="px-3 py-2 font-semibold text-emerald-700">
+                    {money(p.precio)}
+                  </td>
+                  <td className="px-3 py-2 font-semibold text-rose-700">
+                    {money(calculateInstallmentPrice(p.precio))}
+                  </td>
                   <td className="px-3 py-2">
-                    <span className={p.stock <= 0 ? "font-bold text-rose-600" : ""}>
+                    <span
+                      className={p.stock <= 0 ? "font-bold text-rose-600" : ""}
+                    >
                       {p.stock}
                     </span>
                   </td>
@@ -855,9 +1028,12 @@ function DashboardTab({
                           onRequestConfirm?.({
                             open: true,
                             title: `¿Eliminar "${p.nombre}"?`,
-                            description: "Se eliminará este producto del inventario.",
+                            description:
+                              "Se eliminará este producto del inventario.",
                             onConfirm: () => {
-                              setProductos((cur) => cur.filter((x) => x.id !== p.id));
+                              setProductos((cur) =>
+                                cur.filter((x) => x.id !== p.id),
+                              );
                             },
                           })
                         }
@@ -941,7 +1117,9 @@ function AddProductoForm({
           <select
             className={input}
             value={form.categoria}
-            onChange={(e) => setForm((f) => ({ ...f, categoria: e.target.value }))}
+            onChange={(e) =>
+              setForm((f) => ({ ...f, categoria: e.target.value }))
+            }
             required
           >
             <option value="">Seleccionar categoría</option>
@@ -957,7 +1135,10 @@ function AddProductoForm({
             placeholder="Costo de proveedor"
             value={form.precioCosto || ""}
             onChange={(e) =>
-              setForm((f) => ({ ...f, precioCosto: Number(e.target.value) || 0 }))
+              setForm((f) => ({
+                ...f,
+                precioCosto: Number(e.target.value) || 0,
+              }))
             }
           />
           <input
@@ -982,7 +1163,12 @@ function AddProductoForm({
         </div>
 
         <div className="sm:col-span-2">
-          <ImageField values={form.imagen ? [form.imagen] : []} onChange={(values) => setForm((f) => ({ ...f, imagen: values[0] || "" }))} />
+          <ImageField
+            values={form.imagen ? [form.imagen] : []}
+            onChange={(values) =>
+              setForm((f) => ({ ...f, imagen: values[0] || "" }))
+            }
+          />
         </div>
 
         <div className="flex flex-wrap items-center gap-4">
@@ -1019,7 +1205,14 @@ function BulkStockImport({
 
   const exportarCsv = () => {
     // Export format matches the import parser: Name, Category, Cost, Price, Quantity, DeletedAt
-    const headers = ["Name", "Category", "Cost", "Price", "Quantity", "DeletedAt"];
+    const headers = [
+      "Name",
+      "Category",
+      "Cost",
+      "Price",
+      "Quantity",
+      "DeletedAt",
+    ];
     const rows = productos.map((producto) => [
       producto.nombre,
       producto.categoria,
@@ -1029,9 +1222,13 @@ function BulkStockImport({
       "",
     ]);
     const csv = [headers, ...rows]
-      .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","))
+      .map((row) =>
+        row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","),
+      )
       .join("\n");
-    const blob = new Blob([`\uFEFF${csv}\n`], { type: "text/csv;charset=utf-8;" });
+    const blob = new Blob([`\uFEFF${csv}\n`], {
+      type: "text/csv;charset=utf-8;",
+    });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
@@ -1098,10 +1295,17 @@ function BulkStockImport({
       const csvText = await archivoCsv.text();
       const rows = parseCsvRows(csvText);
       if (rows.length < 2) {
-        throw new Error("El CSV debe tener una cabecera y al menos una fila de datos.");
+        throw new Error(
+          "El CSV debe tener una cabecera y al menos una fila de datos.",
+        );
       }
 
-      const headers = rows[0].map((header) => header.replace(/^\uFEFF/, "").trim().toLowerCase());
+      const headers = rows[0].map((header) =>
+        header
+          .replace(/^\uFEFF/, "")
+          .trim()
+          .toLowerCase(),
+      );
       const idxName = headers.indexOf("name");
       const idxCategory = headers.indexOf("category");
       const idxCost = headers.indexOf("cost");
@@ -1109,11 +1313,19 @@ function BulkStockImport({
       const idxQuantity = headers.indexOf("quantity");
       const idxDeletedAt = headers.indexOf("deletedat");
 
-      if ([idxName, idxCategory, idxCost, idxPrice, idxQuantity].some((idx) => idx < 0)) {
-        throw new Error("Faltan columnas obligatorias: Name, Category, Cost, Price o Quantity.");
+      if (
+        [idxName, idxCategory, idxCost, idxPrice, idxQuantity].some(
+          (idx) => idx < 0,
+        )
+      ) {
+        throw new Error(
+          "Faltan columnas obligatorias: Name, Category, Cost, Price o Quantity.",
+        );
       }
 
-      const mapaPorNombre = new Map(productos.map((p) => [normalizeCsvProductName(p.nombre), p]));
+      const mapaPorNombre = new Map(
+        productos.map((p) => [normalizeCsvProductName(p.nombre), p]),
+      );
       const importados: Producto[] = [];
       let creados = 0;
       let actualizados = 0;
@@ -1121,16 +1333,21 @@ function BulkStockImport({
 
       for (let i = 1; i < rows.length; i += 1) {
         const row = rows[i];
-        const deletedAt = idxDeletedAt >= 0 ? String(row[idxDeletedAt] || "").trim() : "";
+        const deletedAt =
+          idxDeletedAt >= 0 ? String(row[idxDeletedAt] || "").trim() : "";
         if (deletedAt) {
           omitidos += 1;
           continue;
         }
 
         const nombre = String(row[idxName] || "").trim();
-        const categoria = normalizeImportedCategory(String(row[idxCategory] || "").trim() || "ARTICULO");
+        const categoria = normalizeImportedCategory(
+          String(row[idxCategory] || "").trim() || "ARTICULO",
+        );
         const parseNumber = (value: string | undefined) => {
-          const normalized = String(value ?? "").trim().replace(",", ".");
+          const normalized = String(value ?? "")
+            .trim()
+            .replace(",", ".");
           return normalized ? Number(normalized) : Number.NaN;
         };
         const costo = parseNumber(row[idxCost]);
@@ -1138,7 +1355,13 @@ function BulkStockImport({
         const stock = parseNumber(row[idxQuantity]);
         const nombreNormalizado = normalizeCsvProductName(nombre);
 
-        if (!nombre || shouldIgnoreCsvProduct(nombre) || !Number.isFinite(costo) || !Number.isFinite(precio) || !Number.isFinite(stock)) {
+        if (
+          !nombre ||
+          shouldIgnoreCsvProduct(nombre) ||
+          !Number.isFinite(costo) ||
+          !Number.isFinite(precio) ||
+          !Number.isFinite(stock)
+        ) {
           omitidos += 1;
           continue;
         }
@@ -1168,7 +1391,9 @@ function BulkStockImport({
         `Importacion completada. Creados: ${resultado.creados ?? creados}, actualizados: ${resultado.actualizados ?? actualizados}, marcados sin stock: ${resultado.marcadosSinStock ?? 0}, omitidos: ${omitidos}.`,
       );
     } catch (error) {
-      setMensaje(error instanceof Error ? error.message : "No se pudo importar el CSV.");
+      setMensaje(
+        error instanceof Error ? error.message : "No se pudo importar el CSV.",
+      );
     } finally {
       setImportando(false);
     }
@@ -1179,7 +1404,9 @@ function BulkStockImport({
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="text-lg font-semibold">Carga de Inventario</h2>
-          <p className="text-xs text-slate-500">Exportá el inventario en el formato compatible con la importación.</p>
+          <p className="text-xs text-slate-500">
+            Exportá el inventario en el formato compatible con la importación.
+          </p>
         </div>
         <button
           type="button"
@@ -1206,6 +1433,8 @@ function ComponentesTab({
   onRequestConfirm,
   priceRules,
   setPriceRules,
+  dollarQuote,
+  setDollarQuote,
 }: {
   catalog: ComponentCatalog;
   setCatalog: React.Dispatch<React.SetStateAction<ComponentCatalog>>;
@@ -1215,30 +1444,59 @@ function ComponentesTab({
   onRequestConfirm?: (req: ConfirmRequest) => void;
   priceRules: ComponentPriceRules;
   setPriceRules: React.Dispatch<React.SetStateAction<ComponentPriceRules>>;
+  dollarQuote: DollarQuote | null;
+  setDollarQuote: React.Dispatch<React.SetStateAction<DollarQuote | null>>;
 }) {
-  const pricingState = { catalog, priceRules };
-  const { saving, saved, error, dirty, run } = useSaver(pricingState, (next) => saveComponentCatalog(next.catalog, next.priceRules));
+  const pricingState = { catalog, priceRules, dollarQuote };
+  const { saving, saved, error, dirty, run, revert } = useSaver(pricingState, (next) =>
+    saveComponentCatalog(next.catalog, next.priceRules, next.dollarQuote || undefined),
+  );
   const [filter, setFilter] = useState("");
   const [category, setCategory] = useState<ComponentCatalogKey | "all">("all");
   const [applyingMargin, setApplyingMargin] = useState(false);
   const [marginMessage, setMarginMessage] = useState("");
+  const [dollarMessage, setDollarMessage] = useState("");
+  const [dollarInput, setDollarInput] = useState(
+    String(dollarQuote?.valor || 1545),
+  );
+  const [includeUnclassified, setIncludeUnclassified] = useState(false);
+  const [updatingDollar, setUpdatingDollar] = useState(false);
   const [showMarginRules, setShowMarginRules] = useState(true);
-  const [selectedComponents, setSelectedComponents] = useState<Set<string>>(new Set());
+  const [selectedComponents, setSelectedComponents] = useState<Set<string>>(
+    new Set(),
+  );
   const ruleCategory = category === "all" ? null : category;
-  const visible = useMemo(() => catalogDataKeys.flatMap((key) =>
-    (category === "all" || category === key ? catalog[key] || [] : [])
-      .map((component) => ({ key, component })),
-  ).filter(({ component }) =>
-    `${component.nombre} ${component.marca} ${component.modelo}`.toLowerCase().includes(filter.toLowerCase()),
-  ), [catalog, category, filter]);
-  const componentSelectionKey = (key: ComponentCatalogKey, id: string) => `${key}:${id}`;
-  const allVisibleComponentsSelected = visible.length > 0 && visible.every(({ key, component }) => selectedComponents.has(componentSelectionKey(key, component.id)));
-  const toggleComponent = (key: ComponentCatalogKey, id: string) => setSelectedComponents((current) => {
-    const next = new Set(current);
-    const selectionKey = componentSelectionKey(key, id);
-    if (next.has(selectionKey)) next.delete(selectionKey); else next.add(selectionKey);
-    return next;
-  });
+  const visible = useMemo(
+    () =>
+      catalogDataKeys
+        .flatMap((key) =>
+          (category === "all" || category === key
+            ? catalog[key] || []
+            : []
+          ).map((component) => ({ key, component })),
+        )
+        .filter(({ component }) =>
+          `${component.nombre} ${component.marca} ${component.modelo}`
+            .toLowerCase()
+            .includes(filter.toLowerCase()),
+        ),
+    [catalog, category, filter],
+  );
+  const componentSelectionKey = (key: ComponentCatalogKey, id: string) =>
+    `${key}:${id}`;
+  const allVisibleComponentsSelected =
+    visible.length > 0 &&
+    visible.every(({ key, component }) =>
+      selectedComponents.has(componentSelectionKey(key, component.id)),
+    );
+  const toggleComponent = (key: ComponentCatalogKey, id: string) =>
+    setSelectedComponents((current) => {
+      const next = new Set(current);
+      const selectionKey = componentSelectionKey(key, id);
+      if (next.has(selectionKey)) next.delete(selectionKey);
+      else next.add(selectionKey);
+      return next;
+    });
   const deleteSelectedComponents = () => {
     if (!selectedComponents.size) return;
     onRequestConfirm?.({
@@ -1246,10 +1504,17 @@ function ComponentesTab({
       title: `¿Eliminar ${selectedComponents.size} componente(s)?`,
       description: "Se eliminarán los componentes seleccionados del catálogo.",
       onConfirm: async () => {
-        const next = Object.fromEntries(catalogDataKeys.map((key) => [
-          key,
-          (catalog[key] || []).filter((component) => !selectedComponents.has(componentSelectionKey(key, component.id))),
-        ])) as ComponentCatalog;
+        const next = Object.fromEntries(
+          catalogDataKeys.map((key) => [
+            key,
+            (catalog[key] || []).filter(
+              (component) =>
+                !selectedComponents.has(
+                  componentSelectionKey(key, component.id),
+                ),
+            ),
+          ]),
+        ) as ComponentCatalog;
         setCatalog(next);
         setSelectedComponents(new Set());
         if (persistent) {
@@ -1265,14 +1530,31 @@ function ComponentesTab({
 
   const create = () => {
     const key = category === "all" ? catalogDataKeys[0] : category;
-    onEdit(normalizeCatalogProduct({ id: newId(), nombre: "", precio: 0, precioCosto: 0, stock: 0, imagen: "", categoria: key }, key, 0));
+    onEdit(
+      normalizeCatalogProduct(
+        {
+          id: newId(),
+          nombre: "",
+          precio: 0,
+          precioCosto: 0,
+          stock: 0,
+          imagen: "",
+          categoria: key,
+        },
+        key,
+        0,
+      ),
+    );
   };
 
   const remove = (key: ComponentCatalogKey, id: string) => {
     const component = catalog[key]?.find((item) => item.id === id);
     if (!component) return;
     const deleteComponent = async () => {
-      const next = { ...catalog, [key]: catalog[key].filter((item) => item.id !== id) };
+      const next = {
+        ...catalog,
+        [key]: catalog[key].filter((item) => item.id !== id),
+      };
       setCatalog(next);
       if (persistent) {
         try {
@@ -1298,8 +1580,13 @@ function ComponentesTab({
     const rules = priceRules[ruleCategory] || [];
     const nextCategory = (catalog[ruleCategory] || []).map((component) => {
       const cost = Number(component.precioCosto ?? component.precio) || 0;
-      const rule = rules.find((item) => cost >= (item.min || 0) && (item.max == null || cost < item.max));
-      const price = rule ? Math.round(cost + (cost * (Number(rule.pct) || 0)) / 100) : Math.round(cost);
+      const rule = rules.find(
+        (item) =>
+          cost >= (item.min || 0) && (item.max == null || cost < item.max),
+      );
+      const price = rule
+        ? Math.round(cost + (cost * (Number(rule.pct) || 0)) / 100)
+        : Math.round(cost);
       return { ...component, precioCosto: cost, precio: price };
     });
     const next = { ...catalog, [ruleCategory]: nextCategory };
@@ -1308,19 +1595,141 @@ function ComponentesTab({
     try {
       if (persistent) await saveComponentCatalog(next, priceRules);
       setCatalog(next);
-      setMarginMessage(`Margen aplicado en ${componentCatalogLabels[ruleCategory].toUpperCase()}.`);
+      setMarginMessage(
+        `Margen aplicado en ${componentCatalogLabels[ruleCategory].toUpperCase()}.`,
+      );
     } catch (e) {
-      setMarginMessage(e instanceof Error ? e.message : "No se pudo aplicar el margen.");
+      setMarginMessage(
+        e instanceof Error ? e.message : "No se pudo aplicar el margen.",
+      );
     } finally {
       setApplyingMargin(false);
     }
   };
 
+  const updateCostsFromDollar = () => {
+    const value = Number(dollarInput.replace(",", "."));
+    if (!persistent) {
+      setDollarMessage(
+        "Conecta Vercel Blob para guardar la cotización y actualizar costos.",
+      );
+      return;
+    }
+    if (!Number.isFinite(value) || value <= 0) {
+      setDollarMessage("Ingresá una cotización válida mayor a cero.");
+      return;
+    }
+
+    const unclassified = catalogDataKeys
+      .flatMap((key) => catalog[key] || [])
+      .filter(
+        (component) => {
+          const currentCost = Number(component.precioCosto ?? component.precio) || 0;
+          return currentCost > 0 &&
+            component.monedaCosto !== "USD" &&
+            !(Number(component.costoBaseUsd) > 0);
+        },
+      );
+    if (unclassified.length > 0 && !includeUnclassified) {
+      setDollarMessage(
+        `${unclassified.length} componente(s) no tienen costo USD confirmado. Activá la opción de migración inicial para incluirlos.`,
+      );
+      return;
+    }
+
+    onRequestConfirm?.({
+      open: true,
+      title: "Actualizar costos con dólar blue venta",
+      description: includeUnclassified
+        ? `Se convertirán ${unclassified.length} costo(s) actuales en ARS a una base USD usando $${INITIAL_DOLLAR_QUOTE}, y luego se calcularán con la cotización ingresada. Se reaplicarán los márgenes por rango. ¿Continuar?`
+        : "Se actualizarán sólo los componentes con costo USD confirmado y se reaplicarán los márgenes por rango. ¿Continuar?",
+      onConfirm: async () => {
+        setUpdatingDollar(true);
+        setDollarMessage("");
+        const updatedAt = new Date().toISOString();
+        const next = Object.fromEntries(
+          catalogDataKeys.map((key) => [
+            key,
+            (catalog[key] || []).map((component) => {
+              const currentCost =
+                Number(component.precioCosto ?? component.precio) || 0;
+              const baseUsd =
+                Number(component.costoBaseUsd) > 0
+                  ? Number(component.costoBaseUsd)
+                  : includeUnclassified && currentCost > 0
+                    ? currentCost / INITIAL_DOLLAR_QUOTE
+                    : 0;
+              if (baseUsd <= 0) return component;
+              const cost = Math.round(baseUsd * value);
+              const rule = (priceRules[key] || []).find(
+                (item) =>
+                  cost >= (item.min || 0) &&
+                  (item.max == null || cost < item.max),
+              );
+              const price = rule
+                ? Math.round(cost + (cost * (Number(rule.pct) || 0)) / 100)
+                : Math.round(cost);
+              return {
+                ...component,
+                precioCosto: cost,
+                precio: price,
+                monedaCosto: "USD" as const,
+                costoBaseUsd: baseUsd,
+                cotizacionDolar: value,
+                costoActualizadoEn: updatedAt,
+              };
+            }),
+          ]),
+        ) as ComponentCatalog;
+        const nextQuote = { valor: value, actualizadoEn: updatedAt };
+        try {
+          await saveComponentCatalog(next, priceRules, nextQuote);
+          setCatalog(next);
+          setDollarQuote(nextQuote);
+          setDollarInput(String(value));
+          const updatedCount = catalogDataKeys.reduce(
+            (total, key) =>
+              total +
+              (next[key] || []).filter(
+                (component) =>
+                  component.cotizacionDolar === value &&
+                  component.costoActualizadoEn === updatedAt,
+              ).length,
+            0,
+          );
+          setDollarMessage(
+            `${updatedCount} componente(s) actualizado(s) con dólar venta $${value.toLocaleString("es-AR")}.`,
+          );
+        } catch (error) {
+          setDollarMessage(
+            error instanceof Error
+              ? error.message
+              : "No se pudieron actualizar los costos.",
+          );
+        } finally {
+          setUpdatingDollar(false);
+        }
+      },
+    });
+  };
+
   return (
     <div className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-3">
-        <StatCard label="Componentes" value={catalogDataKeys.reduce((sum, key) => sum + (catalog[key]?.length || 0), 0)} />
-        <StatCard label="Categorías" value={catalogDataKeys.filter((key) => (catalog[key]?.length || 0) > 0).length} />
+        <StatCard
+          label="Componentes"
+          value={catalogDataKeys.reduce(
+            (sum, key) => sum + (catalog[key]?.length || 0),
+            0,
+          )}
+        />
+        <StatCard
+          label="Categorías"
+          value={
+            catalogDataKeys.filter((key) => (catalog[key]?.length || 0) > 0)
+              .length
+          }
+        />
         <StatCard label="Origen" value="Vercel Blob" />
       </div>
 
@@ -1328,27 +1737,63 @@ function ComponentesTab({
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 className="text-lg font-semibold">Componentes</h2>
-            <p className="text-xs text-slate-500">Catálogo compartido por Armá tu PC y la tienda de componentes.</p>
+            <p className="text-xs text-slate-500">
+              Catálogo compartido por Armá tu PC y la tienda de componentes.
+            </p>
           </div>
           <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:gap-3">
-            <button onClick={create} className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 sm:flex-none sm:px-4">
+            <button
+              onClick={create}
+              className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 sm:flex-none sm:px-4"
+            >
               <Plus className="size-4" /> Nuevo componente
             </button>
-            <button onClick={onOpenBulk} className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 sm:flex-none sm:px-4">
+            <button
+              onClick={onOpenBulk}
+              className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 sm:flex-none sm:px-4"
+            >
               Carga masiva
             </button>
-            <SaveButton dirty={dirty} saving={saving} saved={saved} error={error} onSave={run} persistent={persistent} />
+            <SaveButton
+              dirty={dirty}
+              saving={saving}
+              saved={saved}
+              error={error}
+              onSave={run}
+              onRevert={() => {
+                const previous = revert();
+                setCatalog(previous.catalog);
+                setPriceRules(previous.priceRules);
+                setDollarQuote(previous.dollarQuote);
+              }}
+              persistent={persistent}
+            />
           </div>
         </div>
 
         <div className="mb-4 grid gap-3 sm:grid-cols-[1fr_260px]">
           <div className="relative">
             <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
-            <input className={`${input} pl-9`} placeholder="Buscar componente..." value={filter} onChange={(event) => setFilter(event.target.value)} />
+            <input
+              className={`${input} pl-9`}
+              placeholder="Buscar componente..."
+              value={filter}
+              onChange={(event) => setFilter(event.target.value)}
+            />
           </div>
-          <select className={input} value={category} onChange={(event) => setCategory(event.target.value as ComponentCatalogKey | "all")}>
+          <select
+            className={input}
+            value={category}
+            onChange={(event) =>
+              setCategory(event.target.value as ComponentCatalogKey | "all")
+            }
+          >
             <option value="all">Todas las categorías</option>
-            {catalogDataKeys.map((key) => <option key={key} value={key}>{componentCatalogLabels[key].toUpperCase()}</option>)}
+            {catalogDataKeys.map((key) => (
+              <option key={key} value={key}>
+                {componentCatalogLabels[key].toUpperCase()}
+              </option>
+            ))}
           </select>
         </div>
 
@@ -1362,62 +1807,238 @@ function ComponentesTab({
             {showMarginRules ? "Ocultar margen" : "Mostrar margen"}
           </button>
         </div>
-        {showMarginRules && <div className="mb-5 rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 via-white to-sky-50 p-4 shadow-sm">
-          <div className="mb-3">
-            <h3 className="text-sm font-semibold">Margen por rango</h3>
-            <p className="text-xs text-slate-500">Se aplica al costo cargado y define el efectivo/transferencia de esta categoría.</p>
+        <div className="mb-5 grid gap-4 lg:grid-cols-2">
+          <div className="rounded-2xl border border-sky-200 bg-sky-50/70 p-4 shadow-sm">
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div>
+                <h3 className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+                  <DollarSign className="size-4 text-sky-700" />
+                  Cotización dólar blue venta
+                </h3>
+                <p className="mt-1 text-xs text-slate-600">
+                  Actualiza sólo costos USD, recalcula el efectivo por rango y
+                  conserva la base para evitar aumentos acumulativos.
+                </p>
+              </div>
+              <div className="text-right text-xs text-slate-500">
+                <p>
+                  {dollarQuote
+                    ? `Última actualización: ${new Date(dollarQuote.actualizadoEn).toLocaleString("es-AR")}`
+                    : "Sin actualización guardada"}
+                </p>
+                {dollarMessage && (
+                  <p className="mt-1 max-w-xs font-semibold text-sky-700">
+                    {dollarMessage}
+                  </p>
+                )}
+              </div>
+            </div>
+            <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-end">
+              <label className="flex-1 text-xs font-semibold text-slate-700">
+                Valor venta (ARS)
+                <input
+                  type="number"
+                  min="1"
+                  step="0.01"
+                  value={dollarInput}
+                  onChange={(event) => setDollarInput(event.target.value)}
+                  className={`${input} mt-1 bg-white`}
+                />
+              </label>
+              <button
+                type="button"
+                onClick={updateCostsFromDollar}
+                disabled={updatingDollar || !persistent}
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-sky-700 px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-sky-800 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {updatingDollar && <Loader2 className="size-4 animate-spin" />}
+                Actualizar costos
+              </button>
+            </div>
+            <label className="mt-3 flex cursor-pointer items-start gap-2 text-xs text-slate-600">
+              <input
+                type="checkbox"
+                checked={includeUnclassified}
+                onChange={(event) =>
+                  setIncludeUnclassified(event.target.checked)
+                }
+                className="mt-0.5 size-4 accent-sky-700"
+              />
+              Actualizar base de USD.
+            </label>
           </div>
-          <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-            <span className="text-xs font-semibold text-slate-600">Los cambios se calculan desde el costo.</span>
-            <button
-              type="button"
-              onClick={() => void applyMargin()}
-              disabled={!ruleCategory || applyingMargin || !persistent}
-              className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {applyingMargin && <Loader2 className="size-4 animate-spin" />}
-              {applyingMargin ? "Aplicando..." : "Aplicar margen"}
-            </button>
-          </div>
-          {ruleCategory ? (
-            <CategoryPriceRules
-              rules={priceRules[ruleCategory] || []}
-              onChange={(rules) => setPriceRules((current) => ({ ...current, [ruleCategory]: rules }))}
-            />
-          ) : (
-            <p className="rounded-lg border border-dashed border-slate-300 bg-white/70 px-3 py-3 text-sm text-slate-600">Selecciona una categoria para editar y aplicar sus rangos.</p>
+          {showMarginRules && (
+            <div className="rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 via-white to-sky-50 p-4 shadow-sm">
+              <div className="mb-3">
+                <h3 className="text-sm font-semibold">Margen por rango</h3>
+                <p className="text-xs text-slate-500">
+                  Se aplica al costo cargado y define el efectivo/transferencia
+                  de esta categoría.
+                </p>
+              </div>
+              <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+                <span className="text-xs font-semibold text-slate-600">
+                  Los cambios se calculan desde el costo.
+                </span>
+                <button
+                  type="button"
+                  onClick={() => void applyMargin()}
+                  disabled={!ruleCategory || applyingMargin || !persistent}
+                  className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {applyingMargin && (
+                    <Loader2 className="size-4 animate-spin" />
+                  )}
+                  {applyingMargin ? "Aplicando..." : "Aplicar margen"}
+                </button>
+              </div>
+              {ruleCategory ? (
+                <CategoryPriceRules
+                  rules={priceRules[ruleCategory] || []}
+                  onChange={(rules) =>
+                    setPriceRules((current) => ({
+                      ...current,
+                      [ruleCategory]: rules,
+                    }))
+                  }
+                />
+              ) : (
+                <p className="rounded-lg border border-dashed border-slate-300 bg-white/70 px-3 py-3 text-sm text-slate-600">
+                  Selecciona una categoria para editar y aplicar sus rangos.
+                </p>
+              )}
+              {marginMessage && (
+                <p className="mt-3 text-xs font-semibold text-slate-600">
+                  {marginMessage}
+                </p>
+              )}
+            </div>
           )}
-          {marginMessage && <p className="mt-3 text-xs font-semibold text-slate-600">{marginMessage}</p>}
-        </div>}
+        </div>
 
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
           <label className="flex min-h-10 cursor-pointer items-center gap-2 text-sm font-semibold text-slate-700">
-            <input type="checkbox" checked={allVisibleComponentsSelected} onChange={() => setSelectedComponents((current) => allVisibleComponentsSelected ? new Set([...current].filter((id) => !visible.some(({ key, component }) => componentSelectionKey(key, component.id) === id))) : new Set([...current, ...visible.map(({ key, component }) => componentSelectionKey(key, component.id))]))} className="size-4 accent-sky-600" />
+            <input
+              type="checkbox"
+              checked={allVisibleComponentsSelected}
+              onChange={() =>
+                setSelectedComponents((current) =>
+                  allVisibleComponentsSelected
+                    ? new Set(
+                        [...current].filter(
+                          (id) =>
+                            !visible.some(
+                              ({ key, component }) =>
+                                componentSelectionKey(key, component.id) === id,
+                            ),
+                        ),
+                      )
+                    : new Set([
+                        ...current,
+                        ...visible.map(({ key, component }) =>
+                          componentSelectionKey(key, component.id),
+                        ),
+                      ]),
+                )
+              }
+              className="size-4 accent-sky-600"
+            />
             Seleccionar visibles
           </label>
-          {selectedComponents.size > 0 && <button type="button" onClick={deleteSelectedComponents} className="min-h-10 rounded-lg bg-rose-600 px-3 py-2 text-sm font-bold text-white transition hover:bg-rose-700">Eliminar seleccionados ({selectedComponents.size})</button>}
+          {selectedComponents.size > 0 && (
+            <button
+              type="button"
+              onClick={deleteSelectedComponents}
+              className="min-h-10 rounded-lg bg-rose-600 px-3 py-2 text-sm font-bold text-white transition hover:bg-rose-700"
+            >
+              Eliminar seleccionados ({selectedComponents.size})
+            </button>
+          )}
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="border-b text-left text-xs uppercase text-slate-400">
-              <tr><th className="w-10 px-3 py-2"><span className="sr-only">Seleccionar</span></th><th className="px-3 py-2">COMPONENTE</th><th className="px-3 py-2">CATEGORÍA</th><th className="px-3 py-2 text-orange-600">COSTO</th><th className="px-3 py-2 text-emerald-700">PRECIO EFT</th><th className="px-3 py-2 text-rose-700">CRÉDITO</th><th className="px-3 py-2" /></tr>
+              <tr>
+                <th className="w-10 px-3 py-2">
+                  <span className="sr-only">Seleccionar</span>
+                </th>
+                <th className="px-3 py-2">COMPONENTE</th>
+                <th className="px-3 py-2">CATEGORÍA</th>
+                <th className="px-3 py-2 text-orange-600">COSTO</th>
+                <th className="px-3 py-2 text-emerald-700">PRECIO EFT</th>
+                <th className="px-3 py-2 text-rose-700">CRÉDITO</th>
+                <th className="px-3 py-2" />
+              </tr>
             </thead>
             <tbody className="divide-y">
               {visible.map(({ key, component }) => (
-                <tr key={`${key}-${component.id}`} className="hover:bg-slate-50">
-                  <td className="px-3 py-2"><input type="checkbox" checked={selectedComponents.has(componentSelectionKey(key, component.id))} onChange={() => toggleComponent(key, component.id)} aria-label={`Seleccionar ${component.nombre}`} className="size-4 accent-sky-600" /></td>
-                  <td className="px-3 py-2"><div className="flex items-center gap-2">{component.imagen && <img src={component.imagen} alt="" className="size-9 rounded border object-contain" />}{component.nombre}</div></td>
-                  <td className="px-3 py-2 text-slate-500">{componentCatalogLabels[key].toUpperCase()}</td>
-                  <td className="px-3 py-2 font-semibold text-orange-600">{money(Number(component.precioCosto ?? component.precio))}</td>
-                  <td className="px-3 py-2 font-semibold text-emerald-700">{money(component.precio)}</td>
-                  <td className="px-3 py-2 font-semibold text-rose-700">{money(calculateInstallmentPrice(Number(component.precio) || 0))}</td>
-                  <td className="px-3 py-2 text-right"><button onClick={() => onEdit(component)} className="mr-2 rounded border p-2 hover:bg-slate-100" aria-label="Editar"><Pencil className="size-4" /></button><button onClick={() => void remove(key, component.id)} className="rounded border p-2 text-rose-600 hover:bg-rose-50" aria-label="Eliminar"><Trash2 className="size-4" /></button></td>
+                <tr
+                  key={`${key}-${component.id}`}
+                  className="hover:bg-slate-50"
+                >
+                  <td className="px-3 py-2">
+                    <input
+                      type="checkbox"
+                      checked={selectedComponents.has(
+                        componentSelectionKey(key, component.id),
+                      )}
+                      onChange={() => toggleComponent(key, component.id)}
+                      aria-label={`Seleccionar ${component.nombre}`}
+                      className="size-4 accent-sky-600"
+                    />
+                  </td>
+                  <td className="px-3 py-2">
+                    <div className="flex items-center gap-2">
+                      {component.imagen && (
+                        <img
+                          src={component.imagen}
+                          alt=""
+                          className="size-9 rounded border object-contain"
+                        />
+                      )}
+                      {component.nombre}
+                    </div>
+                  </td>
+                  <td className="px-3 py-2 text-slate-500">
+                    {componentCatalogLabels[key].toUpperCase()}
+                  </td>
+                  <td className="px-3 py-2 font-semibold text-orange-600">
+                    {money(Number(component.precioCosto ?? component.precio))}
+                  </td>
+                  <td className="px-3 py-2 font-semibold text-emerald-700">
+                    {money(component.precio)}
+                  </td>
+                  <td className="px-3 py-2 font-semibold text-rose-700">
+                    {money(
+                      calculateInstallmentPrice(Number(component.precio) || 0),
+                    )}
+                  </td>
+                  <td className="px-3 py-2 text-right">
+                    <button
+                      onClick={() => onEdit(component)}
+                      className="mr-2 rounded border p-2 hover:bg-slate-100"
+                      aria-label="Editar"
+                    >
+                      <Pencil className="size-4" />
+                    </button>
+                    <button
+                      onClick={() => void remove(key, component.id)}
+                      className="rounded border p-2 text-rose-600 hover:bg-rose-50"
+                      aria-label="Eliminar"
+                    >
+                      <Trash2 className="size-4" />
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
-          {visible.length === 0 && <p className="py-10 text-center text-sm text-slate-500">No hay componentes cargados en Blob.</p>}
+          {visible.length === 0 && (
+            <p className="py-10 text-center text-sm text-slate-500">
+              No hay componentes cargados en Blob.
+            </p>
+          )}
         </div>
       </section>
     </div>
@@ -1432,33 +2053,67 @@ function StockTab({
   persistent,
   onEdit,
   onRequestConfirm,
+  notebookPriceRules,
+  setNotebookPriceRules,
+  dollarQuote,
+  setDollarQuote,
 }: {
   equipos: Equipo[];
   setEquipos: React.Dispatch<React.SetStateAction<Equipo[]>>;
   persistent: boolean;
   onEdit: (e: Equipo) => void;
   onRequestConfirm?: (req: ConfirmRequest) => void;
+  notebookPriceRules: PriceRule[];
+  setNotebookPriceRules: React.Dispatch<React.SetStateAction<PriceRule[]>>;
+  dollarQuote: DollarQuote | null;
+  setDollarQuote: React.Dispatch<React.SetStateAction<DollarQuote | null>>;
 }) {
-  const { saving, saved, error, dirty, run } = useSaver(equipos, saveEquipos);
+  const stockState = { equipos, notebookPriceRules, dollarQuote };
+  const { saving, saved, error, dirty, run, revert } = useSaver(stockState, (next) =>
+    saveStockCatalog(next.equipos, next.notebookPriceRules, next.dollarQuote || undefined),
+  );
   const [filter, setFilter] = useState("");
+  const [category, setCategory] = useState<EquipoCategoria | "all">("all");
+  const [dollarInput, setDollarInput] = useState(String(dollarQuote?.valor || INITIAL_DOLLAR_QUOTE));
+  const [includeUnclassified, setIncludeUnclassified] = useState(false);
+  const [updatingDollar, setUpdatingDollar] = useState(false);
+  const [dollarMessage, setDollarMessage] = useState("");
+  const [applyingMargin, setApplyingMargin] = useState(false);
+  const [marginMessage, setMarginMessage] = useState("");
+  const [showPricing, setShowPricing] = useState(true);
+  const [bulkOpen, setBulkOpen] = useState(false);
+  const [selectedEquipos, setSelectedEquipos] = useState<Set<string>>(new Set());
 
   const disponibles = equipos.filter((e) => e.estado !== "vendido").length;
   const destacados = equipos.filter((e) => e.recomendada).length;
 
   const sorted = useMemo(
-    () => [...equipos].sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0)),
+    () => [...equipos].sort((a, b) => {
+      const aIsNotebook = normalizeStockCategoryValue(a.categoria) === "notebook";
+      const bIsNotebook = normalizeStockCategoryValue(b.categoria) === "notebook";
+      if (aIsNotebook && bIsNotebook) {
+        const priceDifference = Number(a.promo || a.original || 0) - Number(b.promo || b.original || 0);
+        if (priceDifference !== 0) return priceDifference;
+      }
+      return (a.orden ?? 0) - (b.orden ?? 0);
+    }),
     [equipos],
   );
   const visible = sorted.filter((e) =>
     `${e.nombre} ${e.marca} ${e.categoria}`
       .toLowerCase()
       .includes(filter.toLowerCase()),
-  );
+  ).filter((e) => category === "all" || normalizeStockCategoryValue(e.categoria) === category);
+  const isNotebookSelected = category === "notebook";
+  const allVisibleEquiposSelected =
+    visible.length > 0 && visible.every((equipment) => selectedEquipos.has(equipment.id));
 
   const groupedVisible = useMemo(() => {
     const groups = CATEGORIAS_EQUIPO.map((category) => ({
       category,
-      items: visible.filter((e) => normalizeStockCategoryValue(e.categoria) === category.value),
+      items: visible.filter(
+        (e) => normalizeStockCategoryValue(e.categoria) === category.value,
+      ),
     })).filter((group) => group.items.length > 0);
 
     if (groups.length > 0) return groups;
@@ -1471,16 +2126,95 @@ function StockTab({
     ];
   }, [visible]);
 
-  const move = (id: string, dir: -1 | 1) => {
-    const idx = sorted.findIndex((e) => e.id === id);
-    const j = idx + dir;
-    if (j < 0 || j >= sorted.length) return;
-    const next = [...sorted];
-    [next[idx], next[j]] = [next[j], next[idx]];
-    setEquipos(next.map((e, i) => ({ ...e, orden: i })));
-  };
   const patch = (id: string, p: Partial<Equipo>) =>
     setEquipos((cur) => cur.map((e) => (e.id === id ? { ...e, ...p } : e)));
+
+  const toggleEquipo = (id: string) =>
+    setSelectedEquipos((current) => {
+      const next = new Set(current);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+
+  const deleteSelectedEquipos = () => {
+    if (!selectedEquipos.size) return;
+    onRequestConfirm?.({
+      open: true,
+      title: `Eliminar ${selectedEquipos.size} equipo(s)?`,
+      description: "Se eliminarán los equipos seleccionados del stock.",
+      onConfirm: async () => {
+        const previous = equipos;
+        const next = equipos.filter((equipment) => !selectedEquipos.has(equipment.id));
+        setEquipos(next);
+        setSelectedEquipos(new Set());
+        if (persistent) {
+          try {
+            await saveStockCatalog(next, notebookPriceRules, dollarQuote || undefined);
+          } catch {
+            setEquipos(previous);
+          }
+        }
+      },
+    });
+  };
+
+  const applyNotebookMargin = async () => {
+    const next = equipos.map((equipment) => {
+      if (normalizeStockCategoryValue(equipment.categoria) !== "notebook") return equipment;
+      const cost = Number(equipment.precioCosto) || 0;
+      const rule = notebookPriceRules.find((item) => cost >= (item.min || 0) && (item.max == null || cost < item.max));
+      const price = rule ? Math.round(cost + (cost * (Number(rule.pct) || 0)) / 100) : Math.round(cost);
+      return { ...equipment, promo: price, original: calculateInstallmentPrice(price) };
+    });
+    setApplyingMargin(true); setMarginMessage("");
+    try {
+      if (persistent) await saveStockCatalog(next, notebookPriceRules, dollarQuote || undefined);
+      setEquipos(next); setMarginMessage("Margen aplicado en NOTEBOOKS.");
+    } catch (error) { setMarginMessage(error instanceof Error ? error.message : "No se pudo aplicar el margen."); }
+    finally { setApplyingMargin(false); }
+  };
+
+  const updateNotebookCosts = () => {
+    const value = Number(dollarInput.replace(",", "."));
+    if (!persistent) { setDollarMessage("Conecta Vercel Blob para guardar la cotización y actualizar costos."); return; }
+    if (!Number.isFinite(value) || value <= 0) { setDollarMessage("Ingresá una cotización válida mayor a cero."); return; }
+    const notebooks = equipos.filter((equipment) => normalizeStockCategoryValue(equipment.categoria) === "notebook" && (Number(equipment.precioCosto) || 0) > 0);
+    const unclassified = notebooks.filter((equipment) => equipment.monedaCosto !== "USD" && !(Number(equipment.costoBaseUsd) > 0));
+    if (unclassified.length > 0 && !includeUnclassified) {
+      setDollarMessage(`${unclassified.length} notebook(s) no tienen base USD. Activá la inicialización desde ARS para incluirlas.`);
+      return;
+    }
+    onRequestConfirm?.({
+      open: true,
+      title: "Actualizar costos de notebooks",
+      description: includeUnclassified
+        ? `Se convertirán ${unclassified.length} costo(s) actuales en ARS a base USD usando $${INITIAL_DOLLAR_QUOTE} y se aplicará la cotización ingresada. También se reaplicará el margen por rango.`
+        : "Se actualizarán sólo notebooks con base USD y se reaplicará el margen por rango.",
+      onConfirm: async () => {
+        setUpdatingDollar(true); setDollarMessage("");
+        const updatedAt = new Date().toISOString();
+        const next = equipos.map((equipment) => {
+          if (normalizeStockCategoryValue(equipment.categoria) !== "notebook") return equipment;
+          const currentCost = Number(equipment.precioCosto) || 0;
+          const baseUsd = Number(equipment.costoBaseUsd) > 0 ? Number(equipment.costoBaseUsd) : includeUnclassified && currentCost > 0 ? currentCost / INITIAL_DOLLAR_QUOTE : 0;
+          if (baseUsd <= 0) return equipment;
+          const cost = Math.round(baseUsd * value);
+          const rule = notebookPriceRules.find((item) => cost >= (item.min || 0) && (item.max == null || cost < item.max));
+          const price = rule ? Math.round(cost + (cost * (Number(rule.pct) || 0)) / 100) : Math.round(cost);
+          return { ...equipment, precioCosto: cost, promo: price, original: calculateInstallmentPrice(price), monedaCosto: "USD" as const, costoBaseUsd: baseUsd, cotizacionDolar: value, costoActualizadoEn: updatedAt };
+        });
+        const nextQuote = { valor: value, actualizadoEn: updatedAt };
+        try {
+          await saveStockCatalog(next, notebookPriceRules, nextQuote);
+          setEquipos(next); setDollarQuote(nextQuote); setDollarInput(String(value));
+          const count = next.filter((equipment) => equipment.cotizacionDolar === value && equipment.costoActualizadoEn === updatedAt).length;
+          setDollarMessage(`${count} notebook(s) actualizado(s) con dólar venta $${value.toLocaleString("es-AR")}.`);
+        } catch (error) { setDollarMessage(error instanceof Error ? error.message : "No se pudieron actualizar los costos."); }
+        finally { setUpdatingDollar(false); }
+      },
+    });
+  };
 
   return (
     <div className="space-y-6">
@@ -1498,37 +2232,101 @@ function StockTab({
               Celulares, notebooks, PC armadas, tablets y TVs
             </p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:gap-3">
             <button
               onClick={() => onEdit(emptyEquipo())}
-              className="inline-flex items-center gap-2 rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+              className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 sm:flex-none sm:px-4"
             >
               <Plus className="size-4" /> Nuevo equipo
             </button>
+            {isNotebookSelected && (
+              <button
+                onClick={() => setBulkOpen((open) => !open)}
+                className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 sm:flex-none sm:px-4"
+              >
+                Carga masiva
+              </button>
+            )}
             <SaveButton
               dirty={dirty}
               saving={saving}
               saved={saved}
               error={error}
               onSave={run}
+              onRevert={() => {
+                const previous = revert();
+                setEquipos(previous.equipos);
+                setNotebookPriceRules(previous.notebookPriceRules);
+                setDollarQuote(previous.dollarQuote);
+                setDollarInput(String(previous.dollarQuote?.valor || INITIAL_DOLLAR_QUOTE));
+                setDollarMessage("");
+                setMarginMessage("");
+              }}
               persistent={persistent}
             />
           </div>
         </div>
 
-        <div className="relative mb-3">
-          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
-          <input
-            className={`${input} pl-9`}
-            placeholder="Buscar equipo…"
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-          />
+        <div className="mb-4 grid gap-3 sm:grid-cols-[1fr_260px]">
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+            <input className={`${input} pl-9`} placeholder="Buscar equipo..." value={filter} onChange={(e) => setFilter(e.target.value)} />
+          </div>
+          <select className={input} value={category} onChange={(event) => setCategory(event.target.value as EquipoCategoria | "all")}>
+            <option value="all">Todas las categorías</option>
+            {CATEGORIAS_EQUIPO.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
+          </select>
+        </div>
+
+        {isNotebookSelected && bulkOpen && <div className="mb-5"><NotebookBulkUpload equipos={equipos} priceRules={notebookPriceRules} dollarQuote={dollarQuote} persistent={persistent} onSaved={(next) => { setEquipos(next); setBulkOpen(false); }} /></div>}
+
+        {isNotebookSelected && <div className="mb-5 rounded-2xl border border-sky-200 bg-sky-50/70 p-4 shadow-sm">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div><h3 className="flex items-center gap-2 text-sm font-semibold text-slate-900"><DollarSign className="size-4 text-sky-700" />Dólar blue venta: sólo notebooks</h3><p className="mt-1 text-xs text-slate-600">Actualiza costo, reaplica el margen de notebooks y conserva la fórmula de cuotas.</p></div>
+            <div className="text-left text-xs text-slate-500 sm:text-right"><p>{dollarQuote ? `Última actualización: ${new Date(dollarQuote.actualizadoEn).toLocaleString("es-AR")}` : "Sin actualización guardada"}</p>{dollarMessage && <p className="mt-1 max-w-xs font-semibold text-sky-700">{dollarMessage}</p>}</div>
+          </div>
+          <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-end"><label className="flex-1 text-xs font-semibold text-slate-700">Valor venta (ARS)<input type="number" min="1" step="0.01" value={dollarInput} onChange={(event) => setDollarInput(event.target.value)} className={`${input} mt-1 bg-white`} /></label><button type="button" onClick={updateNotebookCosts} disabled={updatingDollar || !persistent} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-sky-700 px-4 py-2 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-50">{updatingDollar && <Loader2 className="size-4 animate-spin" />}Actualizar costos</button></div>
+          <label className="mt-3 flex cursor-pointer items-start gap-2 text-xs text-slate-600"><input type="checkbox" checked={includeUnclassified} onChange={(event) => setIncludeUnclassified(event.target.checked)} className="mt-0.5 size-4 accent-sky-700" />Inicializar los costos actuales en ARS como base USD usando $1545.</label>
+        </div>}
+
+        {isNotebookSelected && <div className="mb-5 rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 via-white to-sky-50 p-4 shadow-sm">
+          <div className="flex flex-wrap items-center justify-between gap-3"><div><h3 className="text-sm font-semibold">Margen por rango: notebooks</h3><p className="mt-1 text-xs text-slate-500">Se aplica únicamente al precio efectivo de las notebooks.</p></div><button type="button" onClick={() => setShowPricing((open) => !open)} className="rounded-lg border border-amber-300 bg-white px-3 py-2 text-xs font-bold text-amber-800">{showPricing ? "Ocultar margen" : "Mostrar margen"}</button></div>
+          {showPricing && <><div className="mt-3 flex flex-wrap items-center justify-between gap-3"><span className="text-xs font-semibold text-slate-600">Los cambios se calculan desde el costo.</span><button type="button" onClick={() => void applyNotebookMargin()} disabled={applyingMargin || !persistent} className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-50">{applyingMargin && <Loader2 className="size-4 animate-spin" />}Aplicar margen</button></div><CategoryPriceRules rules={notebookPriceRules} onChange={setNotebookPriceRules} />{marginMessage && <p className="mt-3 text-xs font-semibold text-slate-600">{marginMessage}</p>}</>}
+        </div>}
+
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+          <label className="flex min-h-10 cursor-pointer items-center gap-2 text-sm font-semibold text-slate-700">
+            <input
+              type="checkbox"
+              checked={allVisibleEquiposSelected}
+              onChange={() =>
+                setSelectedEquipos((current) =>
+                  allVisibleEquiposSelected
+                    ? new Set([...current].filter((id) => !visible.some((equipment) => equipment.id === id)))
+                    : new Set([...current, ...visible.map((equipment) => equipment.id)]),
+                )
+              }
+              className="size-4 accent-sky-600"
+            />
+            Seleccionar visibles
+          </label>
+          {selectedEquipos.size > 0 && (
+            <button
+              type="button"
+              onClick={deleteSelectedEquipos}
+              className="min-h-10 rounded-lg bg-rose-600 px-3 py-2 text-sm font-bold text-white transition hover:bg-rose-700"
+            >
+              Eliminar seleccionados ({selectedEquipos.size})
+            </button>
+          )}
         </div>
 
         <div className="space-y-6">
           {groupedVisible.map(({ category, items }) => (
-            <div key={category.value} className="rounded-2xl border border-slate-200 bg-slate-50/70">
+            <div
+              key={category.value}
+              className="rounded-2xl border border-slate-200 bg-slate-50/70"
+            >
               <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
                 <h3 className="text-sm font-bold uppercase tracking-[0.2em] text-slate-600">
                   {category.label}
@@ -1539,13 +2337,17 @@ function StockTab({
               </div>
 
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+                <table className="min-w-[820px] w-full text-sm">
                   <thead className="border-b text-left text-xs uppercase text-slate-400">
                     <tr>
-                      <th className="w-20 py-2 pr-3">Orden</th>
+                      <th className="w-10 px-3 py-2">
+                        <span className="sr-only">Seleccionar</span>
+                      </th>
                       <th className="px-3 py-2">Equipo</th>
                       <th className="px-3 py-2">Categoría</th>
-                      <th className="px-3 py-2">Precio</th>
+                      <th className="px-3 py-2 text-orange-600">COSTO</th>
+                      <th className="px-3 py-2 text-emerald-700">PRECIO EFT</th>
+                      <th className="px-3 py-2 text-rose-700">CRÉDITO</th>
                       <th className="px-3 py-2">Estado</th>
                       <th className="px-3 py-2"></th>
                     </tr>
@@ -1553,23 +2355,14 @@ function StockTab({
                   <tbody className="divide-y">
                     {items.map((e) => (
                       <tr key={e.id} className="hover:bg-slate-50">
-                        <td className="py-2 pr-3">
-                          <div className="flex gap-1">
-                            <button
-                              onClick={() => move(e.id, -1)}
-                              className="rounded border p-1 hover:bg-slate-100"
-                              aria-label="Subir"
-                            >
-                              <ArrowUp className="size-3" />
-                            </button>
-                            <button
-                              onClick={() => move(e.id, 1)}
-                              className="rounded border p-1 hover:bg-slate-100"
-                              aria-label="Bajar"
-                            >
-                              <ArrowDown className="size-3" />
-                            </button>
-                          </div>
+                        <td className="px-3 py-2">
+                          <input
+                            type="checkbox"
+                            checked={selectedEquipos.has(e.id)}
+                            onChange={() => toggleEquipo(e.id)}
+                            aria-label={`Seleccionar ${e.nombre}`}
+                            className="size-4 accent-sky-600"
+                          />
                         </td>
                         <td className="px-3 py-2">
                           <div className="flex items-center gap-2">
@@ -1589,15 +2382,23 @@ function StockTab({
                         <td className="px-3 py-2 text-slate-500">
                           {catLabel(e.categoria)}
                         </td>
-                        <td className="px-3 py-2 font-semibold">
+                        <td className="px-3 py-2 font-semibold text-orange-600">
+                          {e.precioCosto ? money(e.precioCosto) : "-"}
+                        </td>
+                        <td className="px-3 py-2 font-semibold text-emerald-700">
                           {money(e.promo || e.original)}
+                        </td>
+                        <td className="px-3 py-2 font-semibold text-rose-700">
+                          {money(calculateInstallmentPrice(e.promo || e.original))}
                         </td>
                         <td className="px-3 py-2">
                           <button
                             onClick={() =>
                               patch(e.id, {
                                 estado:
-                                  e.estado === "vendido" ? "disponible" : "vendido",
+                                  e.estado === "vendido"
+                                    ? "disponible"
+                                    : "vendido",
                               })
                             }
                             className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
@@ -1609,24 +2410,13 @@ function StockTab({
                             {e.estado === "vendido" ? "Vendido" : "Disponible"}
                           </button>
                         </td>
-                        <td className="px-3 py-2">
-                          <div className="flex justify-end gap-1">
-                            <button
-                              onClick={() => patch(e.id, { recomendada: !e.recomendada })}
-                              className={`rounded p-1.5 hover:bg-slate-100 ${
-                                e.recomendada ? "text-amber-500" : "text-slate-400"
-                              }`}
-                              aria-label="Destacar"
-                            >
-                              <Star
-                                className="size-4"
-                                fill={e.recomendada ? "currentColor" : "none"}
-                              />
-                            </button>
+                        <td className="min-w-[104px] px-3 py-2">
+                          <div className="flex items-center justify-end gap-2 whitespace-nowrap">
                             <button
                               onClick={() => onEdit(e)}
-                              className="rounded p-1.5 text-slate-500 hover:bg-slate-100"
+                              className="grid size-9 shrink-0 place-items-center rounded-lg border border-slate-200 text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
                               aria-label="Editar"
+                              title="Editar"
                             >
                               <Pencil className="size-4" />
                             </button>
@@ -1640,23 +2430,34 @@ function StockTab({
                                     if (persistent) {
                                       const next = equipos
                                         .filter((x) => x.id !== e.id)
-                                        .map((item, i) => ({ ...item, orden: typeof item.orden === "number" ? item.orden : i }));
+                                        .map((item, i) => ({
+                                          ...item,
+                                          orden:
+                                            typeof item.orden === "number"
+                                              ? item.orden
+                                              : i,
+                                        }));
                                       try {
                                         await saveEquipos(next);
-                                        window.dispatchEvent(new Event("equiposUpdated"));
+                                        window.dispatchEvent(
+                                          new Event("equiposUpdated"),
+                                        );
                                         setEquipos(next);
                                       } catch (err) {
                                         console.error("delete equipo", err);
                                         alert("No se pudo eliminar el equipo.");
                                       }
                                     } else {
-                                      setEquipos((cur) => cur.filter((x) => x.id !== e.id));
+                                      setEquipos((cur) =>
+                                        cur.filter((x) => x.id !== e.id),
+                                      );
                                     }
                                   },
                                 })
                               }
-                              className="rounded p-1.5 text-rose-600 hover:bg-rose-50"
+                              className="grid size-9 shrink-0 place-items-center rounded-lg border border-rose-200 text-rose-600 transition hover:bg-rose-50 hover:text-rose-700"
                               aria-label="Eliminar"
+                              title="Eliminar"
                             >
                               <Trash2 className="size-4" />
                             </button>

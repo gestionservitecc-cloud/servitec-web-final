@@ -2,8 +2,9 @@
 
 import type { Equipo, Producto } from "@/lib/types";
 import type { ComponentCatalog } from "@/lib/component-catalog";
-import type { PriceRule } from "./CategoryPriceRules";
 export type ComponentPriceRules = Partial<Record<keyof ComponentCatalog, PriceRule[]>>;
+export type DollarQuote = { valor: number; actualizadoEn: string };
+export type PriceRule = { min: number; max?: number | null; pct: number };
 
 export async function uploadImage(file: File): Promise<string> {
   const fd = new FormData();
@@ -25,6 +26,21 @@ export async function saveEquipos(equipos: Equipo[]) {
   return data;
 }
 
+export async function saveStockCatalog(
+  equipos: Equipo[],
+  notebookPriceRules: PriceRule[] = [],
+  dollarQuote?: DollarQuote,
+) {
+  const res = await fetch("/api/admin/stock", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ equipos, notebookPriceRules, ...(dollarQuote ? { dollarQuote } : {}) }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || "No se pudo guardar el stock.");
+  return data;
+}
+
 export async function saveProductos(productos: Producto[]) {
   const res = await fetch("/api/admin/productos", {
     method: "PUT",
@@ -36,11 +52,11 @@ export async function saveProductos(productos: Producto[]) {
   return data;
 }
 
-export async function saveComponentCatalog(catalog: ComponentCatalog, priceRules: ComponentPriceRules = {}) {
+export async function saveComponentCatalog(catalog: ComponentCatalog, priceRules: ComponentPriceRules = {}, dollarQuote?: DollarQuote) {
   const res = await fetch("/api/admin/componentes", {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ catalog, priceRules }),
+    body: JSON.stringify({ catalog, priceRules, ...(dollarQuote ? { dollarQuote } : {}) }),
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.error || "No se pudieron guardar los componentes.");
@@ -73,6 +89,8 @@ export const emptyEquipo = (): Equipo => ({
   estado: "disponible",
   original: 0,
   promo: 0,
+  precioCosto: 0,
+  stock: 0,
   recomendada: false,
   warranty: "",
   imagenes: [],

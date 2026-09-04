@@ -71,7 +71,7 @@ export function EquipoDialog({
 
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-h-[calc(100dvh-1.5rem)] max-w-[calc(100vw-1.5rem)] overflow-x-hidden overflow-y-auto p-4 sm:max-h-[92vh] sm:max-w-[calc(100vw-2rem)] sm:p-6 md:max-w-3xl">
+      <DialogContent className="w-[calc(100vw-1rem)] max-h-[calc(100dvh-1.5rem)] max-w-[calc(100vw-1rem)] overflow-x-hidden overflow-y-auto p-3 sm:max-h-[92vh] sm:w-[calc(100vw-2rem)] sm:max-w-[calc(100vw-2rem)] sm:p-6 md:max-w-3xl">
         <DialogHeader className="pr-8 sm:flex-row sm:items-center sm:justify-between">
           <DialogTitle>{equipo.nombre ? "Editar equipo" : "Nuevo equipo"}</DialogTitle>
           <PrivateNotesButton
@@ -123,7 +123,7 @@ export function EquipoDialog({
           {isPc ? (
             <ComponentesEditor
               catalog={componentCatalog}
-              value={draft.componentes}
+              value={draft.componentes || []}
               onChange={(v) => set("componentes", v)}
             />
           ) : isTablet || isTv ? (
@@ -257,7 +257,7 @@ export function EquipoDialog({
               />
               {draft.promo && <p className="mt-1 text-[11px] text-red-500">3/6 cuotas: ${draft.promo ? calculateInstallmentPrice(Number(draft.promo)).toLocaleString("es-AR") : "0"}</p>}
             </Field>
-            <Field label="Condición">
+            <Field label="CondiciÃ³n">
               <Select
                 value={draft.condition}
                 onValueChange={(v) => set("condition", v)}
@@ -271,6 +271,16 @@ export function EquipoDialog({
                 </SelectContent>
               </Select>
             </Field>
+            {isNotebook && (
+              <>
+                <Field label="Costo actual (ARS)">
+                  <Input type="number" min="0" value={draft.precioCosto ?? ""} onChange={(e) => set("precioCosto", Number(e.target.value) || 0)} />
+                </Field>
+                <Field label="Stock">
+                  <Input type="number" min="0" value={draft.stock ?? ""} onChange={(e) => set("stock", Number(e.target.value) || 0)} />
+                </Field>
+              </>
+            )}
           </div>}
 
           {isTablet && (
@@ -429,7 +439,7 @@ function PrivateNotesButton({
 
 function ComponentesEditor({
   catalog,
-  value,
+  value = [],
   onChange,
 }: {
   catalog: ComponentCatalog;
@@ -475,7 +485,6 @@ function ComponentesEditor({
         {value.map((c, i) => (
           <div key={i} className="flex min-w-0 flex-wrap items-center gap-2 rounded-xl border border-slate-200 bg-white p-2 shadow-sm">
             {c.imagen && (
-              // eslint-disable-next-line @next/next/no-img-element
               <img src={c.imagen} alt="" className="size-10 shrink-0 rounded border border-slate-100 bg-white object-contain" />
             )}
             <div className="min-w-0 flex-1 basis-32">

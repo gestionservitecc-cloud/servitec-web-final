@@ -11,6 +11,10 @@ export type CatalogProduct = CatalogItem & {
   url: string;
   tags: string[];
   searchable: string;
+  monedaCosto?: "ARS" | "USD";
+  costoBaseUsd?: number;
+  cotizacionDolar?: number;
+  costoActualizadoEn?: string;
   [key: string]: unknown;
 };
 export type ComponentCatalog = Record<ComponentKey, CatalogProduct[]>;

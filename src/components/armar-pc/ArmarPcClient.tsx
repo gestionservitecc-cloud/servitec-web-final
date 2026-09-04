@@ -33,6 +33,7 @@ import {
   RotateCcw,
   Send,
   X,
+  Waves,
   Zap,
 } from "lucide-react";
 import { isPcArmadaCategoryValue } from "@/lib/utils";
@@ -57,6 +58,8 @@ type Option = {
   image?: string;
   platform?: string;
   memoryType?: string;
+  brand?: string;
+  specs?: Record<string, unknown>;
 };
 type Group = {
   key: ComponentKey;
@@ -157,17 +160,66 @@ const formatPrice = (price?: number) =>
 
 const normalizePlatform = (value?: string) => {
   if (!value) return undefined;
-  const normalized = value.replace(/\s/g, "").toUpperCase();
+  const socket = value.match(/AM[45]|S\d{4}|LGA\s?\d+/i)?.[0] || value;
+  const normalized = socket.replace(/\s/g, "").toUpperCase();
   if (normalized === "S1851" || normalized === "LGA1851") return "S1851";
   if (normalized === "S1700" || normalized === "LGA1700") return "S1700";
   return normalized;
 };
 
-const getPlatform = (option: Option) => normalizePlatform(option.platform ?? `${option.name} ${option.detail}`.match(/AM[45]|S\d{4}|LGA\s?\d+/i)?.[0]);
-const getMemoryType = (option: Option) => option.memoryType ?? `${option.name} ${option.detail}`.match(/DDR[45]/i)?.[0].toUpperCase();
+const normalizeSpecKey = (value: string) => normalizeCatalogText(value).replace(/[^a-z0-9]/g, "");
+const getSpec = (option: Option, keys: string[]) => {
+  const specs = option.specs || {};
+  const entries = Object.entries(specs);
+  const requested = keys.map(normalizeSpecKey);
+  const entry = entries.find(([key, value]) => requested.includes(normalizeSpecKey(key)) && value !== undefined && value !== null && String(value).trim());
+  return entry ? String(entry[1]).trim() : undefined;
+};
+const getOptionText = (option: Option) => `${option.name} ${option.detail} ${Object.values(option.specs || {}).join(" ")}`;
+const getPlatform = (option: Option) => normalizePlatform(
+  option.platform
+    || getSpec(option, ["socket", "plataforma", "socket compatible"])
+    || getOptionText(option).match(/AM[45]|S\d{4}|LGA\s?\d+/i)?.[0],
+);
+const getMemoryType = (option: Option) => (
+  option.memoryType
+  || getSpec(option, ["memoryType", "ramType", "tipo de memoria", "tipo de memoria ram"])
+  || getOptionText(option).match(/DDR[45]/i)?.[0]
+)?.toUpperCase();
+const getBrand = (option: Option) => {
+  const value = option.brand || getSpec(option, ["marca", "brand"]) || getOptionText(option);
+  if (/\bamd\b|\bryzen\b|\bathlon\b/i.test(value)) return "AMD";
+  if (/\bintel\b|\bcore\b|\bceleron\b|\bpentium\b/i.test(value)) return "INTEL";
+  return undefined;
+};
+const getRamSlots = (option?: Option) => {
+  if (!option) return undefined;
+  const value = getSpec(option, ["ramSlots", "cantidad de slots ram", "slots ram", "cantidad slots de ram"]);
+  const match = value?.match(/\d+/);
+  return match ? Math.max(1, Number(match[0])) : undefined;
+};
+const getNumbers = (option: Option, keys: string[]) => {
+  const value = getSpec(option, keys) || getOptionText(option);
+  const match = value.match(/\d+(?:[.,]\d+)?/);
+  return match ? Number(match[0].replace(",", ".")) : undefined;
+};
+const getSpecNumber = (option: Option | undefined, keys: string[]) => {
+  if (!option) return undefined;
+  const value = getSpec(option, keys);
+  const match = value?.match(/\d+(?:[.,]\d+)?/);
+  return match ? Number(match[0].replace(",", ".")) : undefined;
+};
+const getConsumptionWatts = (option: Option | undefined) => getSpecNumber(option, [
+  "consumo",
+  "powerConsumption",
+  "consumo energetico",
+  "tdp",
+]);
+const getCompatibleSockets = (option: Option) => getSpec(option, ["compatibleSocket", "socket compatible", "sockets compatibles", "socket"]);
+const getFormFactor = (option: Option) => getSpec(option, ["formFactor", "formato"]);
 const hasIntegratedGraphics = (option?: Option) => {
   if (!option) return false;
-  const description = `${option.name} ${option.detail}`;
+  const description = getOptionText(option);
   if (/video integrado|gr[aá]ficos integrados|integrated graphics/i.test(description)) return true;
   if (/apu|radeon graphics/i.test(description)) return true;
   if (/intel\s+(?:core|ultra)/i.test(option.name)) return !/\d{4,5}[a-z]*f\b/i.test(option.name);
@@ -185,8 +237,10 @@ const mapProduct = (product: CatalogProduct): Option => ({
   detail: "",
   precio: product.precio,
   image: catalogProductImage(product) || undefined,
-  platform: normalizePlatform(product.nombre.match(/AM[45]|S\d{4}|LGA\s?\d+/i)?.[0]),
-  memoryType: product.nombre.match(/DDR[45]/i)?.[0].toUpperCase(),
+  brand: product.marca,
+  specs: product.specs && typeof product.specs === "object" ? product.specs as Record<string, unknown> : undefined,
+  platform: normalizePlatform(String(product.socket || "").match(/AM[45]|S\d{4}|LGA\s?\d+/i)?.[0]),
+  memoryType: String(product.memoryType || product.ramType || "").match(/DDR[45]/i)?.[0].toUpperCase(),
 });
 
 const classifyPeripheral = (productName: string): ExtraKey | null => {
@@ -377,6 +431,7 @@ const ArmarPc = () => {
   const [selected, setSelected] = useState<
     Partial<Record<ComponentKey, number>>
   >({});
+  const [selectedMemorySlots, setSelectedMemorySlots] = useState<number[]>([]);
   const [selectedExtras, setSelectedExtras] = useState<ExtraKey[]>([]);
   const [selectedExtraModels, setSelectedExtraModels] = useState<Partial<Record<ExtraKey, number>>>({});
   const [openGroup, setOpenGroup] = useState<ComponentKey | null>(null);
@@ -475,7 +530,7 @@ const ArmarPc = () => {
     [catalogGroups],
   );
   const selectedGroups = pricedCatalogGroups.filter(
-    (group) => selected[group.key] !== undefined,
+    (group) => group.key === "memory" ? selectedMemorySlots.length > 0 : selected[group.key] !== undefined,
   );
   const orderedGroups = [...pricedCatalogGroups].sort((left, right) => {
     if (left.key === "processor") return -1;
@@ -525,29 +580,92 @@ const ArmarPc = () => {
   }, [availablePcs.length, step]);
   const currentExtra = catalogExtras.find((extra) => extra.key === openExtra);
   const currentExtraOptions = openExtra ? catalogExtraOptions[openExtra] ?? [currentExtra?.option].filter(Boolean) as Option[] : [];
-  const selectedProcessor = catalogGroups.find((group) => group.key === "processor")?.options[selected.processor ?? 0];
+  const selectedProcessor = selected.processor !== undefined ? catalogGroups.find((group) => group.key === "processor")?.options[selected.processor] : undefined;
+  const selectedMotherboard = selected.motherboard !== undefined ? catalogGroups.find((group) => group.key === "motherboard")?.options[selected.motherboard] : undefined;
+  const selectedGraphics = selected.graphics !== undefined ? catalogGroups.find((group) => group.key === "graphics")?.options[selected.graphics] : undefined;
+  const selectedPower = selected.power !== undefined ? catalogGroups.find((group) => group.key === "power")?.options[selected.power] : undefined;
+  const selectedCooling = selected.cooling !== undefined ? catalogGroups.find((group) => group.key === "cooling")?.options[selected.cooling] : undefined;
+  const selectedCase = selected.case !== undefined ? catalogGroups.find((group) => group.key === "case")?.options[selected.case] : undefined;
+  const maxMemorySlots = getRamSlots(selectedMotherboard) || 1;
   const requiresDedicatedGraphics = selectedProcessor !== undefined && !hasIntegratedGraphics(selectedProcessor);
   const requiredGroups = orderedGroups.filter((group) => group.key !== "graphics" || requiresDedicatedGraphics);
   const isComponentSelectionComplete = requiredGroups.every((group) => {
-    return selected[group.key] !== undefined;
+    return group.key === "memory" ? selectedMemorySlots.length > 0 : selected[group.key] !== undefined;
   });
+  const selectedConsumptionOptions = orderedGroups.flatMap((group) => {
+    if (group.key === "power") return [];
+    if (group.key === "memory") return selectedMemorySlots.map((index) => group.options[index]).filter(Boolean);
+    if (selected[group.key] === undefined) return [];
+    const option = group.options[selected[group.key]];
+    return option ? [option] : [];
+  });
+  const estimatedConsumption = selectedConsumptionOptions.reduce(
+    (total, option) => total + (getConsumptionWatts(option) || 0),
+    0,
+  );
+  const sourceCapacity = getSpecNumber(selectedPower, ["wattage", "potencia", "potencia total"]);
+  const consumptionPercentage = sourceCapacity
+    ? Math.min((estimatedConsumption / sourceCapacity) * 100, 100)
+    : 0;
+  const hasConsumptionData = selectedConsumptionOptions.some((option) => getConsumptionWatts(option) !== undefined);
+  const powerStatus = !selectedPower
+    ? "Seleccioná una fuente para definir el máximo"
+    : estimatedConsumption > sourceCapacity!
+      ? "El consumo estimado supera la potencia de la fuente"
+      : hasConsumptionData
+        ? "Consumo estimado dentro de la capacidad de la fuente"
+        : "Los componentes seleccionados no informan consumo";
   const graphicsSummary = selected.graphics !== undefined
     ? catalogGroups.find((group) => group.key === "graphics")?.options[selected.graphics]?.name
     : "Sin placa dedicada (usa los gráficos del procesador)";
   const isCompatible = (group: Group, option: Option) => {
     if (group.key === "memory") {
-      const motherboard = catalogGroups.find((item) => item.key === "motherboard");
-      const motherboardOption = motherboard && selected.motherboard !== undefined
-        ? motherboard.options[selected.motherboard]
-        : undefined;
-      const motherboardMemory = motherboardOption && getMemoryType(motherboardOption);
-      return !motherboardMemory || !getMemoryType(option) || getMemoryType(option) === motherboardMemory;
+      const motherboardMemory = selectedMotherboard && getMemoryType(selectedMotherboard);
+      return selectedMemorySlots.length < maxMemorySlots
+        && (!motherboardMemory || !getMemoryType(option) || getMemoryType(option) === motherboardMemory);
     }
 
     if (group.key !== "motherboard" && group.key !== "processor") {
-      return group.key !== "graphics"
-        || option.name !== "Graficos integrados"
-        || hasIntegratedGraphics(selectedProcessor);
+      if (group.key === "graphics" && option.name === "Graficos integrados") return hasIntegratedGraphics(selectedProcessor);
+      if (group.key === "cooling" && selectedProcessor) {
+        const compatibleSockets = getCompatibleSockets(option);
+        return !compatibleSockets || !getPlatform(selectedProcessor) || compatibleSockets.toUpperCase().includes(getPlatform(selectedProcessor) as string);
+      }
+      if (group.key === "storage" && selectedMotherboard) {
+        const interfaceName = getSpec(option, ["interface", "interfaz"]) || getOptionText(option);
+        const hasM2 = /m\.2|nvme/i.test(interfaceName);
+        const hasSata = /sata/i.test(interfaceName);
+        const m2Slots = getNumbers(selectedMotherboard, ["m2Slots", "slots m2", "slots m\.2"]);
+        const sataPorts = getNumbers(selectedMotherboard, ["sataPorts", "puertos sata"]);
+        if (hasM2 && m2Slots === 0) return false;
+        if (hasSata && sataPorts === 0) return false;
+      }
+      if (group.key === "power" && selectedGraphics) {
+        const requiredWatts = getNumbers(selectedGraphics, ["recommendedPsu", "fuente recomendada"]);
+        const powerWatts = getNumbers(option, ["wattage", "potencia"]);
+        if (requiredWatts !== undefined && powerWatts !== undefined && powerWatts < requiredWatts) return false;
+      }
+      if (group.key === "graphics" && selectedPower) {
+        const requiredWatts = getNumbers(option, ["recommendedPsu", "fuente recomendada"]);
+        const powerWatts = getNumbers(selectedPower, ["wattage", "potencia"]);
+        if (requiredWatts !== undefined && powerWatts !== undefined && powerWatts < requiredWatts) return false;
+      }
+      if (group.key === "case" && selectedMotherboard) {
+        const caseFormats = getSpec(option, ["compatibleMotherboards", "motherboards compatibles", "formato"]);
+        const motherboardFormat = getFormFactor(selectedMotherboard);
+        if (caseFormats && motherboardFormat && !normalizeCatalogText(caseFormats).includes(normalizeCatalogText(motherboardFormat))) return false;
+      }
+      if (group.key === "graphics" && selectedCase) {
+        const maxLength = getNumbers(selectedCase, ["maxGpuLength", "longitud maxima de gpu"]);
+        const gpuLength = getNumbers(option, ["length", "longitud"]);
+        if (maxLength !== undefined && gpuLength !== undefined && gpuLength > maxLength) return false;
+      }
+      if (group.key === "cooling" && selectedCase) {
+        const maxHeight = getNumbers(selectedCase, ["maxCoolerHeight", "altura maxima de cooler"]);
+        const coolerHeight = getNumbers(option, ["height", "altura"]);
+        if (maxHeight !== undefined && coolerHeight !== undefined && coolerHeight > maxHeight) return false;
+      }
+      return true;
     }
 
     const relatedKey = group.key === "motherboard" ? "processor" : "motherboard";
@@ -556,8 +674,14 @@ const ArmarPc = () => {
       ? relatedGroup.options[selected[relatedKey] ?? 0]
       : undefined;
 
-    if (!relatedOption?.platform) return true;
-    return !getPlatform(option) || getPlatform(option) === normalizePlatform(relatedOption.platform);
+    if (!relatedOption) return true;
+    const optionPlatform = getPlatform(option);
+    const relatedPlatform = getPlatform(relatedOption);
+    const optionBrand = getBrand(option);
+    const relatedBrand = getBrand(relatedOption);
+    if (optionPlatform && relatedPlatform && optionPlatform !== relatedPlatform) return false;
+    if (optionBrand && relatedBrand && optionBrand !== relatedBrand) return false;
+    return true;
   };
   const orderedOptions = currentGroup
     ? [...currentGroup.options].sort((left, right) => Number(isCompatible(currentGroup, right)) - Number(isCompatible(currentGroup, left)))
@@ -570,6 +694,7 @@ const ArmarPc = () => {
   
   const reset = () => {
     setSelected({});
+    setSelectedMemorySlots([]);
     setSelectedExtras([]);
     setSelectedExtraModels({});
     setPaymentMethod(null);
@@ -579,7 +704,7 @@ const ArmarPc = () => {
   };
   const pedidoNumero = useMemo(() => getNextPedidoNumber(readStoredPedidos()), [selected]);
 
-  const armarPedidoItems = useMemo(() => {
+  const armarPedidoItems = (() => {
     const items = paymentMethod
       ? [{
         nombre: `Forma de pago: ${paymentMethod === "tarjeta" ? "Tarjeta de crédito (3/6 cuotas)" : "Efectivo / Transferencia"}`,
@@ -588,8 +713,15 @@ const ArmarPc = () => {
       }]
       : [];
     orderedGroups
-      .filter((group) => selected[group.key] !== undefined)
+      .filter((group) => group.key === "memory" ? selectedMemorySlots.length > 0 : selected[group.key] !== undefined)
       .forEach((group) => {
+        if (group.key === "memory") {
+          selectedMemorySlots.forEach((memoryIndex) => {
+            const memory = group.options[memoryIndex];
+            if (memory) items.push({ nombre: memory.name, cantidad: 1, precio: parsePrice(memory.precio || 0) });
+          });
+          return;
+        }
         items.push({
           nombre: group.options[selected[group.key] ?? 0].name,
           cantidad: 1,
@@ -609,18 +741,18 @@ const ArmarPc = () => {
     });
 
     return items;
-  }, [catalogExtraOptions, catalogExtras, paymentMethod, selected, selectedExtraModels, selectedExtras, orderedGroups]);
+  })();
 
-  const itemsSubtotal = useMemo(() => armarPedidoItems.reduce((s, it) => s + (Number(it.precio || 0) * (it.cantidad || 1)), 0), [armarPedidoItems]);
+  const itemsSubtotal = armarPedidoItems.reduce((s, it) => s + (Number(it.precio || 0) * (it.cantidad || 1)), 0);
 
   // Use gross sum of green "Precio" values as efectivo/transferencia total
   const itemsGrossTotal = itemsSubtotal;
 
   // Calculate installment on the gross total when selection is complete
-  const installmentTotal = useMemo(() => {
+  const installmentTotal = (() => {
     if (!isComponentSelectionComplete) return 0;
     return calculateInstallmentPrice(itemsGrossTotal);
-  }, [isComponentSelectionComplete, itemsGrossTotal]);
+  })();
 
   const selectedTotal = paymentMethod === "tarjeta" && isComponentSelectionComplete ? installmentTotal : itemsGrossTotal;
 
@@ -760,15 +892,16 @@ const ArmarPc = () => {
                 {orderedGroups.map((group) => {
                   const Icon = group.icon;
                   const value = selected[group.key];
+                  const memorySelected = group.key === "memory" && selectedMemorySlots.length > 0;
                   return (
                     <div key={group.key} className="flex items-center gap-2">
                       <button
                         type="button"
                         onClick={() => setOpenGroup(group.key)}
-                        className={`flex min-w-0 flex-1 items-center gap-3 rounded-xl border border-red-100 bg-white p-3 text-left transition-colors hover:border-secondary/70 hover:bg-red-50 ${value !== undefined ? "border-secondary/60 bg-red-50" : ""}`}
+                        className={`flex min-w-0 flex-1 items-center gap-3 rounded-xl border border-red-100 bg-white p-3 text-left transition-colors hover:border-secondary/70 hover:bg-red-50 ${value !== undefined || memorySelected ? "border-secondary/60 bg-red-50" : ""}`}
                       >
-                        <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${value !== undefined ? "bg-secondary text-slate-950" : "bg-red-50 text-red-800"}`}>
-                          {value !== undefined ? <Check size={19} /> : <Icon size={19} />}
+                        <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${value !== undefined || memorySelected ? "bg-secondary text-slate-950" : "bg-red-50 text-red-800"}`}>
+                          {value !== undefined || memorySelected ? <Check size={19} /> : <Icon size={19} />}
                         </span>
                         <span className="min-w-0">
                           <span className="block text-sm font-semibold">{group.label}</span>
@@ -776,14 +909,16 @@ const ArmarPc = () => {
                             {value !== undefined ? group.options[value].name : group.key === "graphics" && !requiresDedicatedGraphics ? "Opcional con gráficos integrados" : "Seleccioná una opción"}
                           </span>
                         </span>
+                        {memorySelected && <span className="text-[11px] font-semibold text-secondary">{selectedMemorySlots.length}/{maxMemorySlots} slots</span>}
                         <ArrowRight size={15} className="ml-auto shrink-0 text-slate-500" />
                       </button>
-                      {value !== undefined && (
+                      {(value !== undefined || memorySelected) && (
                         <button
                           type="button"
                           onClick={() => setSelected((current) => {
                             const next = { ...current };
                             delete next[group.key];
+                            if (group.key === "memory") setSelectedMemorySlots([]);
                             return next;
                           })}
                           aria-label={`Quitar ${group.label}`}
@@ -795,6 +930,26 @@ const ArmarPc = () => {
                     </div>
                   );
                 })}
+              </div>
+              <div className="mx-auto mt-5 w-full max-w-3xl rounded-xl border border-sky-100 bg-sky-50/70 px-3 py-2.5 text-left" aria-live="polite">
+                <div className="flex items-center justify-between gap-3 text-xs">
+                  <span className="flex min-w-0 items-center gap-2 font-semibold text-sky-900">
+                    <Waves size={15} className="shrink-0 text-sky-600" />
+                    <span className="truncate">Consumo estimado</span>
+                  </span>
+                  <span className={`shrink-0 font-bold ${sourceCapacity !== undefined && estimatedConsumption > sourceCapacity ? "text-red-600" : "text-sky-800"}`}>
+                    {estimatedConsumption} W{sourceCapacity !== undefined ? ` / ${sourceCapacity} W` : ""}
+                  </span>
+                </div>
+                <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-sky-100" role="progressbar" aria-valuemin={0} aria-valuemax={sourceCapacity || 0} aria-valuenow={Math.min(estimatedConsumption, sourceCapacity || 0)} aria-label="Consumo estimado de la PC">
+                  <div
+                    className={`power-water-flow h-full rounded-full transition-[width] duration-500 ${sourceCapacity !== undefined && estimatedConsumption > sourceCapacity ? "bg-red-500" : "bg-sky-500"}`}
+                    style={{ width: `${consumptionPercentage}%` }}
+                  />
+                </div>
+                <p className={`mt-1 text-[11px] ${sourceCapacity !== undefined && estimatedConsumption > sourceCapacity ? "font-bold text-red-600" : "text-sky-700"}`}>
+                  {powerStatus}
+                </p>
               </div>
               <div className="mt-7 flex items-center justify-center gap-5">
                 <Button
@@ -900,9 +1055,18 @@ const ArmarPc = () => {
                       <div>
                         <p className="text-xs text-slate-500">{group.label}</p>
                         <p className="text-sm font-semibold">
-                          {group.options[selected[group.key] ?? 0].name}
+                          {group.key === "memory"
+                            ? `${selectedMemorySlots.length} modulo(s): ${selectedMemorySlots.map((index) => group.options[index]?.name).filter(Boolean).join(", ")}`
+                            : group.options[selected[group.key] ?? 0].name}
                         </p>
-                        {group.options[selected[group.key] ?? 0].precio !== undefined && (
+                        {group.key === "memory" ? (
+                          <>
+                            <p className="text-sm font-semibold text-emerald-700">
+                              Precio: {formatPrice(selectedMemorySlots.reduce((sum, index) => sum + parsePrice(group.options[index]?.precio || 0), 0))}
+                            </p>
+                            <p className="text-xs text-slate-500">Cada modulo ocupa 1 slot.</p>
+                          </>
+                        ) : group.options[selected[group.key] ?? 0].precio !== undefined && (
                           <>
                             <p className="text-sm font-semibold text-emerald-700">
                               Precio: {formatPrice(parsePrice(group.options[selected[group.key] ?? 0].precio))}
@@ -1075,14 +1239,24 @@ const ArmarPc = () => {
                   type="button"
                   disabled={!compatible}
                   onClick={() => {
+                    if (currentGroup.key === "memory") {
+                      setSelectedMemorySlots((slots) => {
+                        if (slots.length >= maxMemorySlots) return slots;
+                        return [...slots, index];
+                      });
+                      setSelected((value) => ({ ...value, memory: index }));
+                      return;
+                    }
                     setSelected((value) => {
                       const next = { ...value, [currentGroup.key]: index };
                       if (currentGroup.key === "motherboard") {
                         delete next.memory;
+                        setSelectedMemorySlots([]);
                       }
                       if (currentGroup.key === "processor") {
                         delete next.motherboard;
                         delete next.memory;
+                        setSelectedMemorySlots([]);
                         const graphicsGroup = catalogGroups.find((group) => group.key === "graphics");
                         const selectedGraphics = graphicsGroup?.options[next.graphics ?? 0];
                         if (selectedGraphics?.name === "Graficos integrados") delete next.graphics;
@@ -1091,7 +1265,7 @@ const ArmarPc = () => {
                     });
                     setOpenGroup(null);
                   }}
-                  className={`group flex w-full min-h-32 items-stretch justify-between gap-3 overflow-hidden rounded-xl border p-3 text-left transition-all duration-200 ${compatible ? "border-red-100 bg-white hover:-translate-y-1 hover:border-secondary hover:bg-red-50 hover:shadow-lg hover:shadow-red-100" : "cursor-not-allowed border-red-100 bg-red-50 opacity-40"} ${selected[currentGroup.key] === index ? "border-secondary bg-red-50" : ""}`}
+                  className={`group flex w-full min-h-32 items-stretch justify-between gap-3 overflow-hidden rounded-xl border p-3 text-left transition-all duration-200 ${compatible ? "border-red-100 bg-white hover:-translate-y-1 hover:border-secondary hover:bg-red-50 hover:shadow-lg hover:shadow-red-100" : "cursor-not-allowed border-red-100 bg-red-50 opacity-40"} ${selected[currentGroup.key] === index || (currentGroup.key === "memory" && selectedMemorySlots.includes(index)) ? "border-secondary bg-red-50" : ""}`}
                 >
                   <span className="flex min-w-0 flex-1 items-stretch gap-3">
                     <span className="component-image-slot">
@@ -1120,7 +1294,7 @@ const ArmarPc = () => {
                       )}
                     </span>
                   </span>
-                  {selected[currentGroup.key] === index && (
+                  {(selected[currentGroup.key] === index || (currentGroup.key === "memory" && selectedMemorySlots.includes(index))) && (
                     <Check className="shrink-0 text-secondary" size={20} />
                   )}
                 </button>
