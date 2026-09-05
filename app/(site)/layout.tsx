@@ -5,7 +5,7 @@ import { FloatingActions } from "@/components/site/FloatingActions";
 
 export default function SiteLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="halloween-theme flex min-h-screen flex-col">
       <Header />
       <main className="flex-1">{children}</main>
       <Footer />

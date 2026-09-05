@@ -18,7 +18,8 @@ import { asset } from "@/lib/assets";
 import { FeaturedStock } from "@/components/site/FeaturedStock";
 import { ReviewsSection } from "@/components/site/ReviewsSection";
 import { WhatsAppQuoteForm } from "@/components/site/WhatsAppQuoteForm";
-import { HeroBackdrop } from "@/components/site/HeroBackdrop";
+import { HalloweenBackdrop } from "@/components/site/HalloweenBackdrop";
+import { HalloweenBanner } from "@/components/site/HalloweenBanner";
 import { Reveal, Stagger, StaggerItem, Pressable } from "@/components/site/motion";
 import { waLink } from "@/components/site/site-config";
 
@@ -81,6 +82,7 @@ const repairCards = [
 export default function HomePage() {
   return (
     <>
+      <HalloweenBanner />
       {/* Hero */}
       <section className="relative overflow-hidden bg-sidebar text-sidebar-foreground">
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -88,36 +90,35 @@ export default function HomePage() {
           src={asset("BAN-IN.png")}
           alt=""
           aria-hidden
-          className="absolute inset-0 h-full w-full object-cover opacity-20"
+          className="absolute inset-0 h-full w-full object-cover opacity-10"
           loading="eager"
         />
         <div
           aria-hidden
           className="absolute inset-0 bg-gradient-to-b from-sidebar/70 via-sidebar/85 to-sidebar"
         />
-        <HeroBackdrop />
+        <HalloweenBackdrop />
 
         <div className="container-page relative py-20 sm:py-28 lg:py-32">
           <div className="mx-auto max-w-3xl text-center">
-            <Reveal as="p" y={12} className="eyebrow justify-center text-primary">
-              Venta de equipos · PC a medida · Servicio técnico
+            <Reveal as="p" y={12} className="eyebrow justify-center text-orange-300">
+              Halloween tech · Venta de equipos · PC a medida
             </Reveal>
             <Reveal
               as="h1"
               delay={0.05}
               className="mt-5 font-display text-4xl font-bold leading-[1.05] text-balance sm:text-5xl md:text-6xl"
             >
-              Comprá, armá y potenciá tu{" "}
-              <span className="text-primary">tecnología</span>
+              Entrá en la noche de la{" "}
+              <span className="halloween-gradient-text">tecnología</span>
             </Reveal>
             <Reveal
               as="p"
               delay={0.12}
               className="mx-auto mt-5 max-w-xl text-base text-sidebar-foreground/70 sm:text-lg"
             >
-              Notebooks, celulares y PC armadas con stock real. Configurá tu PC
-              ideal y sumá los accesorios. Y si algo falla, tenés nuestro servicio
-              técnico con garantía escrita.
+              Descubrí equipos y componentes con stock real, configurá tu PC ideal
+              y recibí asesoramiento para comprar con confianza.
             </Reveal>
 
             <Reveal
