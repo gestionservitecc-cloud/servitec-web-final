@@ -661,6 +661,7 @@ function DashboardTab({
     saveProductos,
   );
   const [filter, setFilter] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("all");
   const [selectedProducts, setSelectedProducts] = useState<Set<string>>(
     new Set(),
   );
@@ -686,9 +687,8 @@ function DashboardTab({
   );
 
   const visible = productos
-    .filter((p) =>
-      `${p.nombre} ${p.categoria}`.toLowerCase().includes(filter.toLowerCase()),
-    )
+    .filter((p) => categoryFilter === "all" || p.categoria === categoryFilter)
+    .filter((p) => `${p.nombre} ${p.categoria}`.toLowerCase().includes(filter.toLowerCase()))
     .sort((a, b) => a.nombre.localeCompare(b.nombre, "es"));
   const allVisibleProductsSelected =
     visible.length > 0 &&
@@ -910,7 +910,8 @@ function DashboardTab({
           />
         </div>
 
-        <div className="hidden">
+        <div className="mb-4 grid gap-3 sm:grid-cols-[1fr_260px]">
+          <div className="relative">
           <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
           <input
             className={`${input} pl-9`}
@@ -918,6 +919,17 @@ function DashboardTab({
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
           />
+          </div>
+          <select
+            className={input}
+            value={categoryFilter}
+            onChange={(event) => setCategoryFilter(event.target.value)}
+          >
+            <option value="all">Todas las categorías</option>
+            {categorias.map((categoria) => (
+              <option key={categoria} value={categoria}>{categoria}</option>
+            ))}
+          </select>
         </div>
 
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
@@ -967,7 +979,7 @@ function DashboardTab({
                 <th className="px-3 py-2 text-emerald-700">PRECIO EFT</th>
                 <th className="px-3 py-2 text-rose-700">CRÉDITO</th>
                 <th className="px-3 py-2">Unidades</th>
-                <th className="px-3 py-2"></th>
+                <th className="sticky right-0 z-10 bg-white px-3 py-2 shadow-[-6px_0_8px_-8px_rgba(15,23,42,0.35)]"></th>
               </tr>
             </thead>
             <tbody className="divide-y">
@@ -1014,12 +1026,13 @@ function DashboardTab({
                       {p.stock}
                     </span>
                   </td>
-                  <td className="px-3 py-2">
-                    <div className="flex justify-end gap-1">
+                  <td className="sticky right-0 z-[1] min-w-[104px] bg-white px-3 py-2 shadow-[-6px_0_8px_-8px_rgba(15,23,42,0.35)]">
+                    <div className="flex items-center justify-end gap-2 whitespace-nowrap">
                       <button
                         onClick={() => onEdit(p)}
-                        className="rounded p-1.5 text-slate-500 hover:bg-slate-100"
+                        className="grid size-9 shrink-0 place-items-center rounded-lg border border-slate-200 text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
                         aria-label="Editar"
+                        title="Editar"
                       >
                         <Pencil className="size-4" />
                       </button>
@@ -1037,8 +1050,9 @@ function DashboardTab({
                             },
                           })
                         }
-                        className="rounded p-1.5 text-rose-600 hover:bg-rose-50"
+                        className="grid size-9 shrink-0 place-items-center rounded-lg border border-slate-200 text-rose-600 transition hover:bg-rose-50"
                         aria-label="Eliminar"
+                        title="Eliminar"
                       >
                         <Trash2 className="size-4" />
                       </button>
@@ -2349,7 +2363,7 @@ function StockTab({
                       <th className="px-3 py-2 text-emerald-700">PRECIO EFT</th>
                       <th className="px-3 py-2 text-rose-700">CRÉDITO</th>
                       <th className="px-3 py-2">Estado</th>
-                      <th className="px-3 py-2"></th>
+                      <th className="sticky right-0 z-10 bg-white px-3 py-2 shadow-[-6px_0_8px_-8px_rgba(15,23,42,0.35)]"></th>
                     </tr>
                   </thead>
                   <tbody className="divide-y">
@@ -2410,7 +2424,7 @@ function StockTab({
                             {e.estado === "vendido" ? "Vendido" : "Disponible"}
                           </button>
                         </td>
-                        <td className="min-w-[104px] px-3 py-2">
+                        <td className="sticky right-0 z-[1] min-w-[104px] bg-white px-3 py-2 shadow-[-6px_0_8px_-8px_rgba(15,23,42,0.35)]">
                           <div className="flex items-center justify-end gap-2 whitespace-nowrap">
                             <button
                               onClick={() => onEdit(e)}

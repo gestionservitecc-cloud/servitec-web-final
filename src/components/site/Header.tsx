@@ -118,15 +118,7 @@ export function Header() {
         </nav>
 
         <div className="hidden items-center gap-2 lg:flex">
-          <Button
-            asChild
-            variant="ghost"
-            size="sm"
-            className="text-muted-foreground"
-          >
-            <Link href="/condiciones">Condiciones</Link>
-          </Button>
-          <Button asChild size="sm" className="shadow-soft">
+            <Button asChild size="sm" className="shadow-soft">
             <Link href="/presupuesto">Presupuesto online</Link>
           </Button>
           <Button

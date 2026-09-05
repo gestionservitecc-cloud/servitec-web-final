@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { BadgeCheck, Info, SlidersHorizontal } from "lucide-react";
+import Link from "next/link";
+import { BadgeCheck, Info, Search, SlidersHorizontal } from "lucide-react";
 import { PageHero } from "@/components/site/PageHero";
 import { stockCategories } from "@/components/site/site-config";
 import { Card, CardContent } from "@/components/ui/card";
@@ -135,10 +136,13 @@ const toStockShape = (e: Equipo): EquipoStock => ({
 export const StockClient = () => {
   const [equipos, setEquipos] = useState<EquipoStock[]>([]);
   const [loading, setLoading] = useState(true);
+  const [busqueda, setBusqueda] = useState("");
   const searchParams = useSearchParams();
   const filter = searchParams.get("tipo");
   const categoryFilter = searchParams.get("categoria");
   const normalizedCategoryFilter = normalizeStockCategory(categoryFilter);
+  const conditionHref = (condition: "nuevos" | "reacondicionados") =>
+    `/stock?tipo=${condition}${categoryFilter ? `&categoria=${encodeURIComponent(categoryFilter)}` : ""}`;
 
   useEffect(() => {
     let alive = true;
@@ -162,6 +166,9 @@ export const StockClient = () => {
         if (categoryFilter && normalizeStockCategory(equipo.categoria) !== normalizedCategoryFilter) {
           return false;
         }
+        if (busqueda && !`${equipo.nombre} ${equipo.marca || ""} ${equipo.modelo || ""}`.toLowerCase().includes(busqueda.toLowerCase())) {
+          return false;
+        }
         if (filter === "reacondicionados") {
           return equipo.condition.toLowerCase().includes("reacondicionado");
         }
@@ -178,7 +185,7 @@ export const StockClient = () => {
           equipo.condition.toLowerCase().includes("reacondicionado") ? 1 : 0;
         return conditionOrder(a) - conditionOrder(b) || Number(a.promo || 0) - Number(b.promo || 0);
       });
-  }, [equipos, filter, categoryFilter, normalizedCategoryFilter]);
+  }, [equipos, filter, categoryFilter, normalizedCategoryFilter, busqueda]);
 
   const groupedProducts = useMemo(() => {
     if (categoryFilter) {
@@ -211,10 +218,57 @@ export const StockClient = () => {
               ? "Equipos nuevos y sellados con garantía."
               : "Equipos nuevos y reacondicionados con garantía."
         }
-      />
+      >
+        <div className="mx-auto flex w-fit max-w-full flex-wrap justify-center rounded-xl border border-white/15 bg-white/5 p-1">
+          {[
+            ["nuevos", "Nuevos"],
+            ["reacondicionados", "Reacondicionados"],
+          ].map(([value, label]) => (
+            <Link
+              key={value}
+              href={conditionHref(value as "nuevos" | "reacondicionados")}
+              className={`rounded-lg px-4 py-2 text-sm font-semibold transition sm:px-5 ${
+                filter === value
+                  ? "bg-background text-foreground shadow-soft"
+                  : "text-sidebar-foreground/70 hover:text-white"
+              }`}
+            >
+              {label}
+            </Link>
+          ))}
+        </div>
+      </PageHero>
 
       <section className="py-12 sm:py-16">
         <div className="container-page">
+          <div className="sticky top-16 z-20 -mx-4 mb-10 border-b bg-background/90 px-4 py-3 shadow-soft backdrop-blur sm:mx-0 sm:rounded-2xl sm:border sm:px-4">
+            <div className="flex flex-col gap-3 md:flex-row md:items-center">
+              <div className="relative flex-1">
+                <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  value={busqueda}
+                  onChange={(event) => setBusqueda(event.target.value)}
+                  placeholder="Buscar equipo..."
+                  aria-label="Buscar equipo"
+                  className="w-full rounded-xl border border-border bg-background p-3 pl-9 text-sm outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10"
+                />
+              </div>
+              <select
+                value={categoryFilter || "all"}
+                onChange={(event) => {
+                  const value = event.target.value;
+                  window.location.href = value === "all" ? "/stock" : `/stock?categoria=${value}`;
+                }}
+                className="w-full rounded-xl border border-border bg-background p-3 text-sm outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10 md:w-56"
+                aria-label="Filtrar por categoría"
+              >
+                <option value="all">Todas las categorías</option>
+                {stockCategories.map((category) => (
+                  <option key={category.value} value={category.value}>{category.label}</option>
+                ))}
+              </select>
+            </div>
+          </div>
           {loading && (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {[...Array(6)].map((_, i) => (
