@@ -192,6 +192,120 @@
 }
 
 /* ---------------------------------------------------------------------------
+   V1-CIBERMONDAY — public visual theme, scoped outside /admin
+--------------------------------------------------------------------------- */
+.cyber-theme {
+  --background: 222 47% 6%;
+  --foreground: 210 40% 96%;
+  --card: 222 40% 10%;
+  --card-foreground: 210 40% 96%;
+  --popover: 222 40% 10%;
+  --popover-foreground: 210 40% 96%;
+  --primary: 199 100% 55%;
+  --primary-foreground: 222 47% 8%;
+  --secondary: 271 91% 67%;
+  --secondary-foreground: 222 47% 8%;
+  --muted: 222 32% 14%;
+  --muted-foreground: 215 20% 70%;
+  --accent: 223 48% 17%;
+  --accent-foreground: 190 100% 85%;
+  --border: 217 33% 22%;
+  --input: 217 33% 24%;
+  --ring: 199 100% 55%;
+  --sidebar-background: 224 52% 5%;
+  --sidebar-foreground: 210 40% 96%;
+  --sidebar-primary: 199 100% 55%;
+  --sidebar-primary-foreground: 222 47% 8%;
+  --sidebar-accent: 223 48% 17%;
+  --sidebar-accent-foreground: 190 100% 85%;
+  --sidebar-border: 217 33% 20%;
+  --sidebar-ring: 199 100% 55%;
+  background:
+    radial-gradient(circle at 12% 0%, hsl(199 100% 55% / 0.08), transparent 30rem),
+    radial-gradient(circle at 92% 12%, hsl(271 91% 67% / 0.07), transparent 28rem),
+    hsl(var(--background));
+  color: hsl(var(--foreground));
+  color-scheme: dark;
+}
+
+.cyber-theme .shadow-soft {
+  box-shadow: 0 10px 30px -18px rgb(0 0 0 / 0.9), 0 0 0 1px hsl(var(--border) / 0.35);
+}
+
+.cyber-theme .shadow-soft-lg {
+  box-shadow: 0 24px 60px -28px rgb(0 0 0 / 0.95), 0 0 0 1px hsl(var(--primary) / 0.08);
+}
+
+.cyber-theme a,
+.cyber-theme button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.cyber-theme a:not([class*="text-"]):hover {
+  color: hsl(var(--primary));
+}
+
+.cyber-theme .cyber-gradient-text {
+  background: linear-gradient(100deg, #67e8f9 0%, #38bdf8 42%, #c084fc 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.cyber-theme .cyber-campaign-banner {
+  border-color: hsl(199 100% 55% / 0.16);
+  background:
+    linear-gradient(90deg, hsl(224 52% 5% / 0.96), hsl(223 48% 12% / 0.92), hsl(224 52% 5% / 0.96));
+  box-shadow: inset 0 -1px hsl(199 100% 55% / 0.04);
+}
+
+.cyber-theme .cyber-campaign-icon {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  height: 2rem;
+  width: 2rem;
+  border: 1px solid hsl(199 100% 55% / 0.35);
+  border-radius: 0.65rem;
+  color: #67e8f9;
+  background: hsl(199 100% 55% / 0.1);
+  box-shadow: 0 0 24px hsl(199 100% 55% / 0.16);
+}
+
+.cyber-theme .cyber-live-dot {
+  height: 0.35rem;
+  width: 0.35rem;
+  border-radius: 999px;
+  background: #67e8f9;
+  box-shadow: 0 0 0.7rem #67e8f9;
+  animation: cyber-pulse 1.8s ease-in-out infinite;
+}
+
+.cyber-theme .cyber-campaign-link {
+  transition: color 180ms ease, transform 180ms ease;
+}
+
+.cyber-theme .cyber-campaign-link:hover {
+  color: white;
+  transform: translateX(2px);
+}
+
+.cyber-theme [class*="hover:border-primary"]:hover {
+  border-color: hsl(var(--primary) / 0.5);
+  box-shadow: 0 18px 42px -24px hsl(var(--primary) / 0.5), 0 0 0 1px hsl(var(--primary) / 0.1);
+}
+
+@keyframes cyber-pulse {
+  0%, 100% { opacity: 0.55; transform: scale(0.85); }
+  50% { opacity: 1; transform: scale(1.15); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cyber-theme .cyber-live-dot { animation: none; }
+  .cyber-theme .cyber-campaign-link { transition: none; }
+}
+
+/* ---------------------------------------------------------------------------
    PC Builder (Armá tu PC) — scoped light theme with brand-red accents
 --------------------------------------------------------------------------- */
 .pc-builder {

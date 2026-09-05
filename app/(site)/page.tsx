@@ -19,6 +19,7 @@ import { FeaturedStock } from "@/components/site/FeaturedStock";
 import { ReviewsSection } from "@/components/site/ReviewsSection";
 import { WhatsAppQuoteForm } from "@/components/site/WhatsAppQuoteForm";
 import { HeroBackdrop } from "@/components/site/HeroBackdrop";
+import { CyberMondayBanner } from "@/components/site/CyberMondayBanner";
 import { Reveal, Stagger, StaggerItem, Pressable } from "@/components/site/motion";
 import { waLink } from "@/components/site/site-config";
 
@@ -81,6 +82,7 @@ const repairCards = [
 export default function HomePage() {
   return (
     <>
+      <CyberMondayBanner />
       {/* Hero */}
       <section className="relative overflow-hidden bg-sidebar text-sidebar-foreground">
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -99,25 +101,24 @@ export default function HomePage() {
 
         <div className="container-page relative py-20 sm:py-28 lg:py-32">
           <div className="mx-auto max-w-3xl text-center">
-            <Reveal as="p" y={12} className="eyebrow justify-center text-primary">
-              Venta de equipos · PC a medida · Servicio técnico
+            <Reveal as="p" y={12} className="eyebrow justify-center text-cyan-300">
+              CyberMonday · Venta de equipos · PC a medida
             </Reveal>
             <Reveal
               as="h1"
               delay={0.05}
               className="mt-5 font-display text-4xl font-bold leading-[1.05] text-balance sm:text-5xl md:text-6xl"
             >
-              Comprá, armá y potenciá tu{" "}
-              <span className="text-primary">tecnología</span>
+              Subí el nivel de tu{" "}
+              <span className="cyber-gradient-text">tecnología</span>
             </Reveal>
             <Reveal
               as="p"
               delay={0.12}
               className="mx-auto mt-5 max-w-xl text-base text-sidebar-foreground/70 sm:text-lg"
             >
-              Notebooks, celulares y PC armadas con stock real. Configurá tu PC
-              ideal y sumá los accesorios. Y si algo falla, tenés nuestro servicio
-              técnico con garantía escrita.
+              Encontrá equipos y componentes con stock real, configurá tu PC ideal
+              y recibí asesoramiento para comprar con confianza.
             </Reveal>
 
             <Reveal
