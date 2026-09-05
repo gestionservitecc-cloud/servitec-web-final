@@ -151,7 +151,7 @@ export function EquipoDialog({
                     <Input value={(draft.specs as Record<string, string>)[key] || ""} onChange={(e) => setSpec(key, e.target.value)} />
                   </Field>
                 ))}
-                {(isTablet || isTv) && <Field label="Garantía"><Input value={draft.warranty} onChange={(e) => set("warranty", e.target.value)} /></Field>}
+                
                 {(isTablet || isTv) && <Field label="Precio efectivo">
                   <Input type="number" value={draft.promo || ""} onChange={(e) => setEffectivePrice(Number(e.target.value) || 0)} />
                   {draft.promo && <p className="mt-1 text-[11px] text-red-500">3/6 cuotas: ${draft.promo ? calculateInstallmentPrice(Number(draft.promo)).toLocaleString("es-AR") : "0"}</p>}
@@ -306,14 +306,6 @@ export function EquipoDialog({
               </Select>
             </Field>
           )}
-
-          {!isTablet && !isTv && <Field label="Garantía">
-            <Input
-              value={draft.warranty}
-              onChange={(e) => set("warranty", e.target.value)}
-              placeholder="Ej: 6 meses"
-            />
-          </Field>}
 
           {isPc && (
             <div className="flex items-center justify-between rounded-lg border p-3">
