@@ -14,6 +14,11 @@ export function isAllowedAdminEmail(email: string | null | undefined): boolean {
   return normalized.length > 0 && getAllowedAdminEmails().includes(normalized);
 }
 
+export function hasFullAdminAccess(email: string | null | undefined): boolean {
+  const normalized = normalizeEmail(email || undefined);
+  return Boolean(normalized && normalized !== "servitecnico2@gmail.com");
+}
+
 export function adminAuthConfigured(): boolean {
   const emails = getAllowedAdminEmails();
   return Boolean(

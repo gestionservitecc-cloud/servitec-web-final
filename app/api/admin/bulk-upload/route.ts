@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth";
+import { hasFullAdminAccess } from "@/lib/admin-access";
 import { get, put } from "@vercel/blob";
 import { saveComponentes, saveProductos, saveEquipos } from "@/lib/store";
 
@@ -29,7 +30,8 @@ export const dynamic = "force-dynamic";
 const COLLECTIONS = ["componentes", "productos", "equipos"] as const;
 
 export async function POST(req: Request) {
-  if (!(await requireAdmin())) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+  const session = await requireAdmin();
+  if (!session) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   if (!process.env.BLOB_READ_WRITE_TOKEN) {
     return NextResponse.json({ error: "Falta configurar Vercel Blob." }, { status: 503 });
   }
@@ -37,6 +39,9 @@ export async function POST(req: Request) {
     const form = await req.formData();
     const collection = String(form.get("collection") || "").trim();
     if (!COLLECTIONS.includes(collection as any)) return NextResponse.json({ error: "Colección inválida" }, { status: 400 });
+    if ((collection === "componentes" || collection === "equipos") && !hasFullAdminAccess(session.user?.email)) {
+      return NextResponse.json({ error: "Tu cuenta no tiene permisos para realizar cargas masivas." }, { status: 403 });
+    }
     const dataFile = form.get("data");
     if (!(dataFile instanceof File)) return NextResponse.json({ error: "Falta el archivo de datos (.csv)" }, { status: 400 });
     if (!/\.csv$/i.test(dataFile.name)) return NextResponse.json({ error: "La carga masiva solo admite archivos .csv" }, { status: 400 });

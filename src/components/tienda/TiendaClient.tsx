@@ -325,7 +325,7 @@ export function TiendaClient() {
       <section className="bg-muted/40">
       <div className="container-page py-12 lg:py-16">
         {/* Toolbar */}
-        <div className="sticky top-16 z-20 -mx-4 mb-10 border-b bg-background/90 px-4 py-3 shadow-soft backdrop-blur sm:mx-0 sm:rounded-2xl sm:border sm:px-4">
+        <div className="sticky top-16 z-20 -mx-3 mb-8 border-b bg-background/90 px-3 py-3 shadow-soft backdrop-blur sm:mx-0 sm:mb-10 sm:rounded-2xl sm:border sm:px-4">
           <div className="flex flex-col gap-3 md:flex-row md:items-center">
             <div className="relative flex-1">
               <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />

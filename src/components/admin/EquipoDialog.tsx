@@ -282,9 +282,6 @@ export function EquipoDialog({
                 <Field label="Costo actual (ARS)">
                   <Input type="text" inputMode="numeric" value={formatCurrencyInput(draft.precioCosto)} onChange={(e) => set("precioCosto", parsePrice(e.target.value))} />
                 </Field>
-                <Field label="Stock">
-                  <Input type="number" min="0" value={draft.stock ?? ""} onChange={(e) => set("stock", Number(e.target.value) || 0)} />
-                </Field>
               </>
             )}
           </div>}

@@ -137,6 +137,7 @@ export function Header() {
 
         {/* Mobile */}
         <div className="flex items-center gap-1 lg:hidden">
+          <GlobalCart />
           <Button
             asChild
             size="icon"
@@ -259,7 +260,6 @@ export function Header() {
               </div>
             </SheetContent>
           </Sheet>
-          <GlobalCart />
         </div>
       </div>
     </header>

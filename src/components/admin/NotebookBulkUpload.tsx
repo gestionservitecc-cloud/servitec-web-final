@@ -184,7 +184,6 @@ export default function NotebookBulkUpload({
         const precioVenta = hasImportedCost
           ? calculateNotebookPrice(importedCost, priceRules)
           : Number(current?.promo || current?.original || 0);
-        const stock = numberValue(value("stock"));
         const image = value("imagen");
         const images = value("imagenes").split(";").map((item) => item.trim()).filter(Boolean);
         const selectedImages = uploadedImages.get(value("id"));
@@ -218,7 +217,6 @@ export default function NotebookBulkUpload({
                 costoActualizadoEn: undefined,
               }
             : {}),
-          stock: stock ?? current?.stock ?? 0,
           condition: value("esnuevo") ? (value("esnuevo").toLowerCase() === "true" ? "Sellado" : "Reacondicionado") : current?.condition || "Sellado",
           imagenes: selectedImages?.length ? selectedImages : images.length ? images : image ? [image] : current?.imagenes || [],
           specs: Object.keys(specs).length ? { ...(current?.specs || {}), ...mapSpecs(specs) } : current?.specs || {},

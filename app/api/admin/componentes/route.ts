@@ -1,6 +1,7 @@
 import { get, put } from "@vercel/blob";
 import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth";
+import { readDollarQuote, saveDollarQuote, type DollarQuote } from "@/lib/dollar-quote";
 import {
   catalogBlobJsonPath,
   catalogDataKeys,
@@ -12,10 +13,8 @@ import {
 
 export const dynamic = "force-dynamic";
 const PRICE_RULES_PATH = "servitec-data/component-price-rules.json";
-const DOLLAR_QUOTE_PATH = "servitec-data/dolar-blue.json";
 type PriceRule = { min: number; max?: number | null; pct: number };
 type PriceRules = Partial<Record<ComponentCatalogKey, PriceRule[]>>;
-type DollarQuote = { valor: number; actualizadoEn: string };
 
 const applyRules = (price: number, rules: PriceRule[] = []) => {
   const match = rules.find((rule) => price >= (rule.min || 0) && (rule.max == null || price < rule.max));
@@ -27,16 +26,6 @@ async function readPriceRules(): Promise<PriceRules> {
   if (!blob) return {};
   const payload = await new Response(blob.stream).json().catch(() => ({}));
   return payload && typeof payload === "object" ? payload as PriceRules : {};
-}
-
-async function readDollarQuote(): Promise<DollarQuote | null> {
-  const blob = await get(DOLLAR_QUOTE_PATH, { access: "private" }).catch(() => null);
-  if (!blob) return null;
-  const payload = await new Response(blob.stream).json().catch(() => null);
-  const valor = Number(payload?.valor);
-  return Number.isFinite(valor) && valor > 0 && typeof payload?.actualizadoEn === "string"
-    ? { valor, actualizadoEn: payload.actualizadoEn }
-    : null;
 }
 
 async function readCategory(category: ComponentCatalogKey): Promise<CatalogProduct[]> {
@@ -103,14 +92,9 @@ export async function PUT(request: Request) {
       contentType: "application/json",
     });
     if (dollarQuote) {
-      await put(DOLLAR_QUOTE_PATH, JSON.stringify({
+      await saveDollarQuote({
         valor: Number(dollarQuote.valor),
         actualizadoEn: dollarQuote.actualizadoEn,
-      }, null, 2), {
-        access: "private",
-        addRandomSuffix: false,
-        allowOverwrite: true,
-        contentType: "application/json",
       });
     }
     return NextResponse.json({ ok: true });

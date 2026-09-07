@@ -147,7 +147,13 @@ const getMovementMeta = (tipo: InventoryMovement["tipo"]) => ({
   color: tipo === "entrada" ? "text-emerald-700" : "text-rose-700",
 });
 
-export function AdminDashboard({ persistent }: { persistent: boolean }) {
+export function AdminDashboard({
+  persistent,
+  canManageCatalog,
+}: {
+  persistent: boolean;
+  canManageCatalog: boolean;
+}) {
   const [segment, setSegment] = useState<Segment>("dashboard");
   const [equipos, setEquipos] = useState<Equipo[]>([]);
   const [productos, setProductos] = useState<Producto[]>([]);
@@ -160,7 +166,6 @@ export function AdminDashboard({ persistent }: { persistent: boolean }) {
   const [componentPriceRules, setComponentPriceRules] =
     useState<ComponentPriceRules>({});
   const [dollarQuote, setDollarQuote] = useState<DollarQuote | null>(null);
-  const [stockDollarQuote, setStockDollarQuote] = useState<DollarQuote | null>(null);
   const [notebookPriceRules, setNotebookPriceRules] = useState<PriceRule[]>([]);
   const [movimientos, setMovimientos] =
     useState<InventoryMovement[]>(readStoredMovements);
@@ -217,7 +222,6 @@ export function AdminDashboard({ persistent }: { persistent: boolean }) {
           condition: normalizeEquipmentCondition(equipment.condition),
         })));
         setNotebookPriceRules(Array.isArray(stockResponse?.notebookPriceRules) ? stockResponse.notebookPriceRules : []);
-        setStockDollarQuote(stockResponse?.dollarQuote || null);
         setProductos(Array.isArray(p) ? p : []);
         if (c && typeof c === "object") {
           const response = c as {
@@ -227,7 +231,7 @@ export function AdminDashboard({ persistent }: { persistent: boolean }) {
           };
           setComponentCatalog(response.catalog || (c as ComponentCatalog));
           setComponentPriceRules(response.priceRules || {});
-          setDollarQuote(response.dollarQuote || null);
+          setDollarQuote(response.dollarQuote || stockResponse?.dollarQuote || null);
         }
       })
       .finally(() => setLoading(false));
@@ -251,7 +255,7 @@ export function AdminDashboard({ persistent }: { persistent: boolean }) {
 
   return (
     <>
-      <div className="mx-auto w-full min-w-0 max-w-6xl space-y-6 overflow-x-hidden px-4 py-6 sm:px-6">
+      <div className="mx-auto w-full min-w-0 max-w-6xl space-y-5 overflow-x-hidden px-3 py-4 sm:space-y-6 sm:px-6 sm:py-6">
         {/* Header */}
         <header className="flex flex-col gap-4 rounded-3xl border border-white/10 bg-white/[0.03] p-4 shadow-xl sm:flex-row sm:items-center sm:justify-between sm:p-5">
           <div className="flex min-w-0 items-center gap-3">
@@ -297,8 +301,8 @@ export function AdminDashboard({ persistent }: { persistent: boolean }) {
             [
               {
                 id: "dashboard",
-                label: "Dashboard",
-                description: "Inventario y resumen",
+                label: "Productos",
+                description: "Productos y accesorios de tienda",
                 icon: LayoutDashboard,
               },
               {
@@ -317,8 +321,9 @@ export function AdminDashboard({ persistent }: { persistent: boolean }) {
           ).map(({ id, label, description, icon: Icon }) => (
             <button
               key={id}
+              type="button"
               onClick={() => setSegment(id)}
-              className={`flex min-h-16 min-w-0 items-center gap-3 rounded-2xl border border-transparent px-3 py-3 text-left transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300 sm:px-4 ${
+              className={`flex min-h-16 min-w-0 items-center gap-3 rounded-2xl border border-transparent px-3 py-3 text-left transition ${id === "dashboard" ? "order-1" : id === "componentes" ? "order-2" : "order-3"} hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300 sm:px-4 ${
                 segment === id
                   ? "border-white/20 bg-white text-slate-950 shadow-lg"
                   : "text-white/60 hover:bg-white/10 hover:text-white"
@@ -365,18 +370,20 @@ export function AdminDashboard({ persistent }: { persistent: boolean }) {
             equipos={equipos}
             setEquipos={setEquipos}
             persistent={persistent}
+            canManageCatalog={canManageCatalog}
             onEdit={setEditEquipo}
             onRequestConfirm={setConfirmState}
             notebookPriceRules={notebookPriceRules}
             setNotebookPriceRules={setNotebookPriceRules}
-            dollarQuote={stockDollarQuote}
-            setDollarQuote={setStockDollarQuote}
+            dollarQuote={dollarQuote}
+            setDollarQuote={setDollarQuote}
           />
         ) : (
           <ComponentesTab
             catalog={componentCatalog}
             setCatalog={setComponentCatalog}
             persistent={persistent}
+            canManageCatalog={canManageCatalog}
             onEdit={setEditComponente}
             onOpenBulk={() => setBulkOpen(true)}
             onRequestConfirm={setConfirmState}
@@ -428,7 +435,7 @@ export function AdminDashboard({ persistent }: { persistent: boolean }) {
                 await saveStockCatalog(
                   next,
                   notebookPriceRules,
-                  stockDollarQuote || undefined,
+                  dollarQuote || undefined,
                 );
                 window.dispatchEvent(new Event("equiposUpdated"));
                 setEquipos(next);
@@ -559,6 +566,15 @@ function StatCard({ label, value }: { label: string; value: React.ReactNode }) {
   );
 }
 
+function AdminGuide({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="rounded-2xl border border-sky-200 bg-sky-50/80 px-4 py-3 text-sm text-slate-700">
+      <p className="font-bold text-slate-900">{title}</p>
+      <p className="mt-1 leading-relaxed">{children}</p>
+    </div>
+  );
+}
+
 function SaveButton({
   dirty,
   saving,
@@ -595,6 +611,7 @@ function SaveButton({
         </button>
       )}
       <button
+        type="button"
         onClick={onSave}
         disabled={!dirty || saving || !persistent}
         className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40"
@@ -723,6 +740,9 @@ function DashboardTab({
 
   return (
     <div className="space-y-6">
+      <AdminGuide title="Productos de tienda">
+        Administra productos y accesorios. El stock y las unidades se controlan en esta seccion; los precios se guardan en pesos argentinos.
+      </AdminGuide>
       <div className="grid gap-4 sm:grid-cols-3">
         <StatCard label="Unidades totales" value={stockTotal} />
         <StatCard label="Valor inventario" value={money(valorInventario)} />
@@ -1450,6 +1470,7 @@ function ComponentesTab({
   catalog,
   setCatalog,
   persistent,
+  canManageCatalog,
   onEdit,
   onOpenBulk,
   onRequestConfirm,
@@ -1461,6 +1482,7 @@ function ComponentesTab({
   catalog: ComponentCatalog;
   setCatalog: React.Dispatch<React.SetStateAction<ComponentCatalog>>;
   persistent: boolean;
+  canManageCatalog: boolean;
   onEdit: (component: CatalogProduct) => void;
   onOpenBulk: () => void;
   onRequestConfirm?: (req: ConfirmRequest) => void;
@@ -1737,6 +1759,9 @@ function ComponentesTab({
 
   return (
     <div className="space-y-6">
+      <AdminGuide title="Componentes">
+        Este catalogo alimenta Arma tu PC y la tienda. Elegi una categoria para editar sus rangos, costos y precios; luego usa Guardar cambios.
+      </AdminGuide>
       <div className="grid gap-4 sm:grid-cols-3">
         <StatCard
           label="Componentes"
@@ -1752,10 +1777,55 @@ function ComponentesTab({
               .length
           }
         />
-        <StatCard label="Origen" value="Vercel Blob" />
+        {canManageCatalog && <StatCard label="Origen" value="Vercel Blob" />}
       </div>
 
-      <section className={panel}>
+      {category === "all" && (
+        <section className={panel}>
+          <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <h2 className="text-xl font-bold">Elegir categoria</h2>
+              <p className="mt-1 text-sm text-slate-500">
+                Selecciona una categoria para ver y administrar sus componentes.
+              </p>
+            </div>
+            {canManageCatalog && (
+              <button
+                type="button"
+                onClick={onOpenBulk}
+                className="min-h-11 rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+              >
+                Carga masiva
+              </button>
+            )}
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {catalogDataKeys.map((key) => {
+              const count = catalog[key]?.length || 0;
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => setCategory(key)}
+                  className="group min-h-32 rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-950 via-blue-950 to-red-950 p-5 text-left text-white shadow-md transition hover:-translate-y-1 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400"
+                >
+                  <span className="block text-xs font-bold uppercase tracking-[0.18em] text-blue-200">
+                    Categoria
+                  </span>
+                  <span className="mt-3 block text-lg font-bold">
+                    {componentCatalogLabels[key]}
+                  </span>
+                  <span className="mt-2 block text-sm text-white/70">
+                    {count} componente{count === 1 ? "" : "s"} cargado{count === 1 ? "" : "s"}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      <section className={category === "all" ? "hidden" : panel}>
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 className="text-lg font-semibold">Componentes</h2>
@@ -1765,17 +1835,28 @@ function ComponentesTab({
           </div>
           <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:gap-3">
             <button
+              type="button"
+              onClick={() => setCategory("all")}
+              className="inline-flex min-h-11 flex-1 items-center justify-center rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 sm:flex-none sm:px-4"
+            >
+              Categorias
+            </button>
+            <button
+              type="button"
               onClick={create}
               className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 sm:flex-none sm:px-4"
             >
               <Plus className="size-4" /> Nuevo componente
             </button>
-            <button
-              onClick={onOpenBulk}
-              className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 sm:flex-none sm:px-4"
-            >
-              Carga masiva
-            </button>
+            {canManageCatalog && (
+              <button
+                type="button"
+                onClick={onOpenBulk}
+                className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 sm:flex-none sm:px-4"
+              >
+                Carga masiva
+              </button>
+            )}
             <SaveButton
               dirty={dirty}
               saving={saving}
@@ -1830,7 +1911,7 @@ function ComponentesTab({
           </button>
         </div>
         <div className="mb-5 grid gap-4 lg:grid-cols-2">
-          <div className="rounded-2xl border border-sky-200 bg-sky-50/70 p-4 shadow-sm">
+          <div className="rounded-2xl border border-sky-200 bg-sky-50/70 p-3 shadow-sm sm:p-4">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
                 <h3 className="flex items-center gap-2 text-sm font-semibold text-slate-900">
@@ -1859,7 +1940,8 @@ function ComponentesTab({
               <label className="flex-1 text-xs font-semibold text-slate-700">
                 Valor venta (ARS)
                 <input
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
                   min="1"
                   step="0.01"
                   value={dollarInput}
@@ -1890,7 +1972,7 @@ function ComponentesTab({
             </label>
           </div>
           {showMarginRules && (
-            <div className="rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 via-white to-sky-50 p-4 shadow-sm">
+            <div className="rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 via-white to-sky-50 p-3 shadow-sm sm:p-4">
               <div className="mb-3">
                 <h3 className="text-sm font-semibold">Margen por rango</h3>
                 <p className="text-xs text-slate-500">
@@ -1978,26 +2060,38 @@ function ComponentesTab({
           )}
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="border-b text-left text-xs uppercase text-slate-400">
+        <div className="mb-3 flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">
+              {ruleCategory ? componentCatalogLabels[ruleCategory] : "Componentes"}
+            </p>
+            <p className="mt-1 text-xs text-slate-500">Lista de componentes cargados</p>
+          </div>
+          <span className="rounded-full bg-white px-3 py-1 text-xs font-bold text-slate-500 shadow-sm">
+            {visible.length}
+          </span>
+        </div>
+
+        <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white">
+          <table className="min-w-[600px] w-full text-sm md:min-w-[820px]">
+            <thead className="border-b bg-slate-50 text-left text-xs uppercase text-slate-400">
               <tr>
-                <th className="w-10 px-3 py-2">
+                <th className="w-12 px-3 py-2">
                   <span className="sr-only">Seleccionar</span>
                 </th>
                 <th className="px-3 py-2">COMPONENTE</th>
-                <th className="px-3 py-2">CATEGORÍA</th>
-                <th className="px-3 py-2 text-orange-600">COSTO</th>
-                <th className="px-3 py-2 text-emerald-700">PRECIO EFT</th>
+                <th className="hidden px-3 py-2 md:table-cell">CATEGORÍA</th>
+                <th className="hidden px-3 py-2 text-orange-600 md:table-cell">COSTO</th>
+                <th className="px-3 py-2 text-emerald-700">EFECTIVO</th>
                 <th className="px-3 py-2 text-rose-700">CRÉDITO</th>
-                <th className="px-3 py-2" />
+                <th className="sticky right-0 z-10 min-w-[104px] bg-white px-3 py-2" />
               </tr>
             </thead>
             <tbody className="divide-y">
               {visible.map(({ key, component }) => (
                 <tr
                   key={`${key}-${component.id}`}
-                  className="hover:bg-slate-50"
+                  className="h-[58px] hover:bg-slate-50"
                 >
                   <td className="px-3 py-2">
                     <input
@@ -2019,35 +2113,41 @@ function ComponentesTab({
                           className="size-9 rounded border object-contain"
                         />
                       )}
-                      {component.nombre}
+                      <span className="max-w-[170px] truncate font-medium text-slate-800 md:max-w-[360px]">
+                        {component.nombre || "-"}
+                      </span>
                     </div>
                   </td>
-                  <td className="px-3 py-2 text-slate-500">
+                  <td className="hidden whitespace-nowrap px-3 py-2 text-slate-500 md:table-cell">
                     {componentCatalogLabels[key].toUpperCase()}
                   </td>
-                  <td className="px-3 py-2 font-semibold text-orange-600">
+                  <td className="hidden whitespace-nowrap px-3 py-2 font-semibold text-orange-600 md:table-cell">
                     {money(Number(component.precioCosto ?? component.precio))}
                   </td>
-                  <td className="px-3 py-2 font-semibold text-emerald-700">
+                  <td className="whitespace-nowrap px-3 py-2 font-semibold text-emerald-700">
                     {money(component.precio)}
                   </td>
-                  <td className="px-3 py-2 font-semibold text-rose-700">
+                  <td className="whitespace-nowrap px-3 py-2 font-semibold text-rose-700">
                     {money(
                       calculateInstallmentPrice(Number(component.precio) || 0),
                     )}
                   </td>
-                  <td className="px-3 py-2 text-right">
+                  <td className="sticky right-0 z-[1] min-w-[104px] bg-white px-3 py-2 text-right shadow-[-6px_0_8px_-8px_rgba(15,23,42,0.35)]">
                     <button
+                      type="button"
                       onClick={() => onEdit(component)}
-                      className="mr-2 rounded border p-2 hover:bg-slate-100"
+                      className="mr-1 inline-grid size-9 place-items-center rounded-lg border border-slate-200 text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
                       aria-label="Editar"
+                      title="Editar"
                     >
                       <Pencil className="size-4" />
                     </button>
                     <button
+                      type="button"
                       onClick={() => void remove(key, component.id)}
-                      className="rounded border p-2 text-rose-600 hover:bg-rose-50"
+                      className="inline-grid size-9 place-items-center rounded-lg border border-slate-200 text-rose-600 transition hover:bg-rose-50 hover:text-rose-700"
                       aria-label="Eliminar"
+                      title="Eliminar"
                     >
                       <Trash2 className="size-4" />
                     </button>
@@ -2073,6 +2173,7 @@ function StockTab({
   equipos,
   setEquipos,
   persistent,
+  canManageCatalog,
   onEdit,
   onRequestConfirm,
   notebookPriceRules,
@@ -2083,6 +2184,7 @@ function StockTab({
   equipos: Equipo[];
   setEquipos: React.Dispatch<React.SetStateAction<Equipo[]>>;
   persistent: boolean;
+  canManageCatalog: boolean;
   onEdit: (e: Equipo) => void;
   onRequestConfirm?: (req: ConfirmRequest) => void;
   notebookPriceRules: PriceRule[];
@@ -2240,6 +2342,9 @@ function StockTab({
 
   return (
     <div className="space-y-6">
+      <AdminGuide title="Equipos y reacondicionados">
+        Carga equipos nuevos o reacondicionados por categoria. Las notebooks usan dolar y margen por rango; los equipos nuevos no manejan unidades de stock.
+      </AdminGuide>
       <div className="grid gap-4 sm:grid-cols-3">
         <StatCard label="Equipos" value={equipos.length} />
         <StatCard label="Disponibles" value={disponibles} />
@@ -2261,7 +2366,7 @@ function StockTab({
             >
               <Plus className="size-4" /> Nuevo equipo
             </button>
-            {isNotebookSelected && (
+            {isNotebookSelected && canManageCatalog && (
               <button
                 onClick={() => setBulkOpen((open) => !open)}
                 className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 sm:flex-none sm:px-4"
@@ -2302,7 +2407,7 @@ function StockTab({
 
         {isNotebookSelected && bulkOpen && <div className="mb-5"><NotebookBulkUpload equipos={equipos} priceRules={notebookPriceRules} dollarQuote={dollarQuote} persistent={persistent} onSaved={(next) => { setEquipos(next); setBulkOpen(false); }} /></div>}
 
-        {isNotebookSelected && <div className="mb-5 rounded-2xl border border-sky-200 bg-sky-50/70 p-4 shadow-sm">
+        {isNotebookSelected && <div className="mb-5 rounded-2xl border border-sky-200 bg-sky-50/70 p-3 shadow-sm sm:p-4">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div><h3 className="flex items-center gap-2 text-sm font-semibold text-slate-900"><DollarSign className="size-4 text-sky-700" />Dólar blue venta: sólo notebooks</h3><p className="mt-1 text-xs text-slate-600">Actualiza costo, reaplica el margen de notebooks y conserva la fórmula de cuotas.</p></div>
             <div className="text-left text-xs text-slate-500 sm:text-right"><p>{dollarQuote ? `Última actualización: ${new Date(dollarQuote.actualizadoEn).toLocaleString("es-AR")}` : "Sin actualización guardada"}</p>{dollarMessage && <p className="mt-1 max-w-xs font-semibold text-sky-700">{dollarMessage}</p>}</div>
@@ -2311,7 +2416,7 @@ function StockTab({
           <label className="mt-3 flex cursor-pointer items-start gap-2 text-xs text-slate-600"><input type="checkbox" checked={includeUnclassified} onChange={(event) => setIncludeUnclassified(event.target.checked)} className="mt-0.5 size-4 accent-sky-700" />Inicializar los costos actuales en ARS como base USD usando $1545.</label>
         </div>}
 
-        {isNotebookSelected && <div className="mb-5 rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 via-white to-sky-50 p-4 shadow-sm">
+        {isNotebookSelected && <div className="mb-5 rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 via-white to-sky-50 p-3 shadow-sm sm:p-4">
           <div className="flex flex-wrap items-center justify-between gap-3"><div><h3 className="text-sm font-semibold">Margen por rango: notebooks</h3><p className="mt-1 text-xs text-slate-500">Se aplica únicamente al precio efectivo de las notebooks.</p></div><button type="button" onClick={() => setShowPricing((open) => !open)} className="rounded-lg border border-amber-300 bg-white px-3 py-2 text-xs font-bold text-amber-800">{showPricing ? "Ocultar margen" : "Mostrar margen"}</button></div>
           {showPricing && <><div className="mt-3 flex flex-wrap items-center justify-between gap-3"><span className="text-xs font-semibold text-slate-600">Los cambios se calculan desde el costo.</span><button type="button" onClick={() => void applyNotebookMargin()} disabled={applyingMargin || !persistent} className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-50">{applyingMargin && <Loader2 className="size-4 animate-spin" />}Aplicar margen</button></div><CategoryPriceRules rules={notebookPriceRules} onChange={setNotebookPriceRules} />{marginMessage && <p className="mt-3 text-xs font-semibold text-slate-600">{marginMessage}</p>}</>}
         </div>}

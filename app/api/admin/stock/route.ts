@@ -5,13 +5,12 @@ import { getEquipos, saveEquipos } from "@/lib/store";
 import type { Equipo } from "@/lib/types";
 import { normalizeEquipmentCondition } from "@/lib/utils";
 import { parseAdminEquipos, validationMessage } from "@/lib/admin-validation";
+import { readDollarQuote, saveDollarQuote, type DollarQuote } from "@/lib/dollar-quote";
 
 export const dynamic = "force-dynamic";
 
 const RULES_PATH = "servitec-data/notebook-price-rules.json";
-const DOLLAR_PATH = "servitec-data/notebook-dollar-quote.json";
 type PriceRule = { min: number; max?: number | null; pct: number };
-type DollarQuote = { valor: number; actualizadoEn: string };
 
 async function readJson(path: string, fallback: unknown) {
   const blob = await get(path, { access: "private" }).catch(() => null);
@@ -24,7 +23,7 @@ export async function GET() {
   const [equipos, rules, dollarQuote] = await Promise.all([
     getEquipos(),
     readJson(RULES_PATH, []),
-    readJson(DOLLAR_PATH, null),
+    readDollarQuote(),
   ]);
   return NextResponse.json({
     equipos,
@@ -61,7 +60,10 @@ export async function PUT(request: Request) {
     })));
     await put(RULES_PATH, JSON.stringify(rules, null, 2), { access: "private", addRandomSuffix: false, allowOverwrite: true, contentType: "application/json" });
     if (body.dollarQuote) {
-      await put(DOLLAR_PATH, JSON.stringify({ valor: Number(body.dollarQuote.valor), actualizadoEn: body.dollarQuote.actualizadoEn }, null, 2), { access: "private", addRandomSuffix: false, allowOverwrite: true, contentType: "application/json" });
+      await saveDollarQuote({
+        valor: Number(body.dollarQuote.valor),
+        actualizadoEn: body.dollarQuote.actualizadoEn,
+      });
     }
     return NextResponse.json({ ok: true, count: parsedEquipos.data.length });
   } catch (error) {

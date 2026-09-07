@@ -780,7 +780,7 @@ const ArmarPc = () => {
     <main className="pc-builder relative min-h-screen overflow-x-hidden bg-white text-slate-900">
       <div className="pointer-events-none absolute left-[39%] top-1/2 hidden h-[900px] w-[900px] -translate-y-1/2 rounded-full border border-dashed border-red-200/60 xl:block" />
       <div className="pointer-events-none absolute left-[35%] top-1/2 hidden h-[650px] w-[650px] -translate-y-1/2 rounded-full border border-red-100 xl:block" />
-      <div className="relative z-10 mx-auto flex min-h-screen max-w-[1600px] flex-col px-5 py-5 sm:px-8 lg:px-10">
+        <div className="relative z-10 mx-auto flex min-h-screen max-w-[1600px] flex-col px-3 py-4 sm:px-8 sm:py-5 lg:px-10">
         <header className="flex min-w-0 items-center justify-between gap-3 border-b border-white/10 pb-4">
           <button
             type="button"
