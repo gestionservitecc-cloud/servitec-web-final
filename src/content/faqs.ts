@@ -5,7 +5,7 @@ export const faqs = [
       "Reparamos celulares, notebooks, PCs, consolas y equipos de oficina en general. También realizamos diagnósticos y mantenimiento preventivo según la necesidad del cliente.",
   },
   {
-    question: "¿Cuánto tarda un diagnóstico?",
+    question: "¿Cuánto tarda un diagnóstico??",
     answer:
       "Los diagnósticos pueden demorar hasta 5 días hábiles según la complejidad del equipo, la disponibilidad de repuestos y la cantidad de tareas a revisar.",
   },
