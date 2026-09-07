@@ -1,8 +1,13 @@
-import Link from "next/link";
 import { Lock } from "lucide-react";
+import { signIn } from "@/auth";
 import { getAssetUrl } from "@/lib/asset-url";
 
 export function AdminLogin({ configured }: { configured: boolean }) {
+  async function loginWithGoogle() {
+    "use server";
+    await signIn("google", { redirectTo: "/admin" });
+  }
+
   return (
     <div className="grid min-h-[100dvh] place-items-center px-4 py-6 sm:px-6">
       <div className="w-full max-w-sm">
@@ -33,12 +38,14 @@ export function AdminLogin({ configured }: { configured: boolean }) {
             </p>
           ) : (
             <>
-              <Link
-                href="/api/auth/signin/google?callbackUrl=%2Fadmin"
-                className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-slate-900 shadow-lg transition hover:-translate-y-0.5 hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
-              >
-                Continuar con Google
-              </Link>
+              <form action={loginWithGoogle}>
+                <button
+                  type="submit"
+                  className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-slate-900 shadow-lg transition hover:-translate-y-0.5 hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+                >
+                  Continuar con Google
+                </button>
+              </form>
               <p className="text-center text-xs leading-relaxed text-white/50">
                 Solo las cuentas autorizadas por ServiTec pueden ingresar.
               </p>
