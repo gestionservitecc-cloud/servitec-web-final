@@ -99,12 +99,13 @@ export default function HomePage() {
 
         <div className="container-page relative py-20 sm:py-28 lg:py-32">
           <div className="mx-auto max-w-3xl text-center">
-            <Reveal as="p" y={12} className="eyebrow justify-center text-primary">
+            <Reveal as="p" y={12} initiallyVisible className="eyebrow justify-center text-primary">
               Venta de equipos · PC a medida · Servicio técnico
             </Reveal>
             <Reveal
               as="h1"
               delay={0.05}
+              initiallyVisible
               className="mt-5 font-display text-4xl font-bold leading-[1.05] text-balance sm:text-5xl md:text-6xl"
             >
               Comprá, armá y potenciá tu{" "}
@@ -113,6 +114,7 @@ export default function HomePage() {
             <Reveal
               as="p"
               delay={0.12}
+              initiallyVisible
               className="mx-auto mt-5 max-w-xl text-base text-sidebar-foreground/70 sm:text-lg"
             >
               Notebooks, celulares y PC armadas con stock real. Configurá tu PC
@@ -122,6 +124,7 @@ export default function HomePage() {
 
             <Reveal
               delay={0.2}
+              initiallyVisible
               className="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:flex-wrap"
             >
               <Button asChild size="lg" className="h-12 sm:min-w-[180px]">
@@ -155,7 +158,7 @@ export default function HomePage() {
             </Reveal>
           </div>
 
-          <Stagger className="mx-auto mt-14 grid max-w-3xl grid-cols-2 gap-3 sm:grid-cols-4">
+          <Stagger initiallyVisible className="mx-auto mt-14 grid max-w-3xl grid-cols-2 gap-3 sm:grid-cols-4">
             {trustItems.map((t) => (
               <StaggerItem
                 key={t.label}

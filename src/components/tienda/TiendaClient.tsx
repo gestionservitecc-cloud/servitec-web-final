@@ -36,6 +36,7 @@ import { stockCategories, storeCategories, storeEquipmentCategories, waLink } fr
 import { PedidoCheckoutModal } from "@/components/shared/PedidoCheckoutModal";
 import { buildPedidoMessage, formatPedidoNumero, getNextPedidoNumber, readStoredPedidos } from "@/lib/order-data";
 import { cn, normalizeEquipmentCondition, normalizeStockCategoryValue } from "@/lib/utils";
+import { useLockBodyScroll } from "@/hooks/use-lock-body-scroll";
 import type { Equipo } from "@/lib/types";
 
 interface Producto {
@@ -544,6 +545,8 @@ function CartDrawer({
   onChange: (id: string, delta: number) => void;
   onCheckout: () => void;
 }) {
+  useLockBodyScroll(true);
+
   return (
     <div
       className="fixed inset-0 z-50 flex justify-end bg-foreground/40 backdrop-blur-sm"

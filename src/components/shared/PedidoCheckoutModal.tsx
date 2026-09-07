@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { waLink } from "@/components/site/site-config";
 import { calculateInstallmentPrice, calculateNationalPrice } from "@/lib/utils";
+import { useLockBodyScroll } from "@/hooks/use-lock-body-scroll";
 import {
   buildPedidoMessage,
   readStoredClientes,
@@ -41,6 +42,8 @@ export function PedidoCheckoutModal({
     telefono: "",
     direccion: "",
   });
+
+  useLockBodyScroll(open);
 
   if (!open) return null;
 

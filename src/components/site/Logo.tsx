@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { getAssetUrl } from "@/lib/asset-url";
 
 export function Logo({
   className,
@@ -22,7 +21,7 @@ export function Logo({
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={getAssetUrl("logo.png")}
+          src="/logo.png"
           alt=""
           className="h-full w-full object-contain"
         />

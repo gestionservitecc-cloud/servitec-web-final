@@ -36,6 +36,7 @@ export function Reveal({
   y = 24,
   as = "div",
   className,
+  initiallyVisible = false,
   ...rest
 }: {
   children: ReactNode;
@@ -43,6 +44,7 @@ export function Reveal({
   y?: number;
   as?: ElementType;
   className?: string;
+  initiallyVisible?: boolean;
 } & Omit<HTMLMotionProps<"div">, "children">) {
   const reduce = useReducedMotion();
   const { ref, show } = useReveal();
@@ -61,8 +63,8 @@ export function Reveal({
     <MotionTag
       ref={ref as never}
       className={className}
-      initial={{ opacity: 0, y }}
-      animate={show ? { opacity: 1, y: 0 } : { opacity: 0, y }}
+      initial={initiallyVisible ? { opacity: 1, y: 0 } : { opacity: 0, y }}
+      animate={initiallyVisible || show ? { opacity: 1, y: 0 } : { opacity: 0, y }}
       transition={{ duration: 0.6, ease, delay }}
       {...rest}
     >
@@ -74,9 +76,11 @@ export function Reveal({
 export function Stagger({
   children,
   className,
+  initiallyVisible = false,
 }: {
   children: ReactNode;
   className?: string;
+  initiallyVisible?: boolean;
 }) {
   const reduce = useReducedMotion();
   const { ref, show } = useReveal("-60px");
@@ -87,8 +91,8 @@ export function Stagger({
     <motion.div
       ref={ref as never}
       className={className}
-      initial="hidden"
-      animate={show ? "show" : "hidden"}
+      initial={initiallyVisible ? "show" : "hidden"}
+      animate={initiallyVisible || show ? "show" : "hidden"}
       variants={{
         hidden: {},
         show: { transition: { staggerChildren: 0.08, delayChildren: 0.04 } },
