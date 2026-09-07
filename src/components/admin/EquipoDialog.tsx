@@ -333,6 +333,13 @@ export function EquipoDialog({
                     placeholder="Ej: Cargador y cable USB"
                   />
                 </Field>
+                <Field label="Garantía">
+                  <Input
+                    value={draft.warranty || ""}
+                    onChange={(e) => set("warranty", e.target.value)}
+                    placeholder="Ej: 3 meses"
+                  />
+                </Field>
                 <div className="sm:col-span-2">
                   <Field label="Detalles a tener en cuenta">
                     <Textarea

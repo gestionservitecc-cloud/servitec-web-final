@@ -2,9 +2,15 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Check, Info, Share2, ShoppingCart } from "lucide-react";
+import { ArrowLeft, Check, Copy, Info, MessageCircle, Share2, ShoppingCart, Smartphone } from "lucide-react";
 import { ProductImageGallery } from "@/components/site/ProductImageGallery";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   catalogProductImage,
   componentCatalogLabels,
@@ -13,7 +19,7 @@ import {
   type ComponentCatalogKey,
 } from "@/lib/pc-catalog";
 import { calculateInstallmentPrice, normalizeEquipmentCondition, normalizeStockCategoryValue } from "@/lib/utils";
-import { stockCategories } from "@/components/site/site-config";
+import { stockCategories, waLink } from "@/components/site/site-config";
 import type { Equipo } from "@/lib/types";
 
 type DetailType = "componente" | "equipo";
@@ -144,6 +150,20 @@ export function ProductDetailClient({ type, id }: { type: DetailType; id: string
     }
   };
 
+  const shareOnWhatsApp = () => {
+    window.open(waLink(`Mirá este producto de ServiTec: ${title}\n${window.location.href}`), "_blank", "noopener,noreferrer");
+    setShareMessage("Abriendo WhatsApp");
+  };
+
+  const copyProductLink = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setShareMessage("Enlace copiado");
+    } catch {
+      setShareMessage("No se pudo copiar el enlace");
+    }
+  };
+
   const specs = useMemo(() => {
     if (componentData && component) {
       const fields = componentSpecificationFields(component.key, componentData.nombre);
@@ -162,6 +182,7 @@ export function ProductDetailClient({ type, id }: { type: DetailType; id: string
     return [
       ["Marca", equipmentData.marca],
       ["Modelo", equipmentData.modelo],
+      ["Garantía", equipmentData.warranty],
       ...Object.entries(equipmentSpecs).map(([key, value]) => [humanizeKey(key), String(value || "")] as const),
     ].filter(([, value]) => value) as Array<readonly [string, string]>;
   }, [component, componentData, equipmentData]);
@@ -226,7 +247,27 @@ export function ProductDetailClient({ type, id }: { type: DetailType; id: string
             </div>
             <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
               <Button type="button" onClick={addToCart} className="w-full bg-red-600 text-white hover:bg-red-700 sm:w-fit"><ShoppingCart className="size-4" /> Agregar al carrito</Button>
-              <Button type="button" onClick={shareProduct} variant="outline" className="w-full border-white/40 bg-white/10 text-white hover:bg-white/20 sm:w-fit"><Share2 className="size-4" /> Compartir</Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button type="button" variant="outline" className="w-full border-white/40 bg-white/10 text-white hover:bg-white/20 sm:w-fit" aria-label="Abrir opciones para compartir">
+                    <Share2 className="size-4" /> Compartir
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-64 rounded-xl border-slate-200 p-1.5">
+                  <DropdownMenuItem onSelect={shareOnWhatsApp} className="gap-3 rounded-lg px-3 py-2.5">
+                    <MessageCircle className="size-4 text-emerald-600" />
+                    <span>Compartir por WhatsApp</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => void copyProductLink()} className="gap-3 rounded-lg px-3 py-2.5">
+                    <Copy className="size-4 text-blue-600" />
+                    <span>Copiar enlace</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => void shareProduct()} className="gap-3 rounded-lg px-3 py-2.5">
+                    <Smartphone className="size-4 text-red-600" />
+                    <span>Más opciones del dispositivo</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
               <Button asChild variant="ghost" className="w-full text-blue-100 hover:bg-white/10 hover:text-white sm:w-fit"><Link href={backHref}>Volver a comprar</Link></Button>
             </div>
             {(cartMessage || shareMessage) && <p className="mt-3 text-sm font-semibold text-emerald-200">{cartMessage || shareMessage}</p>}
