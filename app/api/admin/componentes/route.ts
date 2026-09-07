@@ -1,6 +1,6 @@
 import { get, put } from "@vercel/blob";
 import { NextResponse } from "next/server";
-import { isAuthed } from "@/lib/auth";
+import { requireAdmin } from "@/lib/auth";
 import {
   catalogBlobJsonPath,
   catalogDataKeys,
@@ -52,7 +52,7 @@ async function readCategory(category: ComponentCatalogKey): Promise<CatalogProdu
 }
 
 export async function GET() {
-  if (!(await isAuthed())) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+  if (!(await requireAdmin())) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   const [entries, priceRules, dollarQuote] = await Promise.all([
     Promise.all(catalogDataKeys.map(async (key) => [key, await readCategory(key)] as const)),
     readPriceRules(),
@@ -62,7 +62,7 @@ export async function GET() {
 }
 
 export async function PUT(request: Request) {
-  if (!(await isAuthed())) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+  if (!(await requireAdmin())) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   if (!process.env.BLOB_READ_WRITE_TOKEN) {
     return NextResponse.json({ error: "Falta configurar Vercel Blob." }, { status: 503 });
   }
@@ -72,6 +72,9 @@ export async function PUT(request: Request) {
     const catalog = body.catalog || {};
     const priceRules = body.priceRules || {};
     const dollarQuote = body.dollarQuote;
+    if (!catalog || typeof catalog !== "object" || catalogDataKeys.some((key) => !Array.isArray(catalog[key]) || catalog[key]!.length > 10000)) {
+      return NextResponse.json({ error: "Catálogo inválido." }, { status: 400 });
+    }
     if (dollarQuote !== undefined && (!Number.isFinite(Number(dollarQuote.valor)) || Number(dollarQuote.valor) <= 0 || typeof dollarQuote.actualizadoEn !== "string")) {
       return NextResponse.json({ error: "Cotización del dólar inválida." }, { status: 400 });
     }
@@ -112,9 +115,7 @@ export async function PUT(request: Request) {
     }
     return NextResponse.json({ ok: true });
   } catch (error) {
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "No se pudieron guardar los componentes." },
-      { status: 500 },
-    );
+    console.error("admin/componentes: save failed", error);
+    return NextResponse.json({ error: "No se pudieron guardar los componentes." }, { status: 500 });
   }
 }

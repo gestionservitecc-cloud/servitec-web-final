@@ -19,6 +19,8 @@ export default function BulkUploadDialog({ onClose, onUploaded, persistent, init
 
   useEffect(() => {
     const urls = Object.fromEntries(imageFiles.map((file) => [file.name, URL.createObjectURL(file)]));
+    // Object URLs are browser resources synchronized from the selected files.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setImagePreviewUrls(urls);
     return () => Object.values(urls).forEach((url) => URL.revokeObjectURL(url));
   }, [imageFiles]);

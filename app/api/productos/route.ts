@@ -5,7 +5,8 @@ export const dynamic = "force-dynamic";
 
 export async function GET() {
   const productos = await getProductos();
-  return NextResponse.json(productos, {
+  const publicProductos = productos.map(({ precioCosto, ...producto }) => producto);
+  return NextResponse.json(publicProductos, {
     headers: { "Cache-Control": "public, s-maxage=30, stale-while-revalidate=300" },
   });
 }

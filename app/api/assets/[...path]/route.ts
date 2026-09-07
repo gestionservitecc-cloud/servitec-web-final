@@ -12,7 +12,12 @@ export async function GET(
   }
   const { path } = await params;
   const pathname = path.join("/");
-  if (!pathname || pathname.includes("..")) {
+  const normalizedPath = pathname.toLowerCase();
+  const allowedPrefix = ["uploads/", "componentes/", "img/", "notebooks_img/"]
+    .some((prefix) => normalizedPath.startsWith(prefix));
+  const allowedRootAsset = /^(?:logo|favicon)\.(?:avif|gif|jpe?g|png|svg|webp)$/i.test(normalizedPath);
+  const isImage = /\.(?:avif|gif|jpe?g|png|svg|webp)$/i.test(normalizedPath);
+  if (!pathname || pathname.includes("..") || normalizedPath.startsWith("servitec-data/") || (!allowedPrefix && !allowedRootAsset) || !isImage) {
     return NextResponse.json({ error: "Ruta de asset inválida." }, { status: 400 });
   }
   const result = await get(pathname, { access: "private" });

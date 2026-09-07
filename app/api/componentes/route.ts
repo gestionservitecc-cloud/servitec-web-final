@@ -28,7 +28,21 @@ export async function GET() {
   }
 
   const entries = await Promise.all(
-    catalogDataKeys.map(async (key) => [key, await readCategory(key)] as const),
+    catalogDataKeys.map(async (key) => {
+      const products = await readCategory(key);
+      const publicProducts = products.map((product) => {
+        const {
+          precioCosto,
+          monedaCosto,
+          costoBaseUsd,
+          cotizacionDolar,
+          costoActualizadoEn,
+          ...publicProduct
+        } = product;
+        return publicProduct;
+      });
+      return [key, publicProducts] as const;
+    }),
   );
 
   return NextResponse.json(

@@ -29,6 +29,8 @@ export function GlobalCart() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // Portal hydration must start only after the browser document exists.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
     const sync = () => setItems(readCart());
     sync();

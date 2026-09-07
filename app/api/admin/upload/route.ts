@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 import { put } from "@vercel/blob";
-import { isAuthed } from "@/lib/auth";
+import { requireAdmin } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
-  if (!(await isAuthed()))
+  if (!(await requireAdmin()))
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
 
   if (!process.env.BLOB_READ_WRITE_TOKEN) {

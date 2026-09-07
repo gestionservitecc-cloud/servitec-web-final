@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { signOut } from "next-auth/react";
 import {
   Boxes,
   Check,
@@ -108,16 +108,8 @@ type ImportSummary = {
 };
 
 const STORAGE_KEY_MOVEMENTS = "servitec-admin-movimientos";
-const STORAGE_KEY_USER = "servitec-admin-user";
-
 const getCurrentAdminUser = () => {
-  if (typeof window === "undefined") return "admin@servitec.com";
-  try {
-    const stored = window.localStorage.getItem(STORAGE_KEY_USER);
-    return stored || "admin@servitec.com";
-  } catch {
-    return "admin@servitec.com";
-  }
+  return "Administrador Google";
 };
 
 type ConfirmRequest = {
@@ -156,7 +148,6 @@ const getMovementMeta = (tipo: InventoryMovement["tipo"]) => ({
 });
 
 export function AdminDashboard({ persistent }: { persistent: boolean }) {
-  const router = useRouter();
   const [segment, setSegment] = useState<Segment>("dashboard");
   const [equipos, setEquipos] = useState<Equipo[]>([]);
   const [productos, setProductos] = useState<Producto[]>([]);
@@ -247,8 +238,7 @@ export function AdminDashboard({ persistent }: { persistent: boolean }) {
   }, []);
 
   const logout = async () => {
-    await fetch("/api/admin/logout", { method: "POST" });
-    router.refresh();
+    await signOut({ callbackUrl: "/admin" });
   };
 
   if (loading) {

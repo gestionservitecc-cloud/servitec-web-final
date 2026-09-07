@@ -1,9 +1,10 @@
 import { get, put } from "@vercel/blob";
 import { NextResponse } from "next/server";
-import { isAuthed } from "@/lib/auth";
+import { requireAdmin } from "@/lib/auth";
 import { getEquipos, saveEquipos } from "@/lib/store";
 import type { Equipo } from "@/lib/types";
 import { normalizeEquipmentCondition } from "@/lib/utils";
+import { parseAdminEquipos, validationMessage } from "@/lib/admin-validation";
 
 export const dynamic = "force-dynamic";
 
@@ -19,7 +20,7 @@ async function readJson(path: string, fallback: unknown) {
 }
 
 export async function GET() {
-  if (!(await isAuthed())) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+  if (!(await requireAdmin())) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   const [equipos, rules, dollarQuote] = await Promise.all([
     getEquipos(),
     readJson(RULES_PATH, []),
@@ -33,7 +34,7 @@ export async function GET() {
 }
 
 export async function PUT(request: Request) {
-  if (!(await isAuthed())) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+  if (!(await requireAdmin())) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   if (!process.env.BLOB_READ_WRITE_TOKEN) {
     return NextResponse.json({ error: "Falta configurar Vercel Blob." }, { status: 503 });
   }
@@ -44,9 +45,8 @@ export async function PUT(request: Request) {
       notebookPriceRules?: PriceRule[];
       dollarQuote?: DollarQuote;
     };
-    if (!Array.isArray(body.equipos)) {
-      return NextResponse.json({ error: "Se esperaba un arreglo de equipos." }, { status: 400 });
-    }
+    const parsedEquipos = parseAdminEquipos(body.equipos);
+    if (!parsedEquipos.success) return NextResponse.json({ error: validationMessage(parsedEquipos.error) }, { status: 400 });
     const rules = Array.isArray(body.notebookPriceRules) ? body.notebookPriceRules : [];
     if (rules.some((rule) => !Number.isFinite(Number(rule.min)) || Number(rule.min) < 0 || (rule.max != null && (!Number.isFinite(Number(rule.max)) || Number(rule.max) <= Number(rule.min))) || !Number.isFinite(Number(rule.pct)) || Number(rule.pct) < 0)) {
       return NextResponse.json({ error: "Los rangos de precio de notebooks son inválidos." }, { status: 400 });
@@ -55,7 +55,7 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: "Cotización del dólar inválida." }, { status: 400 });
     }
 
-    await saveEquipos(body.equipos.map((equipment) => ({
+    await saveEquipos(parsedEquipos.data.map((equipment) => ({
       ...equipment,
       condition: normalizeEquipmentCondition(equipment.condition),
     })));
@@ -63,8 +63,9 @@ export async function PUT(request: Request) {
     if (body.dollarQuote) {
       await put(DOLLAR_PATH, JSON.stringify({ valor: Number(body.dollarQuote.valor), actualizadoEn: body.dollarQuote.actualizadoEn }, null, 2), { access: "private", addRandomSuffix: false, allowOverwrite: true, contentType: "application/json" });
     }
-    return NextResponse.json({ ok: true, count: body.equipos.length });
+    return NextResponse.json({ ok: true, count: parsedEquipos.data.length });
   } catch (error) {
-    return NextResponse.json({ error: error instanceof Error ? error.message : "No se pudo guardar el stock." }, { status: 500 });
+    console.error("admin/stock: save failed", error);
+    return NextResponse.json({ error: "No se pudo guardar el stock." }, { status: 500 });
   }
 }

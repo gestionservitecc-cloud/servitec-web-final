@@ -1,24 +1,27 @@
 import { NextResponse } from "next/server";
-import { isAuthed } from "@/lib/auth";
+import { requireAdmin } from "@/lib/auth";
 import { getEquipos, saveEquipos } from "@/lib/store";
 import { get, put } from "@vercel/blob";
 import type { Equipo } from "@/lib/types";
 import { normalizeEquipmentCondition } from "@/lib/utils";
+import { parseAdminEquipos, validationMessage } from "@/lib/admin-validation";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  if (!(await isAuthed()))
+  if (!(await requireAdmin()))
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   return NextResponse.json(await getEquipos());
 }
 
 export async function PUT(req: Request) {
-  if (!(await isAuthed()))
+  if (!(await requireAdmin()))
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   let body: Equipo[];
   try {
-    body = await req.json();
+    const parsed = parseAdminEquipos(await req.json());
+    if (!parsed.success) return NextResponse.json({ error: validationMessage(parsed.error) }, { status: 400 });
+    body = parsed.data;
     if (!Array.isArray(body)) throw new Error("Se esperaba un arreglo de equipos");
   } catch (e) {
     return NextResponse.json(
@@ -34,10 +37,8 @@ export async function PUT(req: Request) {
     }));
     await saveEquipos(normalizedBody);
   } catch (e) {
-    return NextResponse.json(
-      { error: e instanceof Error ? e.message : "No se pudo guardar" },
-      { status: 500 },
-    );
+    console.error("admin/equipos: save failed", e);
+    return NextResponse.json({ error: "No se pudo guardar el inventario." }, { status: 500 });
   }
   // Best-effort: write equipos per-category under componentes/<CATEGORY>/equipos.json
   try {

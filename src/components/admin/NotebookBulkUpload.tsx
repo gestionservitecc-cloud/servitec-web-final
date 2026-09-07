@@ -91,6 +91,8 @@ export default function NotebookBulkUpload({
 
   useEffect(() => {
     const urls = Object.fromEntries(imageFiles.map((image) => [image.name, URL.createObjectURL(image)]));
+    // Object URLs are browser resources synchronized from the selected files.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setImagePreviewUrls(urls);
     return () => Object.values(urls).forEach((url) => URL.revokeObjectURL(url));
   }, [imageFiles]);

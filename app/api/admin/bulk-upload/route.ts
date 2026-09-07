@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { isAuthed } from "@/lib/auth";
+import { requireAdmin } from "@/lib/auth";
 import { get, put } from "@vercel/blob";
 import { saveComponentes, saveProductos, saveEquipos } from "@/lib/store";
 
@@ -29,7 +29,7 @@ export const dynamic = "force-dynamic";
 const COLLECTIONS = ["componentes", "productos", "equipos"] as const;
 
 export async function POST(req: Request) {
-  if (!(await isAuthed())) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+  if (!(await requireAdmin())) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   if (!process.env.BLOB_READ_WRITE_TOKEN) {
     return NextResponse.json({ error: "Falta configurar Vercel Blob." }, { status: 503 });
   }
@@ -235,7 +235,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ ok: true, count: replaced.length });
   } catch (err) {
-    console.error('bulk-upload', err);
-    return NextResponse.json({ error: err instanceof Error ? err.message : 'Error' }, { status: 500 });
+    console.error('admin/bulk-upload: failed', err);
+    return NextResponse.json({ error: 'No se pudo procesar la carga masiva.' }, { status: 500 });
   }
 }
