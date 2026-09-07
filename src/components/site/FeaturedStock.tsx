@@ -7,7 +7,11 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import type { Equipo } from "@/lib/types";
 import { stockCategories } from "@/components/site/site-config";
-import { calculateInstallmentPrice, normalizeStockCategoryValue } from "@/lib/utils";
+import {
+  calculateInstallmentPrice,
+  normalizeEquipmentCondition,
+  normalizeStockCategoryValue,
+} from "@/lib/utils";
 
 const currency = (n: number) => `$${n.toLocaleString("es-AR")}`;
 
@@ -32,16 +36,20 @@ export function FeaturedStock() {
   const disponibles = list.filter((e) => e.estado !== "vendido");
 
   const destacados = stockCategories
-    .map((category) => ({
-      ...category,
-      items: disponibles
-        .filter(
-          (equipment) =>
-            normalizeStockCategoryValue(equipment.categoria) === category.value &&
-            equipment.recomendada,
-        )
-        .slice(0, 4),
-    }))
+    .flatMap((category) =>
+      (["Sellado", "Reacondicionado"] as const).map((condition) => ({
+        ...category,
+        condition,
+        items: disponibles
+          .filter(
+            (equipment) =>
+              normalizeStockCategoryValue(equipment.categoria) === category.value &&
+              normalizeEquipmentCondition(equipment.condition) === condition &&
+              equipment.recomendada,
+          )
+          .slice(0, 4),
+      })),
+    )
     .filter((category) => category.items.length > 0);
 
   if (ready && destacados.length === 0) return null;
@@ -58,9 +66,9 @@ export function FeaturedStock() {
       ) : (
         destacados.map((category, index) => (
           <StockRow
-            key={category.value}
-            title={`${category.label} destacados`}
-            href={`/stock?categoria=${category.value}`}
+            key={`${category.value}-${category.condition}`}
+            title={`${category.label} ${category.condition === "Sellado" ? "nuevos" : "reacondicionados"} destacados`}
+            href={`/stock?tipo=${category.condition === "Sellado" ? "nuevos" : "reacondicionados"}&categoria=${category.value}`}
             items={category.items}
             accent={index === 0 && category.value === "pc-armada"}
             loading={false}
