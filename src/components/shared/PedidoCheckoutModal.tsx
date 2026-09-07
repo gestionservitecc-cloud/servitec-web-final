@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent, useMemo } from "react";
+import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -48,6 +48,10 @@ export function PedidoCheckoutModal({
     setForm((current) => ({ ...current, [field]: value }));
   };
 
+  const efectivoTotal = Number(total || 0);
+  const tarjetaTotal = calculateInstallmentPrice(efectivoTotal);
+  const totalSeleccionado = paymentMethod === "tarjeta" ? tarjetaTotal : efectivoTotal;
+
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError("");
@@ -73,7 +77,7 @@ export function PedidoCheckoutModal({
       numeroPedido,
       ...payload,
       items,
-      total,
+      total: totalSeleccionado,
       formaPago: paymentMethod || undefined,
       createdAt: new Date().toISOString(),
       origen,
@@ -114,7 +118,7 @@ export function PedidoCheckoutModal({
 
     const fullName = `${payload.nombre} ${payload.apellido}`.trim();
     const lines = [
-      buildPedidoMessage({ numeroPedido, items, total, nombre: fullName }),
+      buildPedidoMessage({ numeroPedido, items, total: totalSeleccionado, nombre: fullName }),
     ];
     if (paymentMethod) lines.push(`Forma de pago: ${paymentMethod === "tarjeta" ? "Tarjeta (3/6 cuotas)" : "Efectivo / Transferencia"}`);
     lines.push("",
@@ -179,12 +183,12 @@ export function PedidoCheckoutModal({
                 <button type="button" onClick={() => setPaymentMethod("efectivo")}
                   className={`w-full rounded-xl border p-3 text-left ${paymentMethod === "efectivo" ? "border-emerald-500 bg-white" : "border-emerald-200 bg-white"}`}>
                   <p className="text-xs font-semibold text-emerald-700">Efectivo / Transferencia</p>
-                  <p className="mt-1 font-display text-lg font-bold text-emerald-700">{`$${Number(total || 0).toLocaleString("es-AR")}`}</p>
+                  <p className="mt-1 font-display text-lg font-bold text-emerald-700">{`$${efectivoTotal.toLocaleString("es-AR")}`}</p>
                 </button>
                 <button type="button" onClick={() => setPaymentMethod("tarjeta")}
                   className={`w-full rounded-xl border p-3 text-left ${paymentMethod === "tarjeta" ? "border-secondary bg-white" : "border-slate-200 bg-white"}`}>
                   <p className="text-xs font-semibold text-rose-500">Tarjeta de crédito</p>
-                  <p className="mt-1 font-display text-lg font-bold text-slate-900">{`$${items.reduce((s, it) => s + calculateInstallmentPrice(Number(it.precio || 0)) * (it.cantidad || 1), 0).toLocaleString("es-AR")}`}</p>
+                  <p className="mt-1 font-display text-lg font-bold text-slate-900">{`$${tarjetaTotal.toLocaleString("es-AR")}`}</p>
                   <p className="mt-1 text-xs text-slate-500">3/6 cuotas sin interés (VISA / Mastercard)</p>
                 </button>
               </div>
@@ -202,8 +206,8 @@ export function PedidoCheckoutModal({
               ))}
             </div>
             <div className="mt-4 flex items-center justify-between border-t border-red-200 pt-3 text-base font-bold">
-              <span>Total</span>
-              <span>${Number(total || 0).toLocaleString("es-AR")}</span>
+              <span>Total {paymentMethod === "tarjeta" ? "con tarjeta" : "en efectivo"}</span>
+              <span>${totalSeleccionado.toLocaleString("es-AR")}</span>
             </div>
           </div>
 

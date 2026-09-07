@@ -12,6 +12,7 @@ import {
   type ComponentCatalogKey,
 } from "@/lib/component-catalog";
 import { ImageField } from "./ImageField";
+import { formatCurrencyInput, parsePrice } from "@/lib/utils";
 
 export function ComponenteDialog({ componente, onClose, onSave }: {
   componente: CatalogProduct;
@@ -41,6 +42,9 @@ export function ComponenteDialog({ componente, onClose, onSave }: {
   });
   const specificationFields = categoryKey ? componentSpecificationFields(categoryKey, draft.nombre) : [];
   const specifications = (draft.specs || {}) as Record<string, unknown>;
+  const singleImageCategories: ComponentCatalogKey[] = ["processor", "cooling", "memory", "storage"];
+  const allowMultipleImages = Boolean(categoryKey && !singleImageCategories.includes(categoryKey));
+  const imageValues = draft.imagenes?.length ? draft.imagenes : draft.imagen ? [draft.imagen] : [];
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-950/80 p-2 sm:p-4" role="dialog" aria-modal="true">
@@ -62,7 +66,7 @@ export function ComponenteDialog({ componente, onClose, onSave }: {
           </div>
           <div className="space-y-1.5">
             <Label>Precio costo</Label>
-            <Input type="number" min="0" value={String(Number(draft.precioCosto ?? draft.precio ?? 0))} onChange={(event) => set("precioCosto", Number(event.target.value) || 0)} />
+            <Input type="text" inputMode="numeric" value={formatCurrencyInput(Number(draft.precioCosto ?? draft.precio ?? 0))} onChange={(event) => set("precioCosto", parsePrice(event.target.value))} />
           </div>
           {specificationFields.length > 0 && (
             <div className="space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-3 sm:col-span-2">
@@ -85,8 +89,17 @@ export function ComponenteDialog({ componente, onClose, onSave }: {
             </div>
           )}
           <div className="space-y-1.5 sm:col-span-2">
-            <Label>Imagen</Label>
-            <ImageField values={draft.imagen ? [draft.imagen] : []} onChange={(values) => set("imagen", values[0] || "")} />
+            <Label>{allowMultipleImages ? "Imágenes (hasta 3)" : "Imagen"}</Label>
+            <ImageField
+              multiple={allowMultipleImages}
+              maxFiles={allowMultipleImages ? 3 : 1}
+              values={imageValues}
+              onChange={(values) => setDraft((current) => ({
+                ...current,
+                imagen: values[0] || "",
+                imagenes: values,
+              }))}
+            />
           </div>
         </div>
         <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">

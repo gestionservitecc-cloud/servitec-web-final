@@ -34,7 +34,7 @@ import type { ComponentCatalog } from "@/lib/component-catalog";
 import { normalizeCatalogText } from "@/lib/pc-catalog";
 import { CATEGORIAS_EQUIPO, SPEC_FIELDS } from "./lib";
 import { ImageField } from "./ImageField";
-import { calculateInstallmentPrice, normalizeStockCategoryValue } from "@/lib/utils";
+import { calculateInstallmentPrice, formatCurrencyInput, normalizeEquipmentCondition, normalizeStockCategoryValue, parsePrice } from "@/lib/utils";
 
 export function EquipoDialog({
   equipo,
@@ -47,7 +47,11 @@ export function EquipoDialog({
   onSave: (e: Equipo) => void;
   onClose: () => void;
 }) {
-  const [draft, setDraft] = useState<Equipo>(() => structuredClone(equipo));
+  const [draft, setDraft] = useState<Equipo>(() => {
+    const initial = structuredClone(equipo);
+    initial.condition = normalizeEquipmentCondition(initial.condition);
+    return initial;
+  });
 
   const set = <K extends keyof Equipo>(key: K, value: Equipo[K]) =>
     setDraft((d) => ({ ...d, [key]: value }));
@@ -68,6 +72,7 @@ export function EquipoDialog({
   const isTablet = draft.categoria === "tablet";
   const isTv = draft.categoria === "tv";
   const isConsola = normalizeStockCategoryValue(draft.categoria) === "consola";
+  const isReacondicionado = normalizeEquipmentCondition(draft.condition) === "Reacondicionado";
 
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
@@ -153,7 +158,7 @@ export function EquipoDialog({
                 ))}
                 
                 {(isTablet || isTv) && <Field label="Precio efectivo">
-                  <Input type="number" value={draft.promo || ""} onChange={(e) => setEffectivePrice(Number(e.target.value) || 0)} />
+                  <Input type="text" inputMode="numeric" value={formatCurrencyInput(draft.promo)} onChange={(e) => setEffectivePrice(parsePrice(e.target.value))} />
                   {draft.promo && <p className="mt-1 text-[11px] text-red-500">3/6 cuotas: ${draft.promo ? calculateInstallmentPrice(Number(draft.promo)).toLocaleString("es-AR") : "0"}</p>}
                 </Field>}
               </div>
@@ -251,9 +256,10 @@ export function EquipoDialog({
           {!isTablet && !isTv && <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Precio efectivo">
               <Input
-                type="number"
-                value={draft.promo || ""}
-                onChange={(e) => setEffectivePrice(Number(e.target.value) || 0)}
+                type="text"
+                inputMode="numeric"
+                value={formatCurrencyInput(draft.promo)}
+                onChange={(e) => setEffectivePrice(parsePrice(e.target.value))}
               />
               {draft.promo && <p className="mt-1 text-[11px] text-red-500">3/6 cuotas: ${draft.promo ? calculateInstallmentPrice(Number(draft.promo)).toLocaleString("es-AR") : "0"}</p>}
             </Field>
@@ -274,7 +280,7 @@ export function EquipoDialog({
             {isNotebook && (
               <>
                 <Field label="Costo actual (ARS)">
-                  <Input type="number" min="0" value={draft.precioCosto ?? ""} onChange={(e) => set("precioCosto", Number(e.target.value) || 0)} />
+                  <Input type="text" inputMode="numeric" value={formatCurrencyInput(draft.precioCosto)} onChange={(e) => set("precioCosto", parsePrice(e.target.value))} />
                 </Field>
                 <Field label="Stock">
                   <Input type="number" min="0" value={draft.stock ?? ""} onChange={(e) => set("stock", Number(e.target.value) || 0)} />
@@ -307,25 +313,57 @@ export function EquipoDialog({
             </Field>
           )}
 
-          {isPc && (
-            <div className="flex items-center justify-between rounded-lg border p-3">
-              <div>
-                <p className="text-sm font-medium">Destacado / recomendado</p>
-                <p className="text-xs text-muted-foreground">
-                  Aparece en la home y en el configurador de PC.
-                </p>
+          {isReacondicionado && (
+            <details className="rounded-xl border border-amber-200 bg-amber-50/60 p-4" open>
+              <summary className="cursor-pointer text-sm font-semibold text-slate-800">
+                Detalles del reacondicionado
+              </summary>
+              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                <Field label="Color">
+                  <Input
+                    value={(draft.specs as Record<string, string>).color || ""}
+                    onChange={(e) => setSpec("color", e.target.value)}
+                    placeholder="Ej: Negro"
+                  />
+                </Field>
+                <Field label="Accesorios">
+                  <Input
+                    value={(draft.specs as Record<string, string>).accesorios || ""}
+                    onChange={(e) => setSpec("accesorios", e.target.value)}
+                    placeholder="Ej: Cargador y cable USB"
+                  />
+                </Field>
+                <div className="sm:col-span-2">
+                  <Field label="Detalles a tener en cuenta">
+                    <Textarea
+                      rows={3}
+                      value={(draft.specs as Record<string, string>).detalles || ""}
+                      onChange={(e) => setSpec("detalles", e.target.value)}
+                      placeholder="Ej: Marcas de uso en la carcasa, pantalla sin detalles"
+                    />
+                  </Field>
+                </div>
               </div>
-              <Switch
-                checked={draft.recomendada}
-                onCheckedChange={(v) => set("recomendada", v)}
-              />
-            </div>
+            </details>
           )}
+
+          <div className="flex items-center justify-between rounded-lg border p-3">
+            <div>
+              <p className="text-sm font-medium">Destacado en el inicio</p>
+              <p className="text-xs text-muted-foreground">
+                Aparece en la portada dentro de su propia categorÃ­a.
+              </p>
+            </div>
+            <Switch
+              checked={draft.recomendada}
+              onCheckedChange={(v) => set("recomendada", v)}
+            />
+          </div>
 
           <Field label="Imágenes">
             <ImageField
-              multiple={isNotebook}
-              maxFiles={isNotebook ? 3 : 1}
+              multiple
+              maxFiles={3}
               values={draft.imagenes}
               onChange={(v) => set("imagenes", v)}
             />

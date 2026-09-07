@@ -17,6 +17,9 @@ export interface EquipoComponente {
 }
 
 export interface EquipoSpecs {
+  color?: string;
+  accesorios?: string;
+  detalles?: string;
   procesador?: string;
   ram?: string;
   almacenamiento?: string;

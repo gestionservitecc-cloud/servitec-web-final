@@ -25,17 +25,17 @@ import { waLink } from "@/components/site/site-config";
 const trustItems = [
   { icon: ShieldCheck, label: "Garantía escrita" },
   { icon: Wallet, label: "Cuotas sin interés" },
-  { icon: Sparkles, label: "Stock actualizado" },
+  { icon: Sparkles, label: "Equipos actualizados" },
   { icon: Truck, label: "Armado y asesoramiento" },
 ];
 
 const shopCards = [
   {
     icon: Laptop,
-    title: "Equipos en stock",
+    title: "Equipos disponibles",
     desc: "Notebooks, celulares, tablets y TVs con garantía y precio en efectivo.",
     href: "/stock",
-    tag: "Ver stock",
+    tag: "Ver equipos",
   },
   {
     icon: Cpu,
@@ -53,10 +53,10 @@ const shopCards = [
   },
   {
     icon: Headphones,
-    title: "Accesorios",
+    title: "Productos",
     desc: "Periféricos, cargadores, cables y todo para tu setup.",
     href: "/tienda?tipo=accesorios",
-    tag: "Ver accesorios",
+    tag: "Ver productos",
   },
 ];
 
@@ -126,7 +126,7 @@ export default function HomePage() {
             >
               <Button asChild size="lg" className="h-12 sm:min-w-[180px]">
                 <Link href="/stock">
-                  Ver equipos en stock <ArrowRight className="size-4" />
+                  Ver equipos disponibles <ArrowRight className="size-4" />
                 </Link>
               </Button>
               <Button

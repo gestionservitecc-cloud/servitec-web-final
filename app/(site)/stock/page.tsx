@@ -3,9 +3,9 @@ import { Suspense } from "react";
 import { StockClient } from "@/components/stock/StockClient";
 
 export const metadata: Metadata = {
-  title: "Equipos en stock",
+  title: "Equipos y reacondicionados",
   description:
-    "Celulares, notebooks, tablets, PC armadas y TVs con garantía. Stock real de ServiTec, consultá disponibilidad por WhatsApp.",
+    "Celulares, notebooks, tablets, PC armadas y TVs con garantía. Equipos disponibles de ServiTec, consultá disponibilidad por WhatsApp.",
 };
 
 export default function StockPage() {

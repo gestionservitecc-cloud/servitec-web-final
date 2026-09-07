@@ -37,7 +37,7 @@ export async function saveStockCatalog(
     body: JSON.stringify({ equipos, notebookPriceRules, ...(dollarQuote ? { dollarQuote } : {}) }),
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error || "No se pudo guardar el stock.");
+  if (!res.ok) throw new Error(data.error || "No se pudo guardar el inventario de equipos.");
   return data;
 }
 
@@ -101,7 +101,7 @@ export const emptyEquipo = (): Equipo => ({
 export const emptyProducto = (): Producto => ({
   id: newId(),
   nombre: "",
-  categoria: "Accesorios",
+  categoria: "Productos",
   precio: 0,
   precioCosto: 0,
   stock: 1,

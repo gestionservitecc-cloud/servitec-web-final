@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { isAuthed } from "@/lib/auth";
 import { getEquipos, saveEquipos } from "@/lib/store";
 import type { Equipo } from "@/lib/types";
+import { normalizeEquipmentCondition } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -54,7 +55,10 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: "Cotización del dólar inválida." }, { status: 400 });
     }
 
-    await saveEquipos(body.equipos);
+    await saveEquipos(body.equipos.map((equipment) => ({
+      ...equipment,
+      condition: normalizeEquipmentCondition(equipment.condition),
+    })));
     await put(RULES_PATH, JSON.stringify(rules, null, 2), { access: "private", addRandomSuffix: false, allowOverwrite: true, contentType: "application/json" });
     if (body.dollarQuote) {
       await put(DOLLAR_PATH, JSON.stringify({ valor: Number(body.dollarQuote.valor), actualizadoEn: body.dollarQuote.actualizadoEn }, null, 2), { access: "private", addRandomSuffix: false, allowOverwrite: true, contentType: "application/json" });

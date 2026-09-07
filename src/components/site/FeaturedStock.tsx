@@ -6,7 +6,8 @@ import { ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import type { Equipo } from "@/lib/types";
-import { calculateInstallmentPrice } from "@/lib/utils";
+import { stockCategories } from "@/components/site/site-config";
+import { calculateInstallmentPrice, normalizeStockCategoryValue } from "@/lib/utils";
 
 const currency = (n: number) => `$${n.toLocaleString("es-AR")}`;
 
@@ -30,30 +31,42 @@ export function FeaturedStock() {
   const list = equipos ?? [];
   const disponibles = list.filter((e) => e.estado !== "vendido");
 
-  const pcs = disponibles
-    .filter((e) => e.categoria === "pc-armada" && e.recomendada)
-    .slice(0, 4);
-  const notebooks = disponibles
-    .filter((e) => e.categoria === "notebook")
-    .slice(0, 4);
+  const destacados = stockCategories
+    .map((category) => ({
+      ...category,
+      items: disponibles
+        .filter(
+          (equipment) =>
+            normalizeStockCategoryValue(equipment.categoria) === category.value &&
+            equipment.recomendada,
+        )
+        .slice(0, 4),
+    }))
+    .filter((category) => category.items.length > 0);
 
-  if (ready && pcs.length === 0 && notebooks.length === 0) return null;
+  if (ready && destacados.length === 0) return null;
 
   return (
     <section className="container-page space-y-14 py-16 lg:py-20">
-      <StockRow
-        title="PC armadas recomendadas"
-        href="/stock?categoria=pc-armada"
-        items={pcs}
-        loading={!ready}
-        accent
-      />
-      <StockRow
-        title="Notebooks"
-        href="/stock?categoria=notebook"
-        items={notebooks}
-        loading={!ready}
-      />
+      {!ready ? (
+        <StockRow
+          title="Equipos destacados"
+          href="/stock"
+          items={[]}
+          loading
+        />
+      ) : (
+        destacados.map((category, index) => (
+          <StockRow
+            key={category.value}
+            title={`${category.label} destacados`}
+            href={`/stock?categoria=${category.value}`}
+            items={category.items}
+            accent={index === 0 && category.value === "pc-armada"}
+            loading={false}
+          />
+        ))
+      )}
     </section>
   );
 }
@@ -77,7 +90,7 @@ function StockRow({
     <div>
       <div className="flex items-end justify-between gap-4">
         <div>
-          <p className="eyebrow">Stock</p>
+          <p className="eyebrow">Equipos destacados</p>
           <h2 className="mt-1.5 font-display text-2xl font-bold sm:text-3xl">
             {title}
           </h2>

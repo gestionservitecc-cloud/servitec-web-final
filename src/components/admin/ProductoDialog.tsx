@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { Producto } from "@/lib/types";
 import { ImageField } from "./ImageField";
+import { formatCurrencyInput, parsePrice } from "@/lib/utils";
 
 export function ProductoDialog({
   producto,
@@ -34,7 +35,7 @@ export function ProductoDialog({
       <DialogContent className="max-h-[calc(100dvh-1.5rem)] max-w-[calc(100vw-1.5rem)] overflow-y-auto p-4 sm:max-w-md sm:p-6">
         <DialogHeader>
           <DialogTitle>
-            {producto.nombre ? "Editar accesorio" : "Nuevo accesorio"}
+            {producto.nombre ? "Editar producto" : "Nuevo producto"}
           </DialogTitle>
         </DialogHeader>
 
@@ -62,17 +63,19 @@ export function ProductoDialog({
             <div className="space-y-1.5">
               <Label className="text-xs">Precio</Label>
               <Input
-                type="number"
-                value={draft.precio || ""}
-                onChange={(e) => set("precio", Number(e.target.value) || 0)}
+                type="text"
+                inputMode="numeric"
+                value={formatCurrencyInput(draft.precio)}
+                onChange={(e) => set("precio", parsePrice(e.target.value))}
               />
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs">Costo</Label>
               <Input
-                type="number"
-                value={draft.precioCosto || ""}
-                onChange={(e) => set("precioCosto", Number(e.target.value) || 0)}
+                type="text"
+                inputMode="numeric"
+                value={formatCurrencyInput(draft.precioCosto)}
+                onChange={(e) => set("precioCosto", parsePrice(e.target.value))}
               />
             </div>
             <div className="space-y-1.5">

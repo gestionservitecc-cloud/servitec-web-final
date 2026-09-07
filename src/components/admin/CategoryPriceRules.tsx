@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import { formatCurrencyInput, parsePrice } from "@/lib/utils";
 
 type PriceRule = { min: number; max?: number | null; pct: number };
 
@@ -23,17 +24,19 @@ export default function CategoryPriceRules({
       {rules.map((r, i) => (
         <div key={i} className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 rounded-xl border border-slate-200 bg-white p-2 sm:flex sm:border-0 sm:bg-transparent sm:p-0">
           <input
-            type="number"
-            value={String(r.min)}
-            onChange={(e) => update(i, { min: Number(e.target.value || 0) })}
+            type="text"
+            inputMode="numeric"
+            value={formatCurrencyInput(r.min)}
+            onChange={(e) => update(i, { min: parsePrice(e.target.value) })}
             className="w-full rounded border border-slate-300 bg-white px-2 py-2 text-slate-800 focus:outline-none focus:ring-1 focus:ring-sky-300 sm:w-28 sm:py-1"
             aria-label={`Desde ${i}`}
           />
           <span>—</span>
           <input
-            type="number"
-            value={r.max == null ? "" : String(r.max)}
-            onChange={(e) => update(i, { max: e.target.value ? Number(e.target.value) : null })}
+            type="text"
+            inputMode="numeric"
+            value={r.max == null ? "" : formatCurrencyInput(r.max)}
+            onChange={(e) => update(i, { max: e.target.value ? parsePrice(e.target.value) : null })}
             placeholder="Sin límite"
             className="w-full rounded border border-slate-300 bg-white px-2 py-2 text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-sky-300 sm:w-28 sm:py-1"
             aria-label={`Hasta ${i}`}

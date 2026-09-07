@@ -2,11 +2,20 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import Link from "next/link";
 import { BadgeCheck, Info, Search, SlidersHorizontal } from "lucide-react";
 import { PageHero } from "@/components/site/PageHero";
+import { ProductImageGallery } from "@/components/site/ProductImageGallery";
+import { PriceRangeFilter } from "@/components/site/PriceRangeFilter";
 import { stockCategories } from "@/components/site/site-config";
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -14,7 +23,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { calculateInstallmentPrice, calculateNationalPrice, isPcArmadaCategoryValue, normalizeStockCategoryValue } from "@/lib/utils";
+import { calculateInstallmentPrice, calculateNationalPrice, isPcArmadaCategoryValue, normalizeEquipmentCondition, normalizeStockCategoryValue } from "@/lib/utils";
 import type { Equipo } from "@/lib/types";
 
 interface EquipoStock {
@@ -129,7 +138,7 @@ const toStockShape = (e: Equipo): EquipoStock => ({
   almacenamiento: e.specs?.almacenamiento || "",
   ram: e.specs?.ram || "",
   warranty: e.warranty || "",
-  condition: e.condition || "Sellado",
+  condition: normalizeEquipmentCondition(e.condition),
   estado: e.estado || "disponible",
 });
 
@@ -137,12 +146,20 @@ export const StockClient = () => {
   const [equipos, setEquipos] = useState<EquipoStock[]>([]);
   const [loading, setLoading] = useState(true);
   const [busqueda, setBusqueda] = useState("");
+  const [orden, setOrden] = useState<"" | "asc" | "desc">("");
+  const [precioMin, setPrecioMin] = useState<number | null>(null);
+  const [precioMax, setPrecioMax] = useState<number | null>(null);
   const searchParams = useSearchParams();
   const filter = searchParams.get("tipo");
   const categoryFilter = searchParams.get("categoria");
   const normalizedCategoryFilter = normalizeStockCategory(categoryFilter);
-  const conditionHref = (condition: "nuevos" | "reacondicionados") =>
-    `/stock?tipo=${condition}${categoryFilter ? `&categoria=${encodeURIComponent(categoryFilter)}` : ""}`;
+  const categoryHref = (value: string) => {
+    const params = new URLSearchParams();
+    if (filter) params.set("tipo", filter);
+    if (value !== "all") params.set("categoria", value);
+    const query = params.toString();
+    return query ? `/stock?${query}` : "/stock";
+  };
 
   useEffect(() => {
     let alive = true;
@@ -169,23 +186,26 @@ export const StockClient = () => {
         if (busqueda && !`${equipo.nombre} ${equipo.marca || ""} ${equipo.modelo || ""}`.toLowerCase().includes(busqueda.toLowerCase())) {
           return false;
         }
+        if (categoryFilter && precioMin !== null && Number(equipo.promo || 0) < precioMin) return false;
+        if (categoryFilter && precioMax !== null && Number(equipo.promo || 0) > precioMax) return false;
         if (filter === "reacondicionados") {
           return equipo.condition.toLowerCase().includes("reacondicionado");
         }
         if (filter === "nuevos") {
-          return (
-            equipo.condition.toLowerCase().includes("sellado") ||
-            equipo.condition.toLowerCase().includes("nuevo")
-          );
+          return equipo.condition.toLowerCase().includes("sellado");
         }
         return true;
       })
       .sort((a, b) => {
         const conditionOrder = (equipo: EquipoStock) =>
           equipo.condition.toLowerCase().includes("reacondicionado") ? 1 : 0;
-        return conditionOrder(a) - conditionOrder(b) || Number(a.promo || 0) - Number(b.promo || 0);
+        const conditionDifference = conditionOrder(a) - conditionOrder(b);
+        if (conditionDifference !== 0) return conditionDifference;
+        const priceDifference = Number(a.promo || 0) - Number(b.promo || 0);
+        if (orden === "desc") return -priceDifference;
+        return priceDifference;
       });
-  }, [equipos, filter, categoryFilter, normalizedCategoryFilter, busqueda]);
+  }, [equipos, filter, categoryFilter, normalizedCategoryFilter, busqueda, orden, precioMin, precioMax]);
 
   const groupedProducts = useMemo(() => {
     if (categoryFilter) {
@@ -205,39 +225,18 @@ export const StockClient = () => {
   return (
     <>
       <PageHero
-        eyebrow="Stock"
+        eyebrow="Reacondicionados"
         title={
           categoryFilter
-            ? categoryLabels[normalizedCategoryFilter] || "Equipos en stock"
-            : "Equipos en stock"
+            ? categoryLabels[normalizedCategoryFilter] || "Equipos Reacondicionados"
+            : "Equipos Reacondicionados"
         }
         description={
           filter === "reacondicionados"
             ? "Equipos reacondicionados con garantía."
-            : filter === "nuevos"
-              ? "Equipos nuevos y sellados con garantía."
-              : "Equipos nuevos y reacondicionados con garantía."
+              : "Equipos reacondicionados con garantía."
         }
-      >
-        <div className="mx-auto flex w-fit max-w-full flex-wrap justify-center rounded-xl border border-white/15 bg-white/5 p-1">
-          {[
-            ["nuevos", "Nuevos"],
-            ["reacondicionados", "Reacondicionados"],
-          ].map(([value, label]) => (
-            <Link
-              key={value}
-              href={conditionHref(value as "nuevos" | "reacondicionados")}
-              className={`rounded-lg px-4 py-2 text-sm font-semibold transition sm:px-5 ${
-                filter === value
-                  ? "bg-background text-foreground shadow-soft"
-                  : "text-sidebar-foreground/70 hover:text-white"
-              }`}
-            >
-              {label}
-            </Link>
-          ))}
-        </div>
-      </PageHero>
+      />
 
       <section className="py-12 sm:py-16">
         <div className="container-page">
@@ -245,29 +244,60 @@ export const StockClient = () => {
             <div className="flex flex-col gap-3 md:flex-row md:items-center">
               <div className="relative flex-1">
                 <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                <input
+                <Input
                   value={busqueda}
                   onChange={(event) => setBusqueda(event.target.value)}
-                  placeholder="Buscar equipo..."
+                  placeholder="Buscar equipo…"
                   aria-label="Buscar equipo"
-                  className="w-full rounded-xl border border-border bg-background p-3 pl-9 text-sm outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10"
+                  className="pl-9"
                 />
               </div>
-              <select
+              <Select
                 value={categoryFilter || "all"}
-                onChange={(event) => {
-                  const value = event.target.value;
-                  window.location.href = value === "all" ? "/stock" : `/stock?categoria=${value}`;
+                onValueChange={(value) => {
+                  window.location.href = categoryHref(value);
                 }}
-                className="w-full rounded-xl border border-border bg-background p-3 text-sm outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10 md:w-56"
-                aria-label="Filtrar por categoría"
               >
-                <option value="all">Todas las categorías</option>
-                {stockCategories.map((category) => (
-                  <option key={category.value} value={category.value}>{category.label}</option>
-                ))}
-              </select>
+                <SelectTrigger className="md:w-56">
+                  <SelectValue placeholder="Categoría" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas las categorías</SelectItem>
+                  {stockCategories.map((category) => (
+                    <SelectItem key={category.value} value={category.value}>
+                      {category.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select
+                value={orden || undefined}
+                onValueChange={(value) => setOrden(value as "asc" | "desc")}
+              >
+                <SelectTrigger className="md:w-48">
+                  <SelectValue placeholder="Ordenar" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="asc">Precio: menor a mayor</SelectItem>
+                  <SelectItem value="desc">Precio: mayor a menor</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
+            {categoryFilter && (
+              <div className="mt-3">
+                <PriceRangeFilter
+                  prices={equipos
+                    .filter((equipo) => normalizeStockCategory(equipo.categoria) === normalizedCategoryFilter)
+                    .map((equipo) => Number(equipo.promo || 0))}
+                  min={precioMin}
+                  max={precioMax}
+                  onChange={({ min, max }) => {
+                    setPrecioMin(min);
+                    setPrecioMax(max);
+                  }}
+                />
+              </div>
+            )}
           </div>
           {loading && (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -316,6 +346,9 @@ export const StockClient = () => {
                         const specifications = [
                           ["Marca", p.marca],
                           ["Modelo", p.modelo],
+                          ["Color", p.specs?.color],
+                          ["Accesorios", p.specs?.accesorios],
+                          ["Detalles a tener en cuenta", p.specs?.detalles],
                           ...(isConsola ? [["Generación", p.generacion]] : []),
                           ["UPC / EAN", p.upc],
                           ["Procesador", p.procesador],
@@ -345,6 +378,7 @@ export const StockClient = () => {
                           ["Origen", p.origen],
                         ].filter(([, value]) => value);
                         const knownSpecKeys = new Set([
+                          "color", "accesorios", "detalles",
                           "upc", "procesador", "ram", "placaVideo", "almacenamiento", "pantalla", "generacion",
                           "resolucion", "unidadOptica", "conectividad", "distribucionTeclado", "tecladoRetroiluminado",
                           "sistema", "lectorOptico", "lectorTarjetas", "webcam", "usb", "rj45", "wifi", "bluetooth",
@@ -355,12 +389,17 @@ export const StockClient = () => {
                           ...Object.entries(p.specs || {}).filter(([key, value]) => value && !knownSpecKeys.has(key)),
                         ];
                         const hasSpecifications = specificationsWithExtras.length > 0 || Boolean(p.warranty);
-                        const hasOfficialWarranty = /sellado|nuevo/i.test(p.condition || "");
+                        const hasOfficialWarranty = /sellado/i.test(p.condition || "");
 
                         return (
                           <Card key={p.id} className="overflow-hidden transition hover:shadow-xl">
                             <div className="relative aspect-square w-full overflow-hidden bg-slate-900">
-                              <ProductGallery images={imagenes} name={nombreDisplay} showThumbnails={isNotebook} />
+                              <ProductImageGallery
+                                images={imagenes}
+                                name={nombreDisplay}
+                                showThumbnails={imagenes.length > 1}
+                                href={`/producto/equipo/${encodeURIComponent(p.id)}`}
+                              />
                               {(hasSpecifications || isPcArmada) && (
                                 <Dialog>
                                   <DialogTrigger asChild>
@@ -494,50 +533,6 @@ export const StockClient = () => {
           )}
         </div>
       </section>
-    </>
-  );
-};
-
-const ProductGallery = ({
-  images,
-  name,
-  showThumbnails = false,
-}: {
-  images: string[];
-  name: string;
-  showThumbnails?: boolean;
-}) => {
-  const [selectedIndex, setSelectedIndex] = useState(0);
-  const selectedImage = images[selectedIndex] || images[0];
-
-  if (!selectedImage) return null;
-
-  return (
-    <>
-      <img
-        src={selectedImage}
-        alt={name}
-        className="h-full w-full object-cover"
-        loading="lazy"
-        decoding="async"
-        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-      />
-      {showThumbnails && images.length > 1 && (
-        <div className="absolute left-3 top-3 flex gap-2" aria-label={`Fotos de ${name}`}>
-          {images.slice(0, 3).map((url, imageIndex) => (
-            <button
-              key={url}
-              type="button"
-              onClick={() => setSelectedIndex(imageIndex)}
-              aria-label={`Ver foto ${imageIndex + 1} de ${name}`}
-              aria-pressed={selectedIndex === imageIndex}
-              className={`h-12 w-12 overflow-hidden rounded border-2 shadow transition ${selectedIndex === imageIndex ? "border-primary ring-2 ring-primary/50" : "border-white/80 opacity-80 hover:opacity-100"}`}
-            >
-              <img src={url} alt="" className="h-full w-full object-cover" loading="lazy" />
-            </button>
-          ))}
-        </div>
-      )}
     </>
   );
 };

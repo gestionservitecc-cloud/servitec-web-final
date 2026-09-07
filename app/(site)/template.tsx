@@ -1,14 +1,12 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
 
 export default function SiteTemplate({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const reduce = useReducedMotion();
-  if (reduce) return <>{children}</>;
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}

@@ -18,9 +18,12 @@ import type { Equipo, EquipoCategoria, Producto } from "@/lib/types";
 import { getAssetUrl } from "@/lib/asset-url";
 import {
   calculateInstallmentPrice,
+  formatCurrencyInput,
   normalizeCsvProductName,
+  normalizeEquipmentCondition,
   normalizeImportedCategory,
   normalizeStockCategoryValue,
+  parsePrice,
   shouldIgnoreCsvProduct,
 } from "@/lib/utils";
 import {
@@ -29,7 +32,6 @@ import {
   emptyProducto,
   newId,
   saveComponentCatalog,
-  saveEquipos,
   saveStockCatalog,
   saveProductos,
 } from "./lib";
@@ -53,6 +55,8 @@ import NotebookBulkUpload from "./NotebookBulkUpload";
 
 const money = (n: number) =>
   `$ ${Math.round(Number(n) || 0).toLocaleString("es-AR")}`;
+const productCategoryLabel = (value: string) =>
+  /accesorios/i.test(value) ? "Productos" : value;
 const INITIAL_DOLLAR_QUOTE = 1545;
 const catLabel = (v: string) =>
   CATEGORIAS_EQUIPO.find((c) => c.value === v)?.label || v;
@@ -212,7 +216,15 @@ export function AdminDashboard({ persistent }: { persistent: boolean }) {
     ])
       .then(([e, p, c]) => {
         const stockResponse = e as { equipos?: Equipo[]; notebookPriceRules?: PriceRule[]; dollarQuote?: DollarQuote | null } | null;
-        setEquipos(Array.isArray(stockResponse?.equipos) ? stockResponse.equipos : Array.isArray(e) ? e : []);
+        const loadedEquipos = Array.isArray(stockResponse?.equipos)
+          ? stockResponse.equipos
+          : Array.isArray(e)
+            ? e
+            : [];
+        setEquipos(loadedEquipos.map((equipment) => ({
+          ...equipment,
+          condition: normalizeEquipmentCondition(equipment.condition),
+        })));
         setNotebookPriceRules(Array.isArray(stockResponse?.notebookPriceRules) ? stockResponse.notebookPriceRules : []);
         setStockDollarQuote(stockResponse?.dollarQuote || null);
         setProductos(Array.isArray(p) ? p : []);
@@ -301,8 +313,8 @@ export function AdminDashboard({ persistent }: { persistent: boolean }) {
               },
               {
                 id: "stock",
-                label: "STOCK",
-                description: "Nuevos y reacondicionados",
+                label: "Equipos",
+                description: "Equipos y reacondicionados",
                 icon: Boxes,
               },
               {
@@ -423,7 +435,11 @@ export function AdminDashboard({ persistent }: { persistent: boolean }) {
                 const next = equipos.some((e) => e.id === saved.id)
                   ? equipos.map((e) => (e.id === saved.id ? saved : e))
                   : [...equipos, { ...saved, orden: equipos.length }];
-                await saveEquipos(next);
+                await saveStockCatalog(
+                  next,
+                  notebookPriceRules,
+                  stockDollarQuote || undefined,
+                );
                 window.dispatchEvent(new Event("equiposUpdated"));
                 setEquipos(next);
                 setEditEquipo(null);
@@ -896,7 +912,7 @@ function DashboardTab({
           <div>
             <h2 className="text-lg font-semibold">Gestión de inventario</h2>
             <p className="text-xs text-slate-500">
-              {productos.length} accesorio(s) cargado(s)
+              {productos.length} producto(s) cargado(s)
             </p>
           </div>
           <SaveButton
@@ -915,7 +931,7 @@ function DashboardTab({
           <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
           <input
             className={`${input} pl-9`}
-            placeholder="Buscar accesorio…"
+            placeholder="Buscar producto…"
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
           />
@@ -927,7 +943,7 @@ function DashboardTab({
           >
             <option value="all">Todas las categorías</option>
             {categorias.map((categoria) => (
-              <option key={categoria} value={categoria}>{categoria}</option>
+              <option key={categoria} value={categoria}>{productCategoryLabel(categoria)}</option>
             ))}
           </select>
         </div>
@@ -967,18 +983,18 @@ function DashboardTab({
         </div>
 
         <div className="overflow-x-auto">
-          <table className="min-w-[720px] w-full text-sm">
+          <table className="min-w-[560px] w-full text-sm md:min-w-[720px]">
             <thead className="border-b text-left text-xs uppercase text-slate-400">
               <tr>
                 <th className="w-10 py-2">
                   <span className="sr-only">Seleccionar</span>
                 </th>
                 <th className="py-2 pr-3">Producto</th>
-                <th className="px-3 py-2">Categoría</th>
-                <th className="px-3 py-2 text-orange-600">COSTO</th>
-                <th className="px-3 py-2 text-emerald-700">PRECIO EFT</th>
+                <th className="hidden px-3 py-2 md:table-cell">Categoría</th>
+                <th className="hidden px-3 py-2 text-orange-600 md:table-cell">COSTO</th>
+                <th className="whitespace-nowrap px-3 py-2 text-emerald-700">EFECTIVO</th>
                 <th className="px-3 py-2 text-rose-700">CRÉDITO</th>
-                <th className="px-3 py-2">Unidades</th>
+                <th className="whitespace-nowrap px-3 py-2">UN.</th>
                 <th className="sticky right-0 z-10 bg-white px-3 py-2 shadow-[-6px_0_8px_-8px_rgba(15,23,42,0.35)]"></th>
               </tr>
             </thead>
@@ -994,7 +1010,7 @@ function DashboardTab({
                       className="size-4 accent-sky-600"
                     />
                   </td>
-                  <td className="py-2 pr-3">
+                  <td className="max-w-[220px] py-2 pr-3 md:max-w-none">
                     <div className="flex items-center gap-2">
                       {p.imagen && (
                         // eslint-disable-next-line @next/next/no-img-element
@@ -1004,22 +1020,22 @@ function DashboardTab({
                           className="size-9 shrink-0 rounded border bg-white object-contain"
                         />
                       )}
-                      <span className="line-clamp-1 font-medium">
+                      <span className="line-clamp-2 break-words font-medium md:line-clamp-1">
                         {p.nombre}
                       </span>
                     </div>
                   </td>
-                  <td className="px-3 py-2 text-slate-500">{p.categoria}</td>
-                  <td className="px-3 py-2 font-semibold text-orange-600">
+                  <td className="hidden px-3 py-2 text-slate-500 md:table-cell">{productCategoryLabel(p.categoria)}</td>
+                  <td className="hidden whitespace-nowrap px-3 py-2 font-semibold text-orange-600 md:table-cell">
                     {money(p.precioCosto)}
                   </td>
-                  <td className="px-3 py-2 font-semibold text-emerald-700">
+                  <td className="whitespace-nowrap px-3 py-2 font-semibold tabular-nums text-emerald-700">
                     {money(p.precio)}
                   </td>
-                  <td className="px-3 py-2 font-semibold text-rose-700">
+                  <td className="whitespace-nowrap px-3 py-2 font-semibold tabular-nums text-rose-700">
                     {money(calculateInstallmentPrice(p.precio))}
                   </td>
-                  <td className="px-3 py-2">
+                  <td className="whitespace-nowrap px-3 py-2 tabular-nums">
                     <span
                       className={p.stock <= 0 ? "font-bold text-rose-600" : ""}
                     >
@@ -1139,29 +1155,31 @@ function AddProductoForm({
             <option value="">Seleccionar categoría</option>
             {categorias.map((c) => (
               <option key={c} value={c}>
-                {c}
+                {productCategoryLabel(c)}
               </option>
             ))}
           </select>
           <input
             className={input}
-            type="number"
+            type="text"
+            inputMode="numeric"
             placeholder="Costo de proveedor"
-            value={form.precioCosto || ""}
+            value={formatCurrencyInput(form.precioCosto)}
             onChange={(e) =>
               setForm((f) => ({
                 ...f,
-                precioCosto: Number(e.target.value) || 0,
+                precioCosto: parsePrice(e.target.value),
               }))
             }
           />
           <input
             className={input}
-            type="number"
+            type="text"
+            inputMode="numeric"
             placeholder="Precio Cliente"
-            value={form.precio || ""}
+            value={formatCurrencyInput(form.precio)}
             onChange={(e) =>
-              setForm((f) => ({ ...f, precio: Number(e.target.value) || 0 }))
+              setForm((f) => ({ ...f, precio: parsePrice(e.target.value) }))
             }
             required
           />
@@ -1471,7 +1489,7 @@ function ComponentesTab({
   const [marginMessage, setMarginMessage] = useState("");
   const [dollarMessage, setDollarMessage] = useState("");
   const [dollarInput, setDollarInput] = useState(
-    String(dollarQuote?.valor || 1545),
+    formatCurrencyInput(dollarQuote?.valor || 1545),
   );
   const [includeUnclassified, setIncludeUnclassified] = useState(false);
   const [updatingDollar, setUpdatingDollar] = useState(false);
@@ -1622,7 +1640,7 @@ function ComponentesTab({
   };
 
   const updateCostsFromDollar = () => {
-    const value = Number(dollarInput.replace(",", "."));
+    const value = parsePrice(dollarInput);
     if (!persistent) {
       setDollarMessage(
         "Conecta Vercel Blob para guardar la cotización y actualizar costos.",
@@ -1700,7 +1718,7 @@ function ComponentesTab({
           await saveComponentCatalog(next, priceRules, nextQuote);
           setCatalog(next);
           setDollarQuote(nextQuote);
-          setDollarInput(String(value));
+          setDollarInput(formatCurrencyInput(value));
           const updatedCount = catalogDataKeys.reduce(
             (total, key) =>
               total +
@@ -1855,7 +1873,7 @@ function ComponentesTab({
                   min="1"
                   step="0.01"
                   value={dollarInput}
-                  onChange={(event) => setDollarInput(event.target.value)}
+                  onChange={(event) => setDollarInput(formatCurrencyInput(event.target.value))}
                   className={`${input} mt-1 bg-white`}
                 />
               </label>
@@ -2088,7 +2106,7 @@ function StockTab({
   );
   const [filter, setFilter] = useState("");
   const [category, setCategory] = useState<EquipoCategoria | "all">("all");
-  const [dollarInput, setDollarInput] = useState(String(dollarQuote?.valor || INITIAL_DOLLAR_QUOTE));
+  const [dollarInput, setDollarInput] = useState(formatCurrencyInput(dollarQuote?.valor || INITIAL_DOLLAR_QUOTE));
   const [includeUnclassified, setIncludeUnclassified] = useState(false);
   const [updatingDollar, setUpdatingDollar] = useState(false);
   const [dollarMessage, setDollarMessage] = useState("");
@@ -2156,7 +2174,7 @@ function StockTab({
     onRequestConfirm?.({
       open: true,
       title: `Eliminar ${selectedEquipos.size} equipo(s)?`,
-      description: "Se eliminarán los equipos seleccionados del stock.",
+      description: "Se eliminarán los equipos seleccionados del inventario.",
       onConfirm: async () => {
         const previous = equipos;
         const next = equipos.filter((equipment) => !selectedEquipos.has(equipment.id));
@@ -2190,7 +2208,7 @@ function StockTab({
   };
 
   const updateNotebookCosts = () => {
-    const value = Number(dollarInput.replace(",", "."));
+    const value = parsePrice(dollarInput);
     if (!persistent) { setDollarMessage("Conecta Vercel Blob para guardar la cotización y actualizar costos."); return; }
     if (!Number.isFinite(value) || value <= 0) { setDollarMessage("Ingresá una cotización válida mayor a cero."); return; }
     const notebooks = equipos.filter((equipment) => normalizeStockCategoryValue(equipment.categoria) === "notebook" && (Number(equipment.precioCosto) || 0) > 0);
@@ -2221,7 +2239,7 @@ function StockTab({
         const nextQuote = { valor: value, actualizadoEn: updatedAt };
         try {
           await saveStockCatalog(next, notebookPriceRules, nextQuote);
-          setEquipos(next); setDollarQuote(nextQuote); setDollarInput(String(value));
+          setEquipos(next); setDollarQuote(nextQuote); setDollarInput(formatCurrencyInput(value));
           const count = next.filter((equipment) => equipment.cotizacionDolar === value && equipment.costoActualizadoEn === updatedAt).length;
           setDollarMessage(`${count} notebook(s) actualizado(s) con dólar venta $${value.toLocaleString("es-AR")}.`);
         } catch (error) { setDollarMessage(error instanceof Error ? error.message : "No se pudieron actualizar los costos."); }
@@ -2241,7 +2259,7 @@ function StockTab({
       <section className={panel}>
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h2 className="text-lg font-semibold">Equipos en stock</h2>
+            <h2 className="text-lg font-semibold">Equipos y reacondicionados</h2>
             <p className="text-xs text-slate-500">
               Celulares, notebooks, PC armadas, tablets y TVs
             </p>
@@ -2272,7 +2290,7 @@ function StockTab({
                 setEquipos(previous.equipos);
                 setNotebookPriceRules(previous.notebookPriceRules);
                 setDollarQuote(previous.dollarQuote);
-                setDollarInput(String(previous.dollarQuote?.valor || INITIAL_DOLLAR_QUOTE));
+                setDollarInput(formatCurrencyInput(previous.dollarQuote?.valor || INITIAL_DOLLAR_QUOTE));
                 setDollarMessage("");
                 setMarginMessage("");
               }}
@@ -2299,7 +2317,7 @@ function StockTab({
             <div><h3 className="flex items-center gap-2 text-sm font-semibold text-slate-900"><DollarSign className="size-4 text-sky-700" />Dólar blue venta: sólo notebooks</h3><p className="mt-1 text-xs text-slate-600">Actualiza costo, reaplica el margen de notebooks y conserva la fórmula de cuotas.</p></div>
             <div className="text-left text-xs text-slate-500 sm:text-right"><p>{dollarQuote ? `Última actualización: ${new Date(dollarQuote.actualizadoEn).toLocaleString("es-AR")}` : "Sin actualización guardada"}</p>{dollarMessage && <p className="mt-1 max-w-xs font-semibold text-sky-700">{dollarMessage}</p>}</div>
           </div>
-          <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-end"><label className="flex-1 text-xs font-semibold text-slate-700">Valor venta (ARS)<input type="number" min="1" step="0.01" value={dollarInput} onChange={(event) => setDollarInput(event.target.value)} className={`${input} mt-1 bg-white`} /></label><button type="button" onClick={updateNotebookCosts} disabled={updatingDollar || !persistent} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-sky-700 px-4 py-2 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-50">{updatingDollar && <Loader2 className="size-4 animate-spin" />}Actualizar costos</button></div>
+          <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-end"><label className="flex-1 text-xs font-semibold text-slate-700">Valor venta (ARS)<input type="text" inputMode="numeric" value={dollarInput} onChange={(event) => setDollarInput(formatCurrencyInput(event.target.value))} className={`${input} mt-1 bg-white`} /></label><button type="button" onClick={updateNotebookCosts} disabled={updatingDollar || !persistent} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-sky-700 px-4 py-2 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-50">{updatingDollar && <Loader2 className="size-4 animate-spin" />}Actualizar costos</button></div>
           <label className="mt-3 flex cursor-pointer items-start gap-2 text-xs text-slate-600"><input type="checkbox" checked={includeUnclassified} onChange={(event) => setIncludeUnclassified(event.target.checked)} className="mt-0.5 size-4 accent-sky-700" />Inicializar los costos actuales en ARS como base USD usando $1545.</label>
         </div>}
 
@@ -2351,16 +2369,16 @@ function StockTab({
               </div>
 
               <div className="overflow-x-auto">
-                <table className="min-w-[820px] w-full text-sm">
+                  <table className="min-w-[600px] w-full text-sm md:min-w-[820px]">
                   <thead className="border-b text-left text-xs uppercase text-slate-400">
                     <tr>
                       <th className="w-10 px-3 py-2">
                         <span className="sr-only">Seleccionar</span>
                       </th>
                       <th className="px-3 py-2">Equipo</th>
-                      <th className="px-3 py-2">Categoría</th>
-                      <th className="px-3 py-2 text-orange-600">COSTO</th>
-                      <th className="px-3 py-2 text-emerald-700">PRECIO EFT</th>
+                      <th className="hidden px-3 py-2 md:table-cell">Categoría</th>
+                      <th className="hidden px-3 py-2 text-orange-600 md:table-cell">COSTO</th>
+                      <th className="whitespace-nowrap px-3 py-2 text-emerald-700">EFECTIVO</th>
                       <th className="px-3 py-2 text-rose-700">CRÉDITO</th>
                       <th className="px-3 py-2">Estado</th>
                       <th className="sticky right-0 z-10 bg-white px-3 py-2 shadow-[-6px_0_8px_-8px_rgba(15,23,42,0.35)]"></th>
@@ -2369,7 +2387,7 @@ function StockTab({
                   <tbody className="divide-y">
                     {items.map((e) => (
                       <tr key={e.id} className="hover:bg-slate-50">
-                        <td className="px-3 py-2">
+                        <td className="max-w-[220px] px-3 py-2 md:max-w-none">
                           <input
                             type="checkbox"
                             checked={selectedEquipos.has(e.id)}
@@ -2388,21 +2406,21 @@ function StockTab({
                                 className="size-9 shrink-0 rounded border object-cover"
                               />
                             )}
-                            <span className="line-clamp-1 font-medium">
+                            <span className="line-clamp-2 break-words font-medium md:line-clamp-1">
                               {e.nombre || "—"}
                             </span>
                           </div>
                         </td>
-                        <td className="px-3 py-2 text-slate-500">
+                        <td className="hidden px-3 py-2 text-slate-500 md:table-cell">
                           {catLabel(e.categoria)}
                         </td>
-                        <td className="px-3 py-2 font-semibold text-orange-600">
+                        <td className="hidden whitespace-nowrap px-3 py-2 font-semibold text-orange-600 md:table-cell">
                           {e.precioCosto ? money(e.precioCosto) : "-"}
                         </td>
-                        <td className="px-3 py-2 font-semibold text-emerald-700">
+                        <td className="whitespace-nowrap px-3 py-2 font-semibold tabular-nums text-emerald-700">
                           {money(e.promo || e.original)}
                         </td>
-                        <td className="px-3 py-2 font-semibold text-rose-700">
+                        <td className="whitespace-nowrap px-3 py-2 font-semibold tabular-nums text-rose-700">
                           {money(calculateInstallmentPrice(e.promo || e.original))}
                         </td>
                         <td className="px-3 py-2">
@@ -2452,7 +2470,11 @@ function StockTab({
                                               : i,
                                         }));
                                       try {
-                                        await saveEquipos(next);
+                                        await saveStockCatalog(
+                                          next,
+                                          notebookPriceRules,
+                                          dollarQuote || undefined,
+                                        );
                                         window.dispatchEvent(
                                           new Event("equiposUpdated"),
                                         );

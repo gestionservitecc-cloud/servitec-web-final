@@ -30,10 +30,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { PageHero } from "@/components/site/PageHero";
-import { waLink } from "@/components/site/site-config";
+import { ProductImageGallery } from "@/components/site/ProductImageGallery";
+import { PriceRangeFilter } from "@/components/site/PriceRangeFilter";
+import { stockCategories, storeCategories, storeEquipmentCategories, waLink } from "@/components/site/site-config";
 import { PedidoCheckoutModal } from "@/components/shared/PedidoCheckoutModal";
 import { buildPedidoMessage, formatPedidoNumero, getNextPedidoNumber, readStoredPedidos } from "@/lib/order-data";
-import { cn } from "@/lib/utils";
+import { cn, normalizeEquipmentCondition, normalizeStockCategoryValue } from "@/lib/utils";
+import type { Equipo } from "@/lib/types";
 
 interface Producto {
   id: string;
@@ -44,12 +47,15 @@ interface Producto {
   stock: number;
   specs?: Record<string, string>;
   componentKey?: ComponentCatalogKey;
+  condition?: string;
+  imagenes?: string[];
 }
 interface CartItem extends Producto {
   cantidad: number;
 }
 
 const CART_KEY = "servitec-tienda-carrito";
+const CART_EVENT = "servitec-cart-updated";
 const money = (n: number) => `$${Number(n || 0).toLocaleString("es-AR")}`;
 
 const loadCart = (): CartItem[] => {
@@ -63,13 +69,20 @@ const loadCart = (): CartItem[] => {
 
 export function TiendaClient() {
   const searchParams = useSearchParams();
-  const tipo = searchParams.get("tipo") === "componentes" ? "componentes" : "accesorios";
+  const requestedTipo = searchParams.get("tipo") || "accesorios";
+  const tipo = [...storeCategories, ...storeEquipmentCategories].some((category) => category.value === requestedTipo)
+    ? requestedTipo
+    : "accesorios";
+  const isStockType = storeEquipmentCategories.some((category) => category.value === tipo);
+  const isEquipmentType = tipo === "equipos" || isStockType;
 
   const [productos, setProductos] = useState<Producto[]>([]);
   const [componentes, setComponentes] = useState<Producto[]>([]);
   const [loading, setLoading] = useState(true);
   const [busqueda, setBusqueda] = useState("");
   const [orden, setOrden] = useState<"" | "asc" | "desc">("");
+  const [precioMin, setPrecioMin] = useState<number | null>(null);
+  const [precioMax, setPrecioMax] = useState<number | null>(null);
   const [categoriaFiltro, setCategoriaFiltro] = useState({ tipo, value: "" });
   const [carrito, setCarrito] = useState<CartItem[]>(loadCart);
   const normalizeComponentCategory = (value?: string) => {
@@ -82,7 +95,23 @@ export function TiendaClient() {
 
   useEffect(() => {
     window.localStorage.setItem(CART_KEY, JSON.stringify(carrito));
+    window.dispatchEvent(new Event(CART_EVENT));
   }, [carrito]);
+
+  useEffect(() => {
+    const syncCart = () => {
+      const next = loadCart();
+      setCarrito((current) =>
+        JSON.stringify(current) === JSON.stringify(next) ? current : next,
+      );
+    };
+    window.addEventListener(CART_EVENT, syncCart);
+    window.addEventListener("storage", syncCart);
+    return () => {
+      window.removeEventListener(CART_EVENT, syncCart);
+      window.removeEventListener("storage", syncCart);
+    };
+  }, []);
 
   useEffect(() => {
     let alive = true;
@@ -93,7 +122,7 @@ export function TiendaClient() {
           if (!alive) return;
           const catalog = response.catalog || {};
           const items = Object.entries(catalog).flatMap(([key, products]) =>
-            key === "peripherals" ? [] : products
+            products
               .filter((product) => hasCatalogPrice(product.precio))
               .map((p, i) => ({
                 id: p.id || `${key}-${i}-${p.nombre}`,
@@ -101,6 +130,7 @@ export function TiendaClient() {
                 categoria: componentCatalogLabels[key as ComponentCatalogKey],
                 componentKey: key as ComponentCatalogKey,
                 imagen: catalogProductImage(p),
+                imagenes: catalogProductImage(p) ? [catalogProductImage(p)] : [],
                 precio: Number(p.precio || 0),
                 stock: 1,
                 specs: p.specs as Record<string, string> | undefined,
@@ -115,17 +145,70 @@ export function TiendaClient() {
       };
     }
 
+    if (isEquipmentType) {
+      fetch("/api/equipos")
+        .then((response) =>
+          response.ok
+            ? response.json()
+            : Promise.reject(new Error("No se pudieron cargar los equipos.")),
+        )
+        .then((data: Equipo[]) => {
+          if (!alive) return;
+          const items = (Array.isArray(data) ? data : [])
+            .filter((equipment) => {
+              const category = normalizeStockCategoryValue(equipment.categoria);
+              return tipo === "equipos"
+                ? storeEquipmentCategories.some((item) => item.value === category)
+                : category === tipo;
+            })
+            .filter((equipment) => equipment.estado !== "vendido")
+            .filter((equipment) => normalizeEquipmentCondition(equipment.condition) === "Sellado")
+            .map((equipment) => ({
+              id: equipment.id,
+              nombre: equipment.nombre,
+              categoria:
+                stockCategories.find(
+                  (category) =>
+                    category.value === normalizeStockCategoryValue(equipment.categoria),
+                )?.label || tipo,
+              imagen: equipment.imagenes?.[0] || "",
+              imagenes: equipment.imagenes || [],
+              precio: Number(equipment.promo || equipment.original || 0),
+              stock: equipment.estado === "vendido"
+                ? 0
+                : Number(equipment.stock ?? 1),
+              specs: equipment.specs,
+              condition: normalizeEquipmentCondition(equipment.condition),
+            }));
+          setProductos(items);
+        })
+        .catch(() => alive && setProductos([]))
+        .finally(() => alive && setLoading(false));
+      return () => {
+        alive = false;
+      };
+    }
+
     fetch("/api/productos")
       .then((r) => (r.ok ? r.json() : []))
       .then((data: Producto[]) => {
-        if (alive) setProductos(Array.isArray(data) ? data : []);
+          if (alive) {
+            setProductos(
+              Array.isArray(data)
+                ? data.map((product) => ({
+                    ...product,
+                    imagenes: product.imagen ? [product.imagen] : [],
+                  }))
+                : [],
+            );
+          }
       })
       .catch(() => alive && setProductos([]))
       .finally(() => alive && setLoading(false));
     return () => {
       alive = false;
     };
-  }, [tipo]);
+  }, [tipo, isEquipmentType]);
 
   const base = useMemo(
     () => tipo === "componentes"
@@ -136,6 +219,10 @@ export function TiendaClient() {
     [componentes, productos, tipo],
   );
   const activeCategoriaFiltro = categoriaFiltro.tipo === tipo ? categoriaFiltro.value : "";
+  const showPriceFilter = Boolean(activeCategoriaFiltro) || isStockType;
+  const priceFilterProducts = activeCategoriaFiltro
+    ? base.filter((product) => normalizeComponentCategory(product.categoria) === activeCategoriaFiltro)
+    : base;
 
   const categorias = useMemo(
     () =>
@@ -149,12 +236,14 @@ export function TiendaClient() {
     const list = base.filter(
       (p) =>
         p.nombre.toLowerCase().includes(busqueda.toLowerCase()) &&
-        (!activeCategoriaFiltro || normalizeComponentCategory(p.categoria) === activeCategoriaFiltro),
+        (!activeCategoriaFiltro || normalizeComponentCategory(p.categoria) === activeCategoriaFiltro) &&
+        (!showPriceFilter || precioMin === null || p.precio >= precioMin) &&
+        (!showPriceFilter || precioMax === null || p.precio <= precioMax),
     );
     if (orden === "asc") list.sort((a, b) => a.precio - b.precio);
     if (orden === "desc") list.sort((a, b) => b.precio - a.precio);
     return list;
-  }, [base, busqueda, orden, activeCategoriaFiltro]);
+  }, [base, busqueda, orden, activeCategoriaFiltro, precioMin, precioMax, showPriceFilter]);
 
   const grupos: [string, Producto[]][] = useMemo(() => {
     const map = new Map<string, Producto[]>();
@@ -206,14 +295,17 @@ export function TiendaClient() {
     <>
       <PageHero
         eyebrow="Tienda"
-        title={tipo === "componentes" ? "Componentes de PC" : "Accesorios y periféricos"}
-        description="Stock actualizado. Armá tu pedido y lo coordinamos por WhatsApp."
+        title={
+          tipo === "componentes"
+            ? "Componentes de PC"
+            : tipo === "accesorios"
+              ? "Productos"
+              : `${tipo === "equipos" ? "Equipos" : stockCategories.find((category) => category.value === tipo)?.label || "Equipos"} sellados`
+        }
+        description="Productos y equipos actualizados. Armá tu pedido y lo coordinamos por WhatsApp."
       >
-        <div className="mx-auto flex w-fit rounded-xl border border-white/15 bg-white/5 p-1">
-          {[
-            ["accesorios", "Accesorios"],
-            ["componentes", "Componentes"],
-          ].map(([value, label]) => (
+        <div className="mx-auto flex w-fit max-w-full flex-wrap justify-center rounded-xl border border-white/15 bg-white/5 p-1">
+          {storeCategories.map(({ value, label }) => (
             <Link
               key={value}
               href={`/tienda?tipo=${value}`}
@@ -262,14 +354,13 @@ export function TiendaClient() {
               </SelectContent>
             </Select>
             <Select
-              value={orden || "none"}
-              onValueChange={(v) => setOrden(v === "none" ? "" : (v as "asc" | "desc"))}
+              value={orden || undefined}
+              onValueChange={(v) => setOrden(v as "asc" | "desc")}
             >
               <SelectTrigger className="md:w-48">
                 <SelectValue placeholder="Ordenar" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">Orden por defecto</SelectItem>
                 <SelectItem value="asc">Precio: menor a mayor</SelectItem>
                 <SelectItem value="desc">Precio: mayor a menor</SelectItem>
               </SelectContent>
@@ -287,6 +378,19 @@ export function TiendaClient() {
               )}
             </Button>
           </div>
+          {showPriceFilter && (
+            <div className="mt-3">
+              <PriceRangeFilter
+                prices={priceFilterProducts.map((product) => product.precio)}
+                min={precioMin}
+                max={precioMax}
+                onChange={({ min, max }) => {
+                  setPrecioMin(min);
+                  setPrecioMax(max);
+                }}
+              />
+            </div>
+          )}
         </div>
 
         {loading && (
@@ -352,16 +456,16 @@ export function TiendaClient() {
                             </DialogContent>
                           </Dialog>
                         )}
-                        {p.imagen ? (
-                          <img
-                            src={p.imagen}
-                            alt={p.nombre}
-                            loading="lazy"
-                            onError={(event) => {
-                              event.currentTarget.onerror = null;
-                              event.currentTarget.src = "/api/assets/placeholder.svg";
-                            }}
-                            className="block max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-105"
+                        {p.imagenes?.length || p.imagen ? (
+                          <ProductImageGallery
+                            images={p.imagenes?.length ? p.imagenes : [p.imagen]}
+                            name={p.nombre}
+                            showThumbnails={isEquipmentType}
+                            href={p.componentKey
+                              ? `/producto/componente/${encodeURIComponent(p.id)}`
+                              : isEquipmentType
+                                ? `/producto/equipo/${encodeURIComponent(p.id)}`
+                                : undefined}
                           />
                         ) : (
                           <ShoppingCart className="size-8 text-muted-foreground/40" />

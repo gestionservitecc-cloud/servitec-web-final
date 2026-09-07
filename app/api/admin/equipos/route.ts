@@ -3,6 +3,7 @@ import { isAuthed } from "@/lib/auth";
 import { getEquipos, saveEquipos } from "@/lib/store";
 import { get, put } from "@vercel/blob";
 import type { Equipo } from "@/lib/types";
+import { normalizeEquipmentCondition } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -26,9 +27,12 @@ export async function PUT(req: Request) {
     );
   }
   try {
-    await saveEquipos(
-      body.map((e, i) => ({ ...e, orden: typeof e.orden === "number" ? e.orden : i })),
-    );
+    const normalizedBody = body.map((e, i) => ({
+      ...e,
+      condition: normalizeEquipmentCondition(e.condition),
+      orden: typeof e.orden === "number" ? e.orden : i,
+    }));
+    await saveEquipos(normalizedBody);
   } catch (e) {
     return NextResponse.json(
       { error: e instanceof Error ? e.message : "No se pudo guardar" },
@@ -37,7 +41,7 @@ export async function PUT(req: Request) {
   }
   // Best-effort: write equipos per-category under componentes/<CATEGORY>/equipos.json
   try {
-    const groups = body.reduce<Record<string, Equipo[]>>((acc, equipo) => {
+    const groups = normalizedBody.reduce<Record<string, Equipo[]>>((acc, equipo) => {
       const key = String(equipo.categoria || "").trim();
       if (!acc[key]) acc[key] = [];
       acc[key].push(equipo);
@@ -57,5 +61,5 @@ export async function PUT(req: Request) {
   } catch {
     // ignore failures
   }
-  return NextResponse.json({ ok: true, count: body.length });
+  return NextResponse.json({ ok: true, count: normalizedBody.length });
 }

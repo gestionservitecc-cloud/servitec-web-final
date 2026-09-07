@@ -77,6 +77,12 @@ export function parsePrice(value: unknown): number {
   return Number.isFinite(n) ? n : 0;
 }
 
+export function formatCurrencyInput(value: unknown): string {
+  if (value === "" || value === null || value === undefined) return "";
+  const parsed = parsePrice(value);
+  return `$${Math.round(parsed).toLocaleString("es-AR")}`;
+}
+
 export function normalizeStockCategoryValue(value?: string): string {
   const normalized = String(value ?? "").trim().toLowerCase();
   if (!normalized) return "";
@@ -92,6 +98,15 @@ export function normalizeStockCategoryValue(value?: string): string {
   if (["tv", "tvs", "tvs"].includes(normalized)) return "tv";
 
   return normalized;
+}
+
+export function normalizeEquipmentCondition(value?: string): "Sellado" | "Reacondicionado" {
+  return String(value ?? "")
+    .trim()
+    .toLowerCase()
+    .includes("reacondicionado")
+    ? "Reacondicionado"
+    : "Sellado";
 }
 
 export function isPcArmadaCategoryValue(value?: string): boolean {

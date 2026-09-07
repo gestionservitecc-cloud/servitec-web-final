@@ -20,6 +20,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Logo } from "./Logo";
+import { GlobalCart } from "./GlobalCart";
 import {
   CONTACT,
   primaryNav,
@@ -108,11 +109,11 @@ export function Header() {
             }))}
           />
           <NavDropdown
-            label="Stock"
+            label="Reacondicionados"
             active={pathname.startsWith("/stock")}
             items={stockCategories.map((c) => ({
               label: c.label,
-              href: `/stock?categoria=${c.value}`,
+              href: `/stock?tipo=reacondicionados&categoria=${c.value}`,
             }))}
           />
         </nav>
@@ -131,6 +132,7 @@ export function Header() {
               WhatsApp
             </a>
           </Button>
+          <GlobalCart />
         </div>
 
         {/* Mobile */}
@@ -210,11 +212,11 @@ export function Header() {
                   ))}
                 </MobileGroup>
 
-                <MobileGroup label="Stock">
+                <MobileGroup label="Reacondicionados">
                   {stockCategories.map((c) => (
                     <Link
                       key={c.value}
-                      href={`/stock?categoria=${c.value}`}
+                      href={`/stock?tipo=reacondicionados&categoria=${c.value}`}
                       onClick={closeMobileMenu}
                       className="rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-muted"
                     >
@@ -257,6 +259,7 @@ export function Header() {
               </div>
             </SheetContent>
           </Sheet>
+          <GlobalCart />
         </div>
       </div>
     </header>

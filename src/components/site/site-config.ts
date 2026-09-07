@@ -22,9 +22,12 @@ export const stockCategories = [
 ];
 
 export const storeCategories = [
-  { label: "Accesorios", value: "accesorios" },
+  { label: "Productos", value: "accesorios" },
   { label: "Componentes", value: "componentes" },
+  { label: "Equipos", value: "equipos" },
 ];
+
+export const storeEquipmentCategories = stockCategories;
 
 // Sales-first ordering: Inicio → Stock → Tienda → Armá tu PC → Servicios (repair last).
 export const primaryNav = [{ label: "Inicio", href: "/" }];
