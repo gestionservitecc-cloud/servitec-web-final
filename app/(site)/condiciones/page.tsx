@@ -55,6 +55,110 @@ export default function CondicionesPage() {
             tarjeta de crédito.
           </p>
 
+          <h2>Productos nuevos</h2>
+          <ul>
+            <li>
+              Todos los productos comercializados son <strong>nuevos</strong>,
+              originales y cuentan con <strong>garantía oficial</strong> según
+              marca y producto; la misma se entregará en la orden final.
+            </li>
+            <li>
+              Los precios y promociones son los vigentes al momento de confirmar
+              la compra y pueden variar sin previo aviso.
+            </li>
+            <li>
+              La compra queda confirmada una vez <strong>acreditado el pago y
+              validado el stock</strong>.
+            </li>
+            <li>
+              En productos solicitados <strong>a pedido</strong>, el pedido se
+              procesa una vez abonado el total y el plazo de entrega comienza
+              desde la acreditación.
+            </li>
+            <li>
+              El cliente debe verificar modelo, capacidad, color y demás
+              características antes de confirmar la compra.
+            </li>
+            <li>
+              La <strong>garantía por fallas de fabricación</strong> se gestiona
+              conforme a las condiciones establecidas por el fabricante o
+              servicio técnico oficial, sin afectar los derechos legales del
+              consumidor.
+            </li>
+            <li>
+              La garantía no cubre daños provocados por golpes, líquidos,
+              sobretensión, mal uso, manipulación, modificaciones o daños
+              externos.
+            </li>
+            <li>
+              Para realizar una gestión de garantía puede solicitarse
+              factura/comprobante, número de serie y accesorios necesarios para
+              verificar el funcionamiento.
+            </li>
+            <li>
+              Los plazos de entrega informados son estimados salvo que se indique
+              expresamente una fecha determinada.
+            </li>
+            <li>Todos los pedidos tienen una demora aproximada de hasta 5 días hábiles.</li>
+            <li>
+              Las imágenes publicadas pueden ser ilustrativas; prevalecen las
+              especificaciones de marca, modelo y características indicadas en la
+              publicación o pedido.
+            </li>
+          </ul>
+
+          <h2>Productos reacondicionados</h2>
+          <ul>
+            <li>
+              Los productos reacondicionados son equipos previamente utilizados,
+              revisados, testeados y acondicionados para su correcto
+              funcionamiento.
+            </li>
+            <li>Stock en tiempo real.</li>
+            <li>El cliente puede realizar una prueba del producto sin compromiso.</li>
+            <li>
+              El estado estético puede presentar marcas normales de uso, las
+              cuales no afectan su funcionamiento.
+            </li>
+            <li>Cada producto se entrega probado y en correcto funcionamiento.</li>
+            <li>
+              Los productos reacondicionados cuentan con <strong>3 meses de
+              garantía</strong> desde la fecha de entrega.
+            </li>
+            <li>La garantía cubre fallas de funcionamiento atribuibles al equipo.</li>
+            <li>
+              La garantía no cubre daños ocasionados por golpes, líquidos,
+              humedad, sobretensión, mal uso, manipulación, modificaciones,
+              roturas físicas o daños externos.
+            </li>
+            <li>
+              La batería y demás componentes sujetos a desgaste natural podrán
+              presentar una capacidad inferior a la de un producto nuevo, acorde
+              al uso previo del equipo.
+            </li>
+            <li>
+              Los accesorios y presentación pueden no ser los originales, salvo
+              que se indique expresamente lo contrario.
+            </li>
+            <li>
+              El cliente deberá verificar modelo, características y estado
+              general del producto al momento de la compra.
+            </li>
+          </ul>
+          <p>
+            Puede hacer uso de su garantía desde el sitio oficial del fabricante.
+            A continuación le facilitamos los enlaces:
+          </p>
+          <ul>
+            <li><a href="https://www.amd.com/es/support/warranty.html" target="_blank" rel="noreferrer">AMD</a></li>
+            <li><a href="https://www.gigabyte.com/ar/Support/Consumer/Warranty" target="_blank" rel="noreferrer">Gigabyte</a></li>
+            <li><a href="https://www.lenovo.com/ar/es/servicios/servicios-pc/?orgRef=https%253A%252F%252Fwww.google.com%252F&srsltid=AfmBOoqpdfXyyUWB3psxOK7GUVvmeveGKX5gfVMDVzakQuJRBwijn3Oe" target="_blank" rel="noreferrer">Lenovo</a></li>
+            <li><a href="https://www.asus.com/latin/support/" target="_blank" rel="noreferrer">ASUS</a></li>
+            <li><a href="https://www.acer.com/ar-es/support" target="_blank" rel="noreferrer">Acer</a></li>
+            <li><a href="https://www.hp.com/ar-es/contact-hp/contact.html" target="_blank" rel="noreferrer">HP</a></li>
+            <li><a href="https://www.samsung.com/ar/support/warranty/" target="_blank" rel="noreferrer">Samsung</a></li>
+          </ul>
+
           <h2>Diagnósticos e intervenciones</h2>
           <p>
             Al realizar cualquier intervención de sistema y/o hardware, el equipo
