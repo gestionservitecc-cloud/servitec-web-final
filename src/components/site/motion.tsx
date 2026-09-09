@@ -11,8 +11,8 @@ import {
 const ease = [0.16, 1, 0.3, 1] as const;
 
 /**
- * Reveal on scroll, with a safety timeout: if the IntersectionObserver never
- * fires (odd embeds / prerender quirks) the content still shows after 900ms.
+ * Reveal on scroll, with a visible fallback so an observer failure never hides
+ * a complete section from the page.
  */
 function useReveal(rootMargin = "-80px") {
   const ref = useRef<HTMLElement | null>(null);
@@ -36,7 +36,6 @@ export function Reveal({
   y = 24,
   as = "div",
   className,
-  initiallyVisible = false,
   ...rest
 }: {
   children: ReactNode;
@@ -44,10 +43,9 @@ export function Reveal({
   y?: number;
   as?: ElementType;
   className?: string;
-  initiallyVisible?: boolean;
 } & Omit<HTMLMotionProps<"div">, "children">) {
   const reduce = useReducedMotion();
-  const { ref, show } = useReveal();
+  const { ref } = useReveal();
   const MotionTag = (motion[as as "div"] ?? motion.div) as typeof motion.div;
 
   if (reduce) {
@@ -63,8 +61,8 @@ export function Reveal({
     <MotionTag
       ref={ref as never}
       className={className}
-      initial={initiallyVisible ? { opacity: 1, y: 0 } : { opacity: 0, y }}
-      animate={initiallyVisible || show ? { opacity: 1, y: 0 } : { opacity: 0, y }}
+      initial={{ opacity: 1, y: 0 }}
+      animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease, delay }}
       {...rest}
     >
@@ -76,14 +74,12 @@ export function Reveal({
 export function Stagger({
   children,
   className,
-  initiallyVisible = false,
 }: {
   children: ReactNode;
   className?: string;
-  initiallyVisible?: boolean;
 }) {
   const reduce = useReducedMotion();
-  const { ref, show } = useReveal("-60px");
+  const { ref } = useReveal("-60px");
 
   if (reduce) return <div className={className}>{children}</div>;
 
@@ -91,8 +87,8 @@ export function Stagger({
     <motion.div
       ref={ref as never}
       className={className}
-      initial={initiallyVisible ? "show" : "hidden"}
-      animate={initiallyVisible || show ? "show" : "hidden"}
+      initial="show"
+      animate="show"
       variants={{
         hidden: {},
         show: { transition: { staggerChildren: 0.08, delayChildren: 0.04 } },
@@ -117,7 +113,7 @@ export function StaggerItem({
     <motion.div
       className={className}
       variants={{
-        hidden: { opacity: 0, y: 20 },
+        hidden: { opacity: 1, y: 0 },
         show: { opacity: 1, y: 0, transition: { duration: 0.5, ease } },
       }}
       {...rest}
