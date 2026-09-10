@@ -7,6 +7,7 @@ const infoLinks = [
   { label: "FAQs", href: "/faqs" },
   { label: "Formas de pago", href: "/formas-de-pago" },
   { label: "Términos y condiciones", href: "/condiciones" },
+  { label: "Política de privacidad", href: "/politica-de-privacidad" },
   {
     label: "Defensa al consumidor",
     href: "https://buenosaires.gob.ar/gcaba_historico/gobierno-y-vinculo-ciudadano/defensa-al-consumidor",
