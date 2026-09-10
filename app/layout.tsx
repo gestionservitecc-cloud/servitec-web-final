@@ -57,8 +57,8 @@ export const metadata: Metadata = {
       "Comprá equipos con stock real, armá tu PC y sumá accesorios. Servicio técnico con garantía escrita en CABA.",
   },
   icons: {
-    icon: "/favicon.webp",
-    apple: "/favicon.webp",
+    icon: "/favicon.png",
+    apple: "/favicon.png",
   },
 };
 
