@@ -325,9 +325,10 @@ export function TiendaClient() {
 
       <section className="bg-muted/40">
       <div className="container-page py-12 lg:py-16">
-        {/* Toolbar */}
-        <div className="sticky top-16 z-20 -mx-3 mb-8 border-b bg-background/90 px-3 py-3 shadow-soft backdrop-blur sm:mx-0 sm:mb-10 sm:rounded-2xl sm:border sm:px-4">
-          <div className="flex flex-col gap-3 md:flex-row md:items-center">
+        <div className="lg:grid lg:grid-cols-[18rem_minmax(0,1fr)] lg:items-start lg:gap-8">
+          {/* On desktop the fixed filters live beside the catalogue, so they never cover product cards. */}
+          <div className="z-20 -mx-3 mb-8 border-b bg-background px-3 py-3 shadow-soft sm:mx-0 sm:mb-10 sm:rounded-2xl sm:border sm:px-4 lg:sticky lg:top-20 lg:mb-0 lg:rounded-2xl lg:border lg:p-4 lg:self-start">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center lg:flex-col lg:items-stretch">
             <div className="relative flex-1">
               <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
               <Input
@@ -342,7 +343,7 @@ export function TiendaClient() {
               value={activeCategoriaFiltro || "all"}
               onValueChange={(v) => setCategoriaFiltro({ tipo, value: v === "all" ? "" : v })}
             >
-              <SelectTrigger className="md:w-56">
+              <SelectTrigger className="md:w-56 lg:w-full">
                 <SelectValue placeholder="Categoría" />
               </SelectTrigger>
               <SelectContent>
@@ -358,7 +359,7 @@ export function TiendaClient() {
               value={orden || undefined}
               onValueChange={(v) => setOrden(v as "asc" | "desc")}
             >
-              <SelectTrigger className="md:w-48">
+              <SelectTrigger className="md:w-48 lg:w-full">
                 <SelectValue placeholder="Ordenar" />
               </SelectTrigger>
               <SelectContent>
@@ -368,7 +369,7 @@ export function TiendaClient() {
             </Select>
             <Button
               onClick={() => setCarritoAbierto(true)}
-              className="relative gap-2"
+              className="relative gap-2 lg:w-full"
               aria-label={`Abrir carrito, ${totalArticulos} artículos`}
             >
               <ShoppingCart className="size-4" /> Carrito
@@ -394,6 +395,7 @@ export function TiendaClient() {
           )}
         </div>
 
+        <div className="min-w-0">
         {loading && (
           <div className="grid grid-cols-1 gap-5 min-[420px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
             {Array.from({ length: 8 }).map((_, i) => (
@@ -508,6 +510,8 @@ export function TiendaClient() {
               </div>
             </div>
           ))}
+        </div>
+        </div>
       </div>
       </section>
 

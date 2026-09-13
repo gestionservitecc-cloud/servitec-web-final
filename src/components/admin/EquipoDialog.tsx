@@ -130,6 +130,7 @@ export function EquipoDialog({
               catalog={componentCatalog}
               value={draft.componentes || []}
               onChange={(v) => set("componentes", v)}
+              manual={isReacondicionado}
             />
           ) : isTablet || isTv ? (
             <details className="rounded-xl border border-slate-200 bg-slate-50/60 p-4" open>
@@ -197,6 +198,7 @@ export function EquipoDialog({
                   <Input value={draft.modelo} onChange={(e) => set("modelo", e.target.value)} />
                 </Field>
                 {[
+                  ["procesador", "Procesador"],
                   ["almacenamiento", "Almacenamiento"],
                   ["ram", "RAM"],
                   ["pantalla", "Pantalla"],
@@ -355,7 +357,7 @@ export function EquipoDialog({
             <div>
               <p className="text-sm font-medium">Destacado en el inicio</p>
               <p className="text-xs text-muted-foreground">
-                Aparece en la portada dentro de su propia categorÃ­a.
+                Aparece en la portada dentro de su propia categorí­a.
               </p>
             </div>
             <Switch
@@ -475,10 +477,12 @@ function ComponentesEditor({
   catalog,
   value = [],
   onChange,
+  manual = false,
 }: {
   catalog: ComponentCatalog;
   value: EquipoComponente[];
   onChange: (v: EquipoComponente[]) => void;
+  manual?: boolean;
 }) {
   const [addKey, setAddKey] = useState<ComponentCatalogKey>(componentCatalogKeys[0]);
   const [componentFilter, setComponentFilter] = useState("");
@@ -508,25 +512,50 @@ function ComponentesEditor({
   };
 
   const selectedCount = value.reduce((total, component) => total + (Number(component.cantidad) || 1), 0);
+  const addManualComponent = () => onChange([
+    ...value,
+    { key: "manual", label: "Componente", nombre: "", detalle: "", imagen: "", precio: null, cantidad: 1 },
+  ]);
 
   return (
     <div className="rounded-lg border p-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-sm font-bold text-slate-900">Componentes de la PC</p>
+        <p className="text-sm font-bold text-slate-900">{manual ? "Componentes de la PC reacondicionada" : "Componentes de la PC"}</p>
         <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">{selectedCount} seleccionado{selectedCount === 1 ? "" : "s"}</span>
       </div>
+      {manual && <p className="mt-2 text-xs text-slate-600">Cargá cada componente manualmente; no se vincula con el catálogo de componentes nuevos.</p>}
       <div className="mt-3 space-y-2">
         {value.map((c, i) => (
           <div key={i} className="flex min-w-0 flex-wrap items-center gap-2 rounded-xl border border-slate-200 bg-white p-2 shadow-sm">
-            {c.imagen && (
+            {!manual && c.imagen && (
               <img src={c.imagen} alt="" className="size-10 shrink-0 rounded border border-slate-100 bg-white object-contain" />
             )}
-            <div className="min-w-0 flex-1 basis-32">
+            {manual ? (
+              <div className="grid min-w-0 flex-1 gap-2 sm:grid-cols-2">
+                <Input
+                  value={c.label}
+                  onChange={(e) => { const next = [...value]; next[i] = { ...c, label: e.target.value }; onChange(next); }}
+                  placeholder="Categoría (ej.: Procesador)"
+                />
+                <Input
+                  value={c.nombre}
+                  onChange={(e) => { const next = [...value]; next[i] = { ...c, nombre: e.target.value }; onChange(next); }}
+                  placeholder="Componente y modelo"
+                />
+                <Textarea
+                  className="sm:col-span-2"
+                  rows={2}
+                  value={c.detalle}
+                  onChange={(e) => { const next = [...value]; next[i] = { ...c, detalle: e.target.value }; onChange(next); }}
+                  placeholder="Detalle del componente"
+                />
+              </div>
+            ) : <div className="min-w-0 flex-1 basis-32">
               <p className="truncate text-xs font-semibold uppercase text-muted-foreground">
                 {c.label}
               </p>
               <p className="truncate text-sm">{c.nombre}</p>
-            </div>
+            </div>}
             <Input
               type="number"
               className="h-10 w-16"
@@ -550,7 +579,11 @@ function ComponentesEditor({
         ))}
       </div>
 
-      <div className="mt-4 rounded-xl border border-sky-200 bg-sky-50/70 p-3 sm:p-4">
+      {manual ? (
+        <Button type="button" variant="outline" className="mt-4 w-full gap-2" onClick={addManualComponent}>
+          <Plus className="size-4" /> Agregar componente
+        </Button>
+      ) : <div className="mt-4 rounded-xl border border-sky-200 bg-sky-50/70 p-3 sm:p-4">
         <p className="mb-2 text-xs font-bold uppercase tracking-wide text-sky-800">Categoría interna</p>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           {componentCatalogKeys.map((key) => (
@@ -576,9 +609,9 @@ function ComponentesEditor({
           ))}
           {filteredComponents.length === 0 && <p className="col-span-full rounded-lg border border-dashed border-slate-300 bg-white/70 px-3 py-4 text-center text-xs text-slate-500">No hay componentes cargados en esta categoría.</p>}
         </div>
-      </div>
+      </div>}
 
-      <div className="hidden mt-3 flex flex-col gap-2 sm:flex-row">
+      {!manual && <div className="hidden mt-3 flex flex-col gap-2 sm:flex-row">
         <Select value={addKey} onValueChange={(value) => setAddKey(value as ComponentCatalogKey)}>
           <SelectTrigger className="w-full sm:w-40">
             <SelectValue />
@@ -614,7 +647,7 @@ function ComponentesEditor({
             ))}
           </SelectContent>
         </Select>
-      </div>
+      </div>}
     </div>
   );
 }

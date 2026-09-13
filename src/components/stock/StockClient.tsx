@@ -240,8 +240,10 @@ export const StockClient = () => {
 
       <section className="py-12 sm:py-16">
         <div className="container-page">
-          <div className="sticky top-16 z-20 -mx-4 mb-10 border-b bg-background/90 px-4 py-3 shadow-soft backdrop-blur sm:mx-0 sm:rounded-2xl sm:border sm:px-4">
-            <div className="flex flex-col gap-3 md:flex-row md:items-center">
+          <div className="lg:grid lg:grid-cols-[18rem_minmax(0,1fr)] lg:items-start lg:gap-8">
+            {/* A side panel remains available while browsing without overlaying the product grid. */}
+            <div className="z-20 -mx-4 mb-10 border-b bg-background px-4 py-3 shadow-soft sm:mx-0 sm:rounded-2xl sm:border sm:px-4 lg:sticky lg:top-20 lg:mb-0 lg:rounded-2xl lg:border lg:p-4 lg:self-start">
+            <div className="flex flex-col gap-3 md:flex-row md:items-center lg:flex-col lg:items-stretch">
               <div className="relative flex-1">
                 <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
@@ -258,7 +260,7 @@ export const StockClient = () => {
                   window.location.href = categoryHref(value);
                 }}
               >
-                <SelectTrigger className="md:w-56">
+                <SelectTrigger className="md:w-56 lg:w-full">
                   <SelectValue placeholder="Categoría" />
                 </SelectTrigger>
                 <SelectContent>
@@ -274,7 +276,7 @@ export const StockClient = () => {
                 value={orden || undefined}
                 onValueChange={(value) => setOrden(value as "asc" | "desc")}
               >
-                <SelectTrigger className="md:w-48">
+                <SelectTrigger className="md:w-48 lg:w-full">
                   <SelectValue placeholder="Ordenar" />
                 </SelectTrigger>
                 <SelectContent>
@@ -297,8 +299,9 @@ export const StockClient = () => {
                   }}
                 />
               </div>
-            )}
-          </div>
+              )}
+            </div>
+          <div className="min-w-0">
           {loading && (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {[...Array(6)].map((_, i) => (
@@ -531,6 +534,8 @@ export const StockClient = () => {
               })}
             </div>
           )}
+          </div>
+          </div>
         </div>
       </section>
     </>
