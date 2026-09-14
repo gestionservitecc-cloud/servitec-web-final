@@ -284,9 +284,11 @@ export function ProductDetailClient({ type, id }: { type: DetailType; id: string
             </div>
           ) : null}
           {specs.length > 0 ? <div className="mt-5 grid gap-x-8 rounded-xl bg-slate-50 px-3 sm:grid-cols-2">{specs.map(([label, value], index) => <div key={`${label}-${index}`} className="flex items-start justify-between gap-4 border-b border-slate-200 py-3 text-sm"><span className="font-semibold text-slate-600">{label}</span><span className="max-w-[58%] text-right font-medium text-slate-900">{value}</span></div>)}</div> : <p className="mt-6 text-sm text-slate-500">Las especificaciones todavía no fueron cargadas.</p>}
-          <div className="mt-6 rounded-xl border border-red-200 bg-gradient-to-r from-red-50 via-white to-blue-50 px-4 py-4 text-center shadow-sm">
-            <p className="text-base font-black uppercase tracking-[0.18em] text-red-700 sm:text-lg">GARANTIA OFICIAL</p>
-          </div>
+          {!isReconditioned && (
+            <div className="mt-6 rounded-xl border border-red-200 bg-gradient-to-r from-red-50 via-white to-blue-50 px-4 py-4 text-center shadow-sm">
+              <p className="text-base font-black uppercase tracking-[0.18em] text-red-700 sm:text-lg">GARANTIA OFICIAL</p>
+            </div>
+          )}
         </section>
       </div>
     </main>
