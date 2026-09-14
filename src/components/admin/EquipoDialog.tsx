@@ -511,42 +511,78 @@ function ComponentesEditor({
     ]);
   };
 
-  const selectedCount = value.reduce((total, component) => total + (Number(component.cantidad) || 1), 0);
-  const addManualComponent = () => onChange([
-    ...value,
-    { key: "manual", label: "Componente", nombre: "", detalle: "", imagen: "", precio: null, cantidad: 1 },
-  ]);
+  const legacyManualComponents = value.filter((component) => component.key === "manual");
+  const emptyManualComponent = (key: ComponentCatalogKey): EquipoComponente => ({
+    key,
+    label: componentCatalogLabels[key],
+    nombre: "",
+    detalle: "",
+    imagen: "",
+    precio: null,
+    cantidad: 1,
+  });
+  const displayedComponents = manual
+    ? componentCatalogKeys.flatMap((key, index) => {
+      const saved = value.filter((component) => component.key === key);
+      const slotCount = key === "memory" || key === "peripherals"
+        ? key === "memory" ? Math.min(4, Math.max(1, saved.length)) : Math.max(1, saved.length)
+        : 1;
+      return Array.from({ length: slotCount }, (_, slotIndex) => {
+        const fallback = slotIndex === 0 ? legacyManualComponents[index] : undefined;
+        return { ...emptyManualComponent(key), ...(saved[slotIndex] || fallback), key, label: componentCatalogLabels[key] };
+      });
+    })
+    : value;
+  const selectedCount = displayedComponents.filter((component) => component.nombre.trim()).length;
+  const updateComponent = (index: number, nextComponent: EquipoComponente) => {
+    const next = [...displayedComponents];
+    next[index] = nextComponent;
+    onChange(next);
+  };
+  const addManualSlot = (key: "memory" | "peripherals") => {
+    onChange([...displayedComponents, emptyManualComponent(key)]);
+  };
+  const memorySlots = displayedComponents.filter((component) => component.key === "memory").length;
+  const peripheralSlots = displayedComponents.filter((component) => component.key === "peripherals").length;
 
   return (
     <div className="rounded-lg border p-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-sm font-bold text-slate-900">{manual ? "Componentes de la PC reacondicionada" : "Componentes de la PC"}</p>
-        <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">{selectedCount} seleccionado{selectedCount === 1 ? "" : "s"}</span>
+        <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">{selectedCount} cargado{selectedCount === 1 ? "" : "s"}</span>
       </div>
       {manual && <p className="mt-2 text-xs text-slate-600">Cargá cada componente manualmente; no se vincula con el catálogo de componentes nuevos.</p>}
+      {manual && (
+        <div className="mt-3 flex flex-wrap gap-2 rounded-xl border border-slate-200 bg-slate-50 p-3">
+          <Button type="button" variant="outline" size="sm" className="gap-1.5" onClick={() => addManualSlot("memory")} disabled={memorySlots >= 4}>
+            <Plus className="size-3.5" /> Agregar RAM ({memorySlots}/4)
+          </Button>
+          <Button type="button" variant="outline" size="sm" className="gap-1.5" onClick={() => addManualSlot("peripherals")}>
+            <Plus className="size-3.5" /> Agregar periférico ({peripheralSlots})
+          </Button>
+        </div>
+      )}
       <div className="mt-3 space-y-2">
-        {value.map((c, i) => (
+        {displayedComponents.map((c, i) => (
           <div key={i} className="flex min-w-0 flex-wrap items-center gap-2 rounded-xl border border-slate-200 bg-white p-2 shadow-sm">
             {!manual && c.imagen && (
               <img src={c.imagen} alt="" className="size-10 shrink-0 rounded border border-slate-100 bg-white object-contain" />
             )}
             {manual ? (
               <div className="grid min-w-0 flex-1 gap-2 sm:grid-cols-2">
-                <Input
-                  value={c.label}
-                  onChange={(e) => { const next = [...value]; next[i] = { ...c, label: e.target.value }; onChange(next); }}
-                  placeholder="Categoría (ej.: Procesador)"
-                />
+                <p className="flex min-h-10 items-center rounded-md border border-slate-200 bg-slate-50 px-3 text-sm font-semibold text-slate-700">
+                  {c.label}
+                </p>
                 <Input
                   value={c.nombre}
-                  onChange={(e) => { const next = [...value]; next[i] = { ...c, nombre: e.target.value }; onChange(next); }}
+                  onChange={(e) => updateComponent(i, { ...c, nombre: e.target.value })}
                   placeholder="Componente y modelo"
                 />
                 <Textarea
                   className="sm:col-span-2"
                   rows={2}
                   value={c.detalle}
-                  onChange={(e) => { const next = [...value]; next[i] = { ...c, detalle: e.target.value }; onChange(next); }}
+                  onChange={(e) => updateComponent(i, { ...c, detalle: e.target.value })}
                   placeholder="Detalle del componente"
                 />
               </div>
@@ -561,9 +597,7 @@ function ComponentesEditor({
               className="h-10 w-16"
               value={c.cantidad || 1}
               onChange={(e) => {
-                const next = [...value];
-                next[i] = { ...c, cantidad: Number(e.target.value) || 1 };
-                onChange(next);
+                updateComponent(i, { ...c, cantidad: Number(e.target.value) || 1 });
               }}
             />
             <Button
@@ -571,7 +605,10 @@ function ComponentesEditor({
               variant="ghost"
               size="icon"
               className="size-10 shrink-0 text-destructive"
-              onClick={() => onChange(value.filter((_, k) => k !== i))}
+              onClick={() => manual
+                ? updateComponent(i, { ...c, nombre: "", detalle: "", imagen: "", precio: null, cantidad: 1 })
+                : onChange(value.filter((_, k) => k !== i))}
+              aria-label={manual ? `Limpiar ${c.label}` : `Eliminar ${c.nombre}`}
             >
               <Trash2 className="size-4" />
             </Button>
@@ -579,11 +616,7 @@ function ComponentesEditor({
         ))}
       </div>
 
-      {manual ? (
-        <Button type="button" variant="outline" className="mt-4 w-full gap-2" onClick={addManualComponent}>
-          <Plus className="size-4" /> Agregar componente
-        </Button>
-      ) : <div className="mt-4 rounded-xl border border-sky-200 bg-sky-50/70 p-3 sm:p-4">
+      {!manual && <div className="mt-4 rounded-xl border border-sky-200 bg-sky-50/70 p-3 sm:p-4">
         <p className="mb-2 text-xs font-bold uppercase tracking-wide text-sky-800">Categoría interna</p>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           {componentCatalogKeys.map((key) => (
