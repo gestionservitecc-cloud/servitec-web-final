@@ -154,6 +154,8 @@ export const StockClient = () => {
   const filter = searchParams.get("tipo");
   const categoryFilter = searchParams.get("categoria");
   const normalizedCategoryFilter = normalizeStockCategory(categoryFilter);
+  const isNewStock = filter === "nuevos";
+  const isReconditionedStock = filter === "reacondicionados";
   const categoryHref = (value: string) => {
     const params = new URLSearchParams();
     if (filter) params.set("tipo", filter);
@@ -226,16 +228,22 @@ export const StockClient = () => {
   return (
     <>
       <PageHero
-        eyebrow="Reacondicionados"
+        eyebrow={isNewStock ? "Equipos nuevos" : isReconditionedStock ? "Reacondicionados" : "Equipos disponibles"}
         title={
           categoryFilter
-            ? categoryLabels[normalizedCategoryFilter] || "Equipos Reacondicionados"
-            : "Equipos Reacondicionados"
+            ? `${categoryLabels[normalizedCategoryFilter] || "Equipos"}${isNewStock ? " nuevos" : isReconditionedStock ? " reacondicionados" : ""}`
+            : isNewStock
+              ? "Equipos nuevos"
+              : isReconditionedStock
+                ? "Equipos Reacondicionados"
+                : "Equipos disponibles"
         }
         description={
-          filter === "reacondicionados"
+          isReconditionedStock
             ? "Equipos reacondicionados con garantía."
-              : "Equipos reacondicionados con garantía."
+            : isNewStock
+              ? "Equipos sellados con garantía."
+              : "Equipos nuevos y reacondicionados con garantía."
         }
       />
 

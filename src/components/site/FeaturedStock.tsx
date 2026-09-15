@@ -154,7 +154,7 @@ function StockRow({
                       className="mt-auto w-full"
                       variant={accent ? "secondary" : "default"}
                     >
-                      <Link href={href}>
+                      <Link href={`/producto/equipo/${encodeURIComponent(item.id)}`}>
                         Ver más <ArrowRight className="size-3.5" />
                       </Link>
                     </Button>
