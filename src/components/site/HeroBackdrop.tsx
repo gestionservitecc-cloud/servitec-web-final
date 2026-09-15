@@ -1,6 +1,7 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
+import FluidOrb from "@/components/ui/fluid-orb";
 
 /** Animated decorative glow orbs for the hero. Purely aesthetic. */
 export function HeroBackdrop() {
@@ -27,6 +28,11 @@ export function HeroBackdrop() {
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
       <div className="absolute inset-0 opacity-[0.12] surface-grid" />
+      <FluidOrb
+        size={360}
+        color="#06b6d4"
+        className="absolute -right-40 -top-36 hidden opacity-35 blur-[1px] lg:block"
+      />
       {orbs.map((orb, i) => (
         <motion.div
           key={i}

@@ -130,19 +130,21 @@ export default function HomePage() {
                   Armá tu PC <ArrowRight className="size-4" />
                 </Link>
               </Button>
-              <Button
-                asChild
-                size="lg"
-                className="h-12 bg-whatsapp text-whatsapp-foreground hover:bg-whatsapp/90 sm:min-w-[200px]"
-              >
-                <a
-                  href={waLink("Hola ServiTec, quiero hacer una consulta")}
-                  target="_blank"
-                  rel="noopener noreferrer"
+              <Pressable lift={false} className="rounded-md">
+                <Button
+                  asChild
+                  size="lg"
+                  className="h-12 bg-whatsapp text-whatsapp-foreground shadow-[0_0_0_1px_rgba(255,255,255,0.16),0_12px_32px_rgba(37,211,102,0.20)] hover:bg-whatsapp/90 hover:shadow-[0_0_0_1px_rgba(255,255,255,0.28),0_16px_38px_rgba(37,211,102,0.30)] sm:min-w-[200px]"
                 >
-                  <MessageCircle className="size-4" /> WhatsApp directo
-                </a>
-              </Button>
+                  <a
+                    href={waLink("Hola ServiTec, quiero hacer una consulta")}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <MessageCircle className="size-4" /> WhatsApp directo
+                  </a>
+                </Button>
+              </Pressable>
             </Reveal>
           </div>
 
