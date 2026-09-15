@@ -6,9 +6,13 @@ import { signOut } from "next-auth/react";
 import {
   Boxes,
   Check,
+  CircleDollarSign,
   DollarSign,
+  ExternalLink,
   LayoutDashboard,
   Loader2,
+  LogOut,
+  Package,
   Pencil,
   Plus,
   Search,
@@ -52,6 +56,23 @@ import {
 } from "@/lib/component-catalog";
 import { ComponenteDialog } from "./ComponenteDialog";
 import NotebookBulkUpload from "./NotebookBulkUpload";
+import { Badge } from "@/components/ui/badge";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarInset,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+  SidebarSeparator,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
 
 const money = (n: number) =>
   `$ ${Math.round(Number(n) || 0).toLocaleString("es-AR")}`;
@@ -87,6 +108,30 @@ const componentKeyFromValue = (value: unknown): ComponentCatalogKey | null => {
 };
 
 type Segment = "dashboard" | "stock" | "componentes";
+
+const adminSections = [
+  {
+    id: "dashboard",
+    label: "Productos",
+    description: "Productos y accesorios",
+    icon: LayoutDashboard,
+  },
+  {
+    id: "stock",
+    label: "Equipos",
+    description: "Equipos y reacondicionados",
+    icon: Package,
+  },
+  {
+    id: "componentes",
+    label: "Componentes",
+    description: "Armá tu PC y tienda",
+    icon: Boxes,
+  },
+] as const;
+
+const adminSectionTitle = (segment: Segment) =>
+  adminSections.find((section) => section.id === segment)?.label || "Panel";
 
 type InventoryMovement = {
   id: string;
@@ -146,6 +191,94 @@ const getMovementMeta = (tipo: InventoryMovement["tipo"]) => ({
   label: tipo === "entrada" ? "Entrada" : "Salida",
   color: tipo === "entrada" ? "text-emerald-700" : "text-rose-700",
 });
+
+function AdminSidebar({
+  segment,
+  onSelect,
+  onLogout,
+}: {
+  segment: Segment;
+  onSelect: (segment: Segment) => void;
+  onLogout: () => void;
+}) {
+  return (
+    <Sidebar collapsible="icon" variant="inset" className="border-sidebar-border/70">
+      <SidebarHeader className="p-3">
+        <div className="flex items-center gap-3 rounded-xl bg-sidebar-accent/70 px-3 py-3">
+          <div className="grid size-9 shrink-0 place-items-center rounded-lg bg-white p-1.5 shadow-sm">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={getAssetUrl("logo.png")}
+              alt="ServiTec"
+              className="size-full object-contain"
+            />
+          </div>
+          <div className="min-w-0 group-data-[collapsible=icon]:hidden">
+            <p className="font-display text-lg font-bold leading-none text-white">
+              Servi<span className="text-primary">Tec</span>
+            </p>
+            <p className="mt-1 truncate text-[10px] font-semibold uppercase tracking-[0.18em] text-sidebar-foreground/55">
+              Administración
+            </p>
+          </div>
+        </div>
+      </SidebarHeader>
+      <SidebarSeparator />
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupLabel>Gestión de catálogo</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {adminSections.map(({ id, label, description, icon: Icon }) => (
+                <SidebarMenuItem key={id}>
+                  <SidebarMenuButton
+                    type="button"
+                    size="lg"
+                    isActive={segment === id}
+                    tooltip={label}
+                    onClick={() => onSelect(id)}
+                    className="h-auto min-h-12 py-2.5 data-[active=true]:bg-primary data-[active=true]:text-primary-foreground"
+                  >
+                    <Icon />
+                    <span className="min-w-0 group-data-[collapsible=icon]:hidden">
+                      <span className="block truncate font-semibold">{label}</span>
+                      <span className="block truncate text-xs font-normal text-sidebar-foreground/55 group-data-[active=true]:text-primary-foreground/75">
+                        {description}
+                      </span>
+                    </span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+      <SidebarFooter className="p-3">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild tooltip="Ver sitio web">
+              <Link href="/" target="_blank">
+                <ExternalLink />
+                <span>Ver sitio web</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              type="button"
+              tooltip="Cerrar sesión"
+              onClick={onLogout}
+              className="text-rose-200 hover:bg-rose-500/15 hover:text-rose-100"
+            >
+              <LogOut />
+              <span>Cerrar sesión</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
+    </Sidebar>
+  );
+}
 
 export function AdminDashboard({
   persistent,
@@ -254,11 +387,14 @@ export function AdminDashboard({
   }
 
   return (
-    <>
-      <div className="mx-auto w-full min-w-0 max-w-6xl space-y-5 overflow-x-hidden px-3 py-4 sm:space-y-6 sm:px-6 sm:py-6">
+    <SidebarProvider>
+      <AdminSidebar segment={segment} onSelect={setSegment} onLogout={logout} />
+      <SidebarInset className="min-w-0 bg-transparent text-white">
+        <div className="mx-auto w-full min-w-0 max-w-7xl space-y-5 overflow-x-hidden px-3 py-4 sm:space-y-6 sm:px-6 sm:py-6">
         {/* Header */}
-        <header className="flex flex-col gap-4 rounded-3xl border border-white/10 bg-white/[0.03] p-4 shadow-xl sm:flex-row sm:items-center sm:justify-between sm:p-5">
+        <header className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-white/[0.04] p-4 shadow-xl backdrop-blur sm:flex-row sm:items-center sm:justify-between sm:p-5">
           <div className="flex min-w-0 items-center gap-3">
+            <SidebarTrigger className="size-10 shrink-0 text-white hover:bg-white/10 hover:text-white" />
             <div className="grid size-12 place-items-center rounded-xl border border-white/15 bg-white/10 p-2">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -273,11 +409,20 @@ export function AdminDashboard({
                 <span className="text-primary">Tec</span>
               </p>
               <p className="text-xs uppercase tracking-[0.22em] text-white/50">
-                Panel administrativo
+                {adminSectionTitle(segment)} · Panel administrativo
               </p>
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-3">
+            <Badge
+              variant="outline"
+              className={persistent
+                ? "border-emerald-300/25 bg-emerald-400/10 text-emerald-100"
+                : "border-amber-300/25 bg-amber-400/10 text-amber-100"}
+            >
+              <CircleDollarSign className="mr-1 size-3" />
+              {persistent ? "Cambios activos" : "Solo lectura"}
+            </Badge>
             <div className="flex w-full items-center gap-2 sm:w-auto">
               <Link
                 href="/"
@@ -296,7 +441,7 @@ export function AdminDashboard({
         </header>
 
         {/* Tabs */}
-        <nav className="grid gap-2 rounded-3xl border border-white/10 bg-white/[0.03] p-2 shadow-xl sm:grid-cols-3">
+        <nav className="hidden grid gap-2 rounded-3xl border border-white/10 bg-white/[0.03] p-2 shadow-xl sm:grid-cols-3">
           {(
             [
               {
@@ -544,8 +689,9 @@ export function AdminDashboard({
             }}
           />
         )}
-      </div>
-    </>
+        </div>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }
 
