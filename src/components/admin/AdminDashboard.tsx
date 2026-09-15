@@ -3,6 +3,15 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
+import { motion, useReducedMotion } from "framer-motion";
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
+import {
+  getCoreRowModel,
+  getSortedRowModel,
+  type LegacyColumnDef as ColumnDef,
+  useLegacyTable as useReactTable,
+} from "@tanstack/react-table/legacy";
+import type { SortingState } from "@tanstack/table-core";
 import {
   Boxes,
   Check,
@@ -57,6 +66,12 @@ import {
 import { ComponenteDialog } from "./ComponenteDialog";
 import NotebookBulkUpload from "./NotebookBulkUpload";
 import { Badge } from "@/components/ui/badge";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
+} from "@/components/ui/chart";
 import {
   Sidebar,
   SidebarContent,
@@ -316,6 +331,7 @@ export function AdminDashboard({
     loading?: boolean;
     onConfirm: () => Promise<void> | void;
   } | null>(null);
+  const reduceMotion = useReducedMotion();
 
   const addMovement = (movement: Omit<InventoryMovement, "id" | "fecha">) => {
     setMovimientos((cur) => {
@@ -499,45 +515,52 @@ export function AdminDashboard({
           </div>
         )}
 
-        {segment === "dashboard" ? (
-          <DashboardTab
-            productos={productos}
-            setProductos={setProductos}
-            persistent={persistent}
-            onEdit={setEditProducto}
-            movimientos={movimientos}
-            addMovement={addMovement}
-            onOpenBulk={() => setBulkOpen(true)}
-            onRequestConfirm={setConfirmState}
-          />
-        ) : segment === "stock" ? (
-          <StockTab
-            equipos={equipos}
-            setEquipos={setEquipos}
-            persistent={persistent}
-            canManageCatalog={canManageCatalog}
-            onEdit={setEditEquipo}
-            onRequestConfirm={setConfirmState}
-            notebookPriceRules={notebookPriceRules}
-            setNotebookPriceRules={setNotebookPriceRules}
-            dollarQuote={dollarQuote}
-            setDollarQuote={setDollarQuote}
-          />
-        ) : (
-          <ComponentesTab
-            catalog={componentCatalog}
-            setCatalog={setComponentCatalog}
-            persistent={persistent}
-            canManageCatalog={canManageCatalog}
-            onEdit={setEditComponente}
-            onOpenBulk={() => setBulkOpen(true)}
-            onRequestConfirm={setConfirmState}
-            priceRules={componentPriceRules}
-            setPriceRules={setComponentPriceRules}
-            dollarQuote={dollarQuote}
-            setDollarQuote={setDollarQuote}
-          />
-        )}
+        <motion.div
+          key={segment}
+          initial={reduceMotion ? false : { opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+        >
+          {segment === "dashboard" ? (
+            <DashboardTab
+              productos={productos}
+              setProductos={setProductos}
+              persistent={persistent}
+              onEdit={setEditProducto}
+              movimientos={movimientos}
+              addMovement={addMovement}
+              onOpenBulk={() => setBulkOpen(true)}
+              onRequestConfirm={setConfirmState}
+            />
+          ) : segment === "stock" ? (
+            <StockTab
+              equipos={equipos}
+              setEquipos={setEquipos}
+              persistent={persistent}
+              canManageCatalog={canManageCatalog}
+              onEdit={setEditEquipo}
+              onRequestConfirm={setConfirmState}
+              notebookPriceRules={notebookPriceRules}
+              setNotebookPriceRules={setNotebookPriceRules}
+              dollarQuote={dollarQuote}
+              setDollarQuote={setDollarQuote}
+            />
+          ) : (
+            <ComponentesTab
+              catalog={componentCatalog}
+              setCatalog={setComponentCatalog}
+              persistent={persistent}
+              canManageCatalog={canManageCatalog}
+              onEdit={setEditComponente}
+              onOpenBulk={() => setBulkOpen(true)}
+              onRequestConfirm={setConfirmState}
+              priceRules={componentPriceRules}
+              setPriceRules={setComponentPriceRules}
+              dollarQuote={dollarQuote}
+              setDollarQuote={setDollarQuote}
+            />
+          )}
+        </motion.div>
 
         {bulkOpen && (
           <BulkUploadDialog
@@ -712,6 +735,64 @@ function StatCard({ label, value }: { label: string; value: React.ReactNode }) {
   );
 }
 
+const inventoryChartConfig = {
+  unidades: {
+    label: "Unidades",
+    color: "hsl(var(--secondary))",
+  },
+} satisfies ChartConfig;
+
+function InventoryCategoryChart({
+  data,
+}: {
+  data: Array<{ categoria: string; unidades: number }>;
+}) {
+  return (
+    <section className="rounded-3xl border border-white/10 bg-white/[0.04] p-5 shadow-xl backdrop-blur sm:p-6">
+      <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.15em] text-white/45">
+            Inventario actual
+          </p>
+          <h2 className="mt-1 text-lg font-bold text-white">Unidades por categoría</h2>
+        </div>
+        <span className="rounded-full bg-secondary/15 px-3 py-1 text-xs font-semibold text-cyan-100">
+          Top {data.length}
+        </span>
+      </div>
+      {data.length > 0 ? (
+        <ChartContainer config={inventoryChartConfig} className="h-56 w-full aspect-auto">
+          <BarChart data={data} accessibilityLayer margin={{ left: -18, right: 8, top: 8 }}>
+            <CartesianGrid vertical={false} stroke="rgba(255,255,255,0.10)" />
+            <XAxis
+              dataKey="categoria"
+              tickLine={false}
+              axisLine={false}
+              tickMargin={10}
+              tick={{ fill: "rgba(255,255,255,0.58)", fontSize: 11 }}
+            />
+            <YAxis
+              allowDecimals={false}
+              tickLine={false}
+              axisLine={false}
+              tick={{ fill: "rgba(255,255,255,0.45)", fontSize: 11 }}
+            />
+            <ChartTooltip
+              cursor={{ fill: "rgba(255,255,255,0.06)" }}
+              content={<ChartTooltipContent hideLabel />}
+            />
+            <Bar dataKey="unidades" fill="var(--color-unidades)" radius={[7, 7, 0, 0]} />
+          </BarChart>
+        </ChartContainer>
+      ) : (
+        <p className="grid h-56 place-items-center text-sm text-white/55">
+          Aún no hay unidades para visualizar.
+        </p>
+      )}
+    </section>
+  );
+}
+
 function AdminGuide({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="rounded-2xl border border-sky-200 bg-sky-50/80 px-4 py-3 text-sm text-slate-700">
@@ -834,6 +915,9 @@ function DashboardTab({
   const [selectedProducts, setSelectedProducts] = useState<Set<string>>(
     new Set(),
   );
+  const [sorting, setSorting] = useState<SortingState>([
+    { id: "nombre", desc: false },
+  ]);
   const [mostrarTodosMovimientos, setMostrarTodosMovimientos] = useState(false);
   const [visibleMovimientos, setVisibleMovimientos] = useState(5);
 
@@ -854,11 +938,62 @@ function DashboardTab({
     () => [...new Set(productos.map((p) => p.categoria))].sort(),
     [productos],
   );
+  const stockPorCategoria = useMemo(
+    () =>
+      Object.entries(
+        productos.reduce<Record<string, number>>((result, producto) => {
+          const categoria = productCategoryLabel(producto.categoria || "Sin categoría");
+          result[categoria] = (result[categoria] || 0) + (Number(producto.stock) || 0);
+          return result;
+        }, {}),
+      )
+        .map(([categoria, unidades]) => ({ categoria, unidades }))
+        .sort((a, b) => b.unidades - a.unidades)
+        .slice(0, 6),
+    [productos],
+  );
 
   const visible = productos
     .filter((p) => categoryFilter === "all" || p.categoria === categoryFilter)
-    .filter((p) => `${p.nombre} ${p.categoria}`.toLowerCase().includes(filter.toLowerCase()))
-    .sort((a, b) => a.nombre.localeCompare(b.nombre, "es"));
+    .filter((p) => `${p.nombre} ${p.categoria}`.toLowerCase().includes(filter.toLowerCase()));
+  const productColumns = useMemo<ColumnDef<Producto>[]>(
+    () => [
+      { accessorKey: "nombre", id: "nombre" },
+      { accessorKey: "categoria", id: "categoria" },
+      { accessorKey: "precioCosto", id: "precioCosto" },
+      { accessorKey: "precio", id: "precio" },
+      {
+        id: "credito",
+        accessorFn: (producto) => calculateInstallmentPrice(producto.precio),
+      },
+      { accessorKey: "stock", id: "stock" },
+    ],
+    [],
+  );
+  const productTable = useReactTable({
+    data: visible,
+    columns: productColumns,
+    state: { sorting },
+    onSortingChange: setSorting,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+  });
+  const sortableHeader = (columnId: string, label: string, className = "") => {
+    const column = productTable.getColumn(columnId);
+    const direction = column?.getIsSorted();
+    return (
+      <button
+        type="button"
+        onClick={column?.getToggleSortingHandler()}
+        className={`inline-flex items-center gap-1 rounded px-1 py-0.5 font-semibold transition hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/40 ${className}`}
+      >
+        {label}
+        <span aria-hidden className="text-[10px] text-slate-400">
+          {direction === "asc" ? "↑" : direction === "desc" ? "↓" : "↕"}
+        </span>
+      </button>
+    );
+  };
   const allVisibleProductsSelected =
     visible.length > 0 &&
     visible.every((product) => selectedProducts.has(product.id));
@@ -894,6 +1029,8 @@ function DashboardTab({
         <StatCard label="Valor inventario" value={money(valorInventario)} />
         <StatCard label="Rol actual" value="ADMIN" />
       </div>
+
+      <InventoryCategoryChart data={stockPorCategoria} />
 
       <AddProductoForm
         categorias={categorias}
@@ -1145,17 +1282,17 @@ function DashboardTab({
                 <th className="w-10 py-2">
                   <span className="sr-only">Seleccionar</span>
                 </th>
-                <th className="py-2 pr-3">Producto</th>
-                <th className="hidden px-3 py-2 md:table-cell">Categoría</th>
-                <th className="hidden px-3 py-2 text-orange-600 md:table-cell">COSTO</th>
-                <th className="whitespace-nowrap px-3 py-2 text-emerald-700">EFECTIVO</th>
-                <th className="px-3 py-2 text-rose-700">CRÉDITO</th>
-                <th className="whitespace-nowrap px-3 py-2">UN.</th>
+                <th className="py-2 pr-3">{sortableHeader("nombre", "Producto")}</th>
+                <th className="hidden px-3 py-2 md:table-cell">{sortableHeader("categoria", "Categoría")}</th>
+                <th className="hidden px-3 py-2 text-orange-600 md:table-cell">{sortableHeader("precioCosto", "Costo", "text-orange-600")}</th>
+                <th className="whitespace-nowrap px-3 py-2 text-emerald-700">{sortableHeader("precio", "Efectivo", "text-emerald-700")}</th>
+                <th className="px-3 py-2 text-rose-700">{sortableHeader("credito", "Crédito", "text-rose-700")}</th>
+                <th className="whitespace-nowrap px-3 py-2">{sortableHeader("stock", "Un.")}</th>
                 <th className="sticky right-0 z-10 bg-white px-3 py-2 shadow-[-6px_0_8px_-8px_rgba(15,23,42,0.35)]"></th>
               </tr>
             </thead>
             <tbody className="divide-y">
-              {visible.map((p) => (
+              {productTable.getRowModel().rows.map(({ original: p }) => (
                 <tr key={p.id} className="hover:bg-slate-50">
                   <td className="py-2">
                     <input
@@ -1232,7 +1369,7 @@ function DashboardTab({
                   </td>
                 </tr>
               ))}
-              {visible.length === 0 && (
+              {productTable.getRowModel().rows.length === 0 && (
                 <tr>
                   <td colSpan={8} className="py-8 text-center text-slate-400">
                     Sin resultados
