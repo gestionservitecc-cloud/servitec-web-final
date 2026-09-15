@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { BadgeCheck, Info, Search, SlidersHorizontal } from "lucide-react";
 import { PageHero } from "@/components/site/PageHero";
 import { ProductImageGallery } from "@/components/site/ProductImageGallery";
@@ -150,8 +150,10 @@ export const StockClient = () => {
   const [orden, setOrden] = useState<"" | "asc" | "desc">("");
   const [precioMin, setPrecioMin] = useState<number | null>(null);
   const [precioMax, setPrecioMax] = useState<number | null>(null);
+  const pathname = usePathname();
   const searchParams = useSearchParams();
-  const filter = searchParams.get("tipo");
+  const isReconditionedRoute = pathname === "/reacondicionados";
+  const filter = searchParams.get("tipo") || (isReconditionedRoute ? "reacondicionados" : null);
   const categoryFilter = searchParams.get("categoria");
   const normalizedCategoryFilter = normalizeStockCategory(categoryFilter);
   const isNewStock = filter === "nuevos";
@@ -161,7 +163,8 @@ export const StockClient = () => {
     if (filter) params.set("tipo", filter);
     if (value !== "all") params.set("categoria", value);
     const query = params.toString();
-    return query ? `/stock?${query}` : "/stock";
+    const basePath = isReconditionedRoute ? "/reacondicionados" : "/stock";
+    return query ? `${basePath}?${query}` : basePath;
   };
 
   useEffect(() => {

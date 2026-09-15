@@ -194,12 +194,17 @@ export function ProductDetailClient({ type, id }: { type: DetailType; id: string
   if ((!componentData && !equipmentData) || (type === "componente" && !componentData)) {
     return (
       <div className="container-page grid min-h-[60vh] place-items-center py-16 text-center">
-        <div><h1 className="font-display text-2xl font-bold">No encontramos este producto</h1><Button asChild className="mt-5"><Link href={type === "componente" ? "/tienda?tipo=componentes" : "/stock"}>Volver</Link></Button></div>
+        <div><h1 className="font-display text-2xl font-bold">No encontramos este producto</h1><Button asChild className="mt-5"><Link href={type === "componente" ? "/tienda?tipo=componentes" : "/tienda?tipo=equipos"}>Volver</Link></Button></div>
       </div>
     );
   }
 
-  const backHref = type === "componente" ? "/tienda?tipo=componentes" : `/stock?categoria=${normalizeStockCategoryValue(equipmentData?.categoria)}`;
+  const equipmentCategory = normalizeStockCategoryValue(equipmentData?.categoria);
+  const backHref = type === "componente"
+    ? "/tienda?tipo=componentes"
+    : isReconditioned
+      ? `/reacondicionados?categoria=${equipmentCategory}`
+      : `/tienda?tipo=${equipmentCategory || "equipos"}`;
   return (
     <main className="min-h-screen bg-slate-100 py-6 sm:py-10">
       <div className="container-page">

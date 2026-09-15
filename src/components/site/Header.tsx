@@ -58,7 +58,8 @@ export function Header() {
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
   const isReconditionedStock =
-    pathname === "/stock" && searchParams.get("tipo") === "reacondicionados";
+    pathname === "/reacondicionados" ||
+    (pathname === "/stock" && searchParams.get("tipo") === "reacondicionados");
 
   return (
     <header
@@ -116,7 +117,7 @@ export function Header() {
             active={isReconditionedStock}
             items={stockCategories.map((c) => ({
               label: c.label,
-              href: `/stock?tipo=reacondicionados&categoria=${c.value}`,
+              href: `/reacondicionados?categoria=${c.value}`,
             }))}
           />
         </nav>
@@ -220,7 +221,7 @@ export function Header() {
                   {stockCategories.map((c) => (
                     <Link
                       key={c.value}
-                      href={`/stock?tipo=reacondicionados&categoria=${c.value}`}
+                      href={`/reacondicionados?categoria=${c.value}`}
                       onClick={closeMobileMenu}
                       className="rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-muted"
                     >

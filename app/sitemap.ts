@@ -7,7 +7,7 @@ const routes = [
   "/servicios",
   "/armar-pc",
   "/tienda",
-  "/stock",
+  "/reacondicionados",
   "/conocenos",
   "/contacto",
   "/faqs",
@@ -21,7 +21,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return routes.map((path) => ({
     url: `${SITE_URL}${path}`,
     lastModified: now,
-    changeFrequency: path === "" || path === "/stock" || path === "/tienda" ? "weekly" : "monthly",
+    changeFrequency: path === "" || path === "/reacondicionados" || path === "/tienda" ? "weekly" : "monthly",
     priority: path === "" ? 1 : 0.7,
   }));
 }

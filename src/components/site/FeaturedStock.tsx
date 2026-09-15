@@ -59,7 +59,7 @@ export function FeaturedStock() {
       {!ready ? (
         <StockRow
           title="Equipos destacados"
-          href="/stock"
+          href="/tienda?tipo=equipos"
           items={[]}
           loading
         />
@@ -68,7 +68,11 @@ export function FeaturedStock() {
           <StockRow
             key={`${category.value}-${category.condition}`}
             title={`${category.label} ${category.condition === "Sellado" ? "nuevos" : "reacondicionados"} destacados`}
-            href={`/stock?tipo=${category.condition === "Sellado" ? "nuevos" : "reacondicionados"}&categoria=${category.value}`}
+            href={
+              category.condition === "Sellado"
+                ? `/tienda?tipo=${category.value}`
+                : `/reacondicionados?categoria=${category.value}`
+            }
             items={category.items}
             accent={index === 0 && category.value === "pc-armada"}
             loading={false}

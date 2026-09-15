@@ -33,14 +33,14 @@ const shopCards = [
     icon: Laptop,
     title: "Equipos disponibles",
     desc: "Notebooks, celulares, tablets y TVs con garantía y precio en efectivo.",
-    href: "/stock",
+    href: "/tienda?tipo=equipos",
     tag: "Ver equipos",
   },
   {
     icon: Cpu,
     title: "PC armadas",
     desc: "Configuraciones listas para oficina, estudio y gaming.",
-    href: "/stock?categoria=pc-armada",
+    href: "/tienda?tipo=pc-armada",
     tag: "Ver PC armadas",
   },
   {
@@ -116,7 +116,7 @@ export default function HomePage() {
               className="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:flex-wrap"
             >
               <Button asChild size="lg" className="h-12 sm:min-w-[180px]">
-                <Link href="/stock">
+                <Link href="/tienda?tipo=equipos">
                   Ver equipos disponibles <ArrowRight className="size-4" />
                 </Link>
               </Button>
