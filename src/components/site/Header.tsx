@@ -2,16 +2,11 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { ChevronDown, Menu, MessageCircle, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { GooeyNav } from "@/components/ui/gooey-nav";
 import {
   Sheet,
   SheetContent,
@@ -39,7 +34,6 @@ function unstickBody() {
 
 export function Header() {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -57,9 +51,12 @@ export function Header() {
 
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
-  const isReconditionedStock =
-    pathname === "/reacondicionados" ||
-    (pathname === "/stock" && searchParams.get("tipo") === "reacondicionados");
+  const desktopNavItems = [
+    ...primaryNav,
+    ...secondaryNav,
+    { label: "Tienda", href: "/tienda" },
+    { label: "Reacondicionados", href: "/reacondicionados" },
+  ];
 
   return (
     <header
@@ -73,54 +70,13 @@ export function Header() {
       <div className="container-page flex h-16 items-center justify-between gap-4">
         <Logo />
 
-        <nav className="hidden items-center gap-1 lg:flex">
-          {primaryNav.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={cn(
-                "rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                isActive(link.href)
-                  ? "bg-accent text-accent-foreground"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground",
-              )}
-            >
-              {link.label}
-            </Link>
-          ))}
-
-          {secondaryNav.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={cn(
-                "rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                isActive(link.href)
-                  ? "bg-accent text-accent-foreground"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground",
-              )}
-            >
-              {link.label}
-            </Link>
-          ))}
-
-          <NavDropdown
-            label="Tienda"
-            active={pathname.startsWith("/tienda")}
-            items={storeCategories.map((c) => ({
-              label: c.label,
-              href: `/tienda?tipo=${c.value}`,
-            }))}
-          />
-          <NavDropdown
-            label="Reacondicionados"
-            active={isReconditionedStock}
-            items={stockCategories.map((c) => ({
-              label: c.label,
-              href: `/reacondicionados?categoria=${c.value}`,
-            }))}
-          />
-        </nav>
+        <GooeyNav
+          items={desktopNavItems}
+          size="sm"
+          activeColor="hsl(var(--primary))"
+          className="hidden lg:inline-block"
+          aria-label="Navegación principal"
+        />
 
         <div className="hidden items-center gap-2 lg:flex">
             <Button asChild size="sm" className="shadow-soft">
@@ -267,44 +223,6 @@ export function Header() {
         </div>
       </div>
     </header>
-  );
-}
-
-function NavDropdown({
-  label,
-  items,
-  active,
-}: {
-  label: string;
-  active: boolean;
-  items: { label: string; href: string }[];
-}) {
-  return (
-    <DropdownMenu
-      modal={false}
-      onOpenChange={(open) => {
-        if (!open) window.setTimeout(unstickBody, 0);
-      }}
-    >
-      <DropdownMenuTrigger
-        className={cn(
-          "inline-flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-medium outline-none transition-colors",
-          active
-            ? "bg-accent text-accent-foreground"
-            : "text-muted-foreground hover:bg-muted hover:text-foreground",
-        )}
-      >
-        {label}
-        <ChevronDown className="size-3.5" />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-52">
-        {items.map((item) => (
-          <DropdownMenuItem key={item.href} asChild>
-            <Link href={item.href}>{item.label}</Link>
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
   );
 }
 
