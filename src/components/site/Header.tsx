@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { ChevronDown, Menu, MessageCircle, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -39,6 +39,7 @@ function unstickBody() {
 
 export function Header() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -56,6 +57,8 @@ export function Header() {
 
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
+  const isReconditionedStock =
+    pathname === "/stock" && searchParams.get("tipo") === "reacondicionados";
 
   return (
     <header
@@ -110,7 +113,7 @@ export function Header() {
           />
           <NavDropdown
             label="Reacondicionados"
-            active={pathname.startsWith("/stock")}
+            active={isReconditionedStock}
             items={stockCategories.map((c) => ({
               label: c.label,
               href: `/stock?tipo=reacondicionados&categoria=${c.value}`,
