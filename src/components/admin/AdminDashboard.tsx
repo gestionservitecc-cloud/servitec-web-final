@@ -429,7 +429,16 @@ export function AdminDashboard({
                 ? "border-emerald-300/25 bg-emerald-400/10 text-emerald-100"
                 : "border-amber-300/25 bg-amber-400/10 text-amber-100"}
             >
-              <CircleDollarSign className="mr-1 size-3" />
+              {persistent ? (
+                <motion.span
+                  aria-hidden="true"
+                  className="mr-2 size-1.5 rounded-full bg-current"
+                  animate={reduceMotion ? undefined : { opacity: [0.45, 1, 0.45], scale: [1, 1.35, 1] }}
+                  transition={{ duration: 1.8, ease: "easeInOut", repeat: Infinity }}
+                />
+              ) : (
+                <CircleDollarSign className="mr-1 size-3" />
+              )}
               {persistent ? "Cambios activos" : "Solo lectura"}
             </Badge>
             <div className="flex w-full items-center gap-2 sm:w-auto">

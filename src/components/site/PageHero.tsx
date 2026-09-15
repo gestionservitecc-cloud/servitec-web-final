@@ -1,10 +1,34 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import FluidOrb from "@/components/ui/fluid-orb";
 
 const ease = [0.16, 1, 0.3, 1] as const;
+
+function DesktopFluidAccent() {
+  const [show, setShow] = useState(false);
+
+  useEffect(() => {
+    const query = window.matchMedia("(min-width: 1024px)");
+    const update = () => setShow(query.matches);
+    update();
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
+  }, []);
+
+  if (!show) return null;
+
+  return (
+    <FluidOrb
+      aria-hidden
+      size={330}
+      color="#06b6d4"
+      className="pointer-events-none absolute -right-24 -top-28 opacity-20"
+    />
+  );
+}
 
 export function PageHero({
   eyebrow,
@@ -22,8 +46,16 @@ export function PageHero({
   align?: "center" | "left";
 }) {
   const reduce = useReducedMotion();
+  const [mounted, setMounted] = useState(false);
+  const shouldAnimate = mounted && !reduce;
+
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => setMounted(true));
+    return () => cancelAnimationFrame(frame);
+  }, []);
+
   const item = (delay: number) =>
-    reduce
+    !shouldAnimate
       ? {}
       : {
           initial: { opacity: 0, y: 18 },
@@ -42,16 +74,17 @@ export function PageHero({
         aria-hidden
         className="pointer-events-none absolute inset-0 opacity-[0.15] surface-grid"
       />
+      <DesktopFluidAccent />
       <motion.div
         aria-hidden
         className="pointer-events-none absolute -left-12 top-0 h-40 w-40 rounded-full bg-primary/25 blur-3xl sm:-left-32 sm:h-72 sm:w-72"
-        animate={reduce ? undefined : { x: [0, 18, 0], y: [0, -12, 0] }}
+        animate={shouldAnimate ? { x: [0, 18, 0], y: [0, -12, 0] } : undefined}
         transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
       />
       <motion.div
         aria-hidden
         className="pointer-events-none absolute -right-10 bottom-0 h-40 w-40 rounded-full bg-secondary/20 blur-3xl sm:-right-24 sm:h-72 sm:w-72"
-        animate={reduce ? undefined : { x: [0, -16, 0], y: [0, 12, 0] }}
+        animate={shouldAnimate ? { x: [0, -16, 0], y: [0, 12, 0] } : undefined}
         transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
       />
       <div

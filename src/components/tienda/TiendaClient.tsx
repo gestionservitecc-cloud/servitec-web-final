@@ -15,6 +15,7 @@ import {
 } from "@/lib/pc-catalog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Dialog,
   DialogContent,
@@ -399,15 +400,19 @@ export function TiendaClient() {
         {loading && (
           <div className="grid grid-cols-1 gap-5 min-[420px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
             {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="h-72 animate-pulse rounded-2xl border bg-muted" />
+              <Skeleton key={i} className="h-72 rounded-2xl" />
             ))}
           </div>
         )}
 
         {!loading && grupos.length === 0 && (
-          <p className="py-16 text-center text-muted-foreground">
-            No encontramos productos con esos filtros.
-          </p>
+          <div className="grid min-h-56 place-items-center rounded-2xl border border-dashed border-slate-300 bg-slate-50/70 p-8 text-center">
+            <div>
+              <Search className="mx-auto mb-3 size-6 text-primary" aria-hidden="true" />
+              <p className="font-semibold text-slate-900">No encontramos productos con esos filtros.</p>
+              <p className="mt-1 text-sm text-muted-foreground">Probá otra búsqueda o limpiá los filtros para ver el catálogo completo.</p>
+            </div>
+          </div>
         )}
 
         {!loading &&

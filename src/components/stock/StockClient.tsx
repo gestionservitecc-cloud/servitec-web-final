@@ -9,6 +9,7 @@ import { PriceRangeFilter } from "@/components/site/PriceRangeFilter";
 import { stockCategories } from "@/components/site/site-config";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
   SelectContent,
@@ -305,15 +306,21 @@ export const StockClient = () => {
           {loading && (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {[...Array(6)].map((_, i) => (
-                <div key={i} className="h-[420px] animate-pulse rounded-2xl bg-slate-200" />
+                <Skeleton key={i} className="h-[420px] rounded-2xl" />
               ))}
             </div>
           )}
 
           {!loading && sortedProducts.length === 0 && (
-            <p className="text-center text-muted-foreground">
-              {filter ? "No hay equipos publicados en esta categoria." : "No hay equipos publicados."}
-            </p>
+            <div className="grid min-h-56 place-items-center rounded-2xl border border-dashed border-slate-300 bg-slate-50/70 p-8 text-center">
+              <div>
+                <Search className="mx-auto mb-3 size-6 text-primary" aria-hidden="true" />
+                <p className="font-semibold text-slate-900">
+                  {filter ? "No hay equipos publicados en esta categoria." : "No hay equipos publicados."}
+                </p>
+                <p className="mt-1 text-sm text-muted-foreground">Probá ajustando los filtros o volvé a ver todo el stock.</p>
+              </div>
+            </div>
           )}
 
           {!loading && sortedProducts.length > 0 && (

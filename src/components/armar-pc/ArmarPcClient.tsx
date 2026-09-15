@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { motion, useReducedMotion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import {
   catalogProductImage,
@@ -441,6 +442,13 @@ const extras: Extra[] = [
   },
 ];
 const ArmarPc = () => {
+  const reduceMotion = useReducedMotion();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => setMounted(true));
+    return () => cancelAnimationFrame(frame);
+  }, []);
   const router = useRouter();
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [selected, setSelected] = useState<
@@ -777,7 +785,12 @@ const ArmarPc = () => {
     setCheckoutOpen(true);
   };
   return (
-    <main className="pc-builder relative min-h-screen overflow-x-hidden bg-white text-slate-900">
+    <motion.main
+      className="pc-builder relative min-h-screen overflow-x-hidden bg-white text-slate-900"
+      initial={mounted && !reduceMotion ? { opacity: 0, y: 10 } : false}
+      animate={mounted && !reduceMotion ? { opacity: 1, y: 0 } : undefined}
+      transition={{ duration: 0.28, ease: "easeOut" }}
+    >
       <div className="pointer-events-none absolute left-[39%] top-1/2 hidden h-[900px] w-[900px] -translate-y-1/2 rounded-full border border-dashed border-red-200/60 xl:block" />
       <div className="pointer-events-none absolute left-[35%] top-1/2 hidden h-[650px] w-[650px] -translate-y-1/2 rounded-full border border-red-100 xl:block" />
         <div className="relative z-10 mx-auto flex min-h-screen max-w-[1600px] flex-col px-3 py-4 sm:px-8 sm:py-5 lg:px-10">
@@ -1402,7 +1415,7 @@ const ArmarPc = () => {
         numeroPedido={pedidoNumero}
         origen="armado"
       />
-    </main>
+    </motion.main>
   );
 };
 

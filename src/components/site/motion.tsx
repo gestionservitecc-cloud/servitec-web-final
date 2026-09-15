@@ -44,24 +44,14 @@ export function Reveal({
   as?: ElementType;
   className?: string;
 } & Omit<HTMLMotionProps<"div">, "children">) {
-  const reduce = useReducedMotion();
   const { ref } = useReveal();
   const MotionTag = (motion[as as "div"] ?? motion.div) as typeof motion.div;
-
-  if (reduce) {
-    const Tag = as as ElementType;
-    return (
-      <Tag className={className} {...(rest as object)}>
-        {children}
-      </Tag>
-    );
-  }
 
   return (
     <MotionTag
       ref={ref as never}
       className={className}
-      initial={{ opacity: 1, y: 0 }}
+      initial={false}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease, delay }}
       {...rest}
@@ -78,10 +68,7 @@ export function Stagger({
   children: ReactNode;
   className?: string;
 }) {
-  const reduce = useReducedMotion();
   const { ref } = useReveal("-60px");
-
-  if (reduce) return <div className={className}>{children}</div>;
 
   return (
     <motion.div
@@ -107,8 +94,6 @@ export function StaggerItem({
   HTMLMotionProps<"div">,
   "children"
 >) {
-  const reduce = useReducedMotion();
-  if (reduce) return <div className={className}>{children}</div>;
   return (
     <motion.div
       className={className}
@@ -135,12 +120,11 @@ export function Pressable({
   lift?: boolean;
 } & Omit<HTMLMotionProps<"div">, "children">) {
   const reduce = useReducedMotion();
-  if (reduce) return <div className={className}>{children}</div>;
   return (
     <motion.div
       className={className}
-      whileHover={lift ? { y: -4 } : { scale: 1.01 }}
-      whileTap={{ scale: 0.98 }}
+      whileHover={reduce ? undefined : lift ? { y: -4 } : { scale: 1.01 }}
+      whileTap={reduce ? undefined : { scale: 0.98 }}
       transition={{ type: "spring", stiffness: 400, damping: 25 }}
       {...rest}
     >
