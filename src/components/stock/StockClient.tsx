@@ -2,12 +2,13 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
-import { BadgeCheck, Info, Search, SlidersHorizontal } from "lucide-react";
+import { BadgeCheck, Info, MessageCircle, Search, SlidersHorizontal } from "lucide-react";
 import { PageHero } from "@/components/site/PageHero";
 import { ProductImageGallery } from "@/components/site/ProductImageGallery";
 import { PriceRangeFilter } from "@/components/site/PriceRangeFilter";
 import { stockCategories } from "@/components/site/site-config";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -413,7 +414,7 @@ export const StockClient = () => {
                         const hasOfficialWarranty = /sellado/i.test(p.condition || "");
 
                         return (
-                          <Card key={p.id} className="overflow-hidden transition hover:shadow-xl">
+                          <Card key={p.id} className="flex h-full flex-col overflow-hidden transition hover:shadow-xl">
                             <div className="relative aspect-square w-full overflow-hidden bg-slate-900">
                               <ProductImageGallery
                                 images={imagenes}
@@ -493,8 +494,8 @@ export const StockClient = () => {
                               </div>
                             </div>
 
-                            <CardContent className="p-4 sm:p-6">
-                              <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                            <CardContent className="flex flex-1 flex-col p-4 sm:p-6">
+                              <div className="flex h-full flex-1 flex-col gap-4">
                                 <div className="w-full space-y-3">
                                   {vendido ? (
                                     <p className="text-xl font-extrabold uppercase tracking-wide text-rose-600">
@@ -517,7 +518,7 @@ export const StockClient = () => {
                                   )}
                                 </div>
 
-                                <div className="flex w-full flex-col gap-2 sm:w-auto sm:min-w-[150px]">
+                                <div className="mt-auto flex w-full flex-col gap-2">
                                          {/*
                                           <div className="mt-6 rounded-xl border-2 border-amber-400 bg-amber-50 px-5 py-4 text-center shadow-sm">
                                             <p className="text-xs font-bold uppercase tracking-[0.2em] text-amber-700">
@@ -532,14 +533,16 @@ export const StockClient = () => {
                                     </Dialog>
                                            */}
 
-                                   <a
-                                    href={`https://wa.me/5491124873190?text=${encodeURIComponent(mensaje)}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="w-full rounded-md bg-primary px-4 py-3 text-center text-sm font-medium text-secondary-foreground transition hover:bg-primary/80 sm:py-2"
-                                  >
-                                    Consultar
-                                  </a>
+                                  <Button asChild size="sm" className="w-full gap-2">
+                                    <a
+                                      href={`https://wa.me/5491124873190?text=${encodeURIComponent(mensaje)}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                    >
+                                      <MessageCircle className="size-3.5" />
+                                      Consultar
+                                    </a>
+                                  </Button>
                                 </div>
                               </div>
                             </CardContent>
