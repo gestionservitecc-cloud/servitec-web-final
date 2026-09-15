@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
 import { motion, useReducedMotion } from "framer-motion";
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import {
   getCoreRowModel,
   getSortedRowModel,
@@ -66,12 +65,6 @@ import {
 import { ComponenteDialog } from "./ComponenteDialog";
 import NotebookBulkUpload from "./NotebookBulkUpload";
 import { Badge } from "@/components/ui/badge";
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-  type ChartConfig,
-} from "@/components/ui/chart";
 import {
   Sidebar,
   SidebarContent,
@@ -735,64 +728,6 @@ function StatCard({ label, value }: { label: string; value: React.ReactNode }) {
   );
 }
 
-const inventoryChartConfig = {
-  unidades: {
-    label: "Unidades",
-    color: "hsl(var(--secondary))",
-  },
-} satisfies ChartConfig;
-
-function InventoryCategoryChart({
-  data,
-}: {
-  data: Array<{ categoria: string; unidades: number }>;
-}) {
-  return (
-    <section className="rounded-3xl border border-white/10 bg-white/[0.04] p-5 shadow-xl backdrop-blur sm:p-6">
-      <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.15em] text-white/45">
-            Inventario actual
-          </p>
-          <h2 className="mt-1 text-lg font-bold text-white">Unidades por categoría</h2>
-        </div>
-        <span className="rounded-full bg-secondary/15 px-3 py-1 text-xs font-semibold text-cyan-100">
-          Top {data.length}
-        </span>
-      </div>
-      {data.length > 0 ? (
-        <ChartContainer config={inventoryChartConfig} className="h-56 w-full aspect-auto">
-          <BarChart data={data} accessibilityLayer margin={{ left: -18, right: 8, top: 8 }}>
-            <CartesianGrid vertical={false} stroke="rgba(255,255,255,0.10)" />
-            <XAxis
-              dataKey="categoria"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={10}
-              tick={{ fill: "rgba(255,255,255,0.58)", fontSize: 11 }}
-            />
-            <YAxis
-              allowDecimals={false}
-              tickLine={false}
-              axisLine={false}
-              tick={{ fill: "rgba(255,255,255,0.45)", fontSize: 11 }}
-            />
-            <ChartTooltip
-              cursor={{ fill: "rgba(255,255,255,0.06)" }}
-              content={<ChartTooltipContent hideLabel />}
-            />
-            <Bar dataKey="unidades" fill="var(--color-unidades)" radius={[7, 7, 0, 0]} />
-          </BarChart>
-        </ChartContainer>
-      ) : (
-        <p className="grid h-56 place-items-center text-sm text-white/55">
-          Aún no hay unidades para visualizar.
-        </p>
-      )}
-    </section>
-  );
-}
-
 function AdminGuide({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="rounded-2xl border border-sky-200 bg-sky-50/80 px-4 py-3 text-sm text-slate-700">
@@ -938,21 +873,6 @@ function DashboardTab({
     () => [...new Set(productos.map((p) => p.categoria))].sort(),
     [productos],
   );
-  const stockPorCategoria = useMemo(
-    () =>
-      Object.entries(
-        productos.reduce<Record<string, number>>((result, producto) => {
-          const categoria = productCategoryLabel(producto.categoria || "Sin categoría");
-          result[categoria] = (result[categoria] || 0) + (Number(producto.stock) || 0);
-          return result;
-        }, {}),
-      )
-        .map(([categoria, unidades]) => ({ categoria, unidades }))
-        .sort((a, b) => b.unidades - a.unidades)
-        .slice(0, 6),
-    [productos],
-  );
-
   const visible = productos
     .filter((p) => categoryFilter === "all" || p.categoria === categoryFilter)
     .filter((p) => `${p.nombre} ${p.categoria}`.toLowerCase().includes(filter.toLowerCase()));
@@ -1029,8 +949,6 @@ function DashboardTab({
         <StatCard label="Valor inventario" value={money(valorInventario)} />
         <StatCard label="Rol actual" value="ADMIN" />
       </div>
-
-      <InventoryCategoryChart data={stockPorCategoria} />
 
       <AddProductoForm
         categorias={categorias}
