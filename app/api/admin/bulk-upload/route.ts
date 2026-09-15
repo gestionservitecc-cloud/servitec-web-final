@@ -114,7 +114,6 @@ export async function POST(req: Request) {
           const v = item[key];
           if (typeof v === 'string') {
             if (key === 'specs') {
-              // try to parse specs JSON
               try {
                 out[key] = JSON.parse(v);
               } catch {

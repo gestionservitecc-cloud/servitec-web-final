@@ -1246,29 +1246,22 @@ function BulkStockImport({
   const [mensaje, setMensaje] = useState("");
 
   const exportarCsv = () => {
-    // Export format matches the import parser: Name, Category, Cost, Price, Quantity, DeletedAt
-    const headers = [
-      "Name",
-      "Category",
-      "Cost",
-      "Price",
-      "Quantity",
-      "DeletedAt",
-    ];
+    // Formato de inventario: Category, Name, Description, Cost, Price, Quantity.
+    const headers = ["Category", "Name", "Description", "Cost", "Price", "Quantity"];
     const rows = productos.map((producto) => [
-      producto.nombre,
       producto.categoria,
+      producto.nombre,
+      "",
       String(producto.precioCosto ?? 0),
       String(producto.precio ?? 0),
       String(producto.stock ?? 0),
-      "",
     ]);
+    const escapeCsvCell = (cell: string) =>
+      /[",\r\n]/.test(cell) ? `"${cell.replace(/"/g, '""')}"` : cell;
     const csv = [headers, ...rows]
-      .map((row) =>
-        row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","),
-      )
-      .join("\n");
-    const blob = new Blob([`\uFEFF${csv}\n`], {
+      .map((row) => row.map((cell) => escapeCsvCell(String(cell))).join(","))
+      .join("\r\n");
+    const blob = new Blob([`${csv}\r\n`], {
       type: "text/csv;charset=utf-8;",
     });
     const url = URL.createObjectURL(blob);
@@ -1447,7 +1440,7 @@ function BulkStockImport({
         <div>
           <h2 className="text-lg font-semibold">Carga de Inventario</h2>
           <p className="text-xs text-slate-500">
-            Exportá el inventario en el formato compatible con la importación.
+            Exportá el inventario en formato Category, Name, Description, Cost, Price y Quantity.
           </p>
         </div>
         <button
