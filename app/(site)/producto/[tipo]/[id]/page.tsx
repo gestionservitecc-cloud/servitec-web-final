@@ -13,7 +13,9 @@ const fallbackMetadata: Metadata = {
 };
 
 function imageForMetadata(image: string) {
-  return image && !image.startsWith("data:") ? [{ url: image }] : undefined;
+  return image.startsWith("https://") || image.startsWith("http://")
+    ? [{ url: image, alt: "Producto ServiTec" }]
+    : undefined;
 }
 
 export async function generateMetadata({
@@ -28,7 +30,7 @@ export async function generateMetadata({
   const product = await getProductShareData(type, id);
   if (!product) return fallbackMetadata;
 
-  const path = `/producto/${type}/${encodeURIComponent(rawId)}`;
+  const path = `/producto/${type}/${encodeURIComponent(id)}`;
   const images = imageForMetadata(product.image);
   return {
     title: product.name,
