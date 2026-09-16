@@ -18,7 +18,7 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL || "https://servitec-web.vercel.app";
+  process.env.NEXT_PUBLIC_SITE_URL || "https://www.servitecbsas.com";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

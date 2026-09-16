@@ -8,6 +8,7 @@ import {
   normalizeCatalogProduct,
   type ComponentCatalogKey,
 } from "@/lib/component-catalog";
+import { getAssetUrl } from "@/lib/asset-url";
 import { getEquipos } from "@/lib/store";
 
 export type ProductShareType = "componente" | "equipo";
@@ -18,6 +19,27 @@ export type ProductShareData = {
   image: string;
   description: string;
 };
+
+const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.servitecbsas.com").replace(/\/+$/, "");
+
+/**
+ * Social crawlers need a public, absolute image URL. Product data can contain
+ * either a direct image URL, a private Vercel Blob URL, or a storage path.
+ */
+export function toShareImageUrl(image?: string): string {
+  const value = String(image || "").trim();
+  if (!value || /^(?:data:|blob:)/i.test(value)) return "";
+
+  const privateBlob = /^https?:\/\/[^/]+\.private\.blob\.vercel-storage\.com\//i.test(value);
+  const storagePath = !/^(?:https?:|\/)/i.test(value);
+  const publicPath = privateBlob || storagePath ? getAssetUrl(value) : value;
+
+  try {
+    return new URL(publicPath, SITE_URL).toString();
+  } catch {
+    return "";
+  }
+}
 
 function productDescription(category: string, name: string) {
   return `${category}: ${name}. Consultá disponibilidad, precio y opciones de compra en ServiTec.`;
@@ -47,7 +69,7 @@ async function findComponent(id: string): Promise<ProductShareData | null> {
       return {
         name: product.nombre,
         category: label,
-        image: product.imagenes[0] || product.imagen || "",
+        image: toShareImageUrl(product.imagenes[0] || product.imagen),
         description: productDescription(label, product.nombre),
       } satisfies ProductShareData;
     }),
@@ -63,7 +85,7 @@ async function findEquipment(id: string): Promise<ProductShareData | null> {
   return {
     name: equipment.nombre,
     category,
-    image: equipment.imagenes[0] || "",
+    image: toShareImageUrl(equipment.imagenes[0]),
     description: productDescription(category, equipment.nombre),
   };
 }
