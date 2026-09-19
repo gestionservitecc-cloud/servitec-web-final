@@ -31,7 +31,13 @@ export async function generateMetadata({
   if (!product) return fallbackMetadata;
 
   const path = `/producto/${type}/${encodeURIComponent(id)}`;
-  const images = [{ url: `${path}/opengraph-image`, alt: product.name }];
+  // WhatsApp fetches the direct equipment image more reliably than a nested
+  // image inside a generated card. Keep the generated card as a fallback when
+  // an inventory record has no usable photo yet.
+  const images = [{
+    url: product.image || `${path}/opengraph-image`,
+    alt: product.name,
+  }];
   return {
     title: product.name,
     description: product.description,
