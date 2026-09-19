@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { createPortal } from "react-dom";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Banknote, CheckCircle2, CreditCard, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -48,7 +49,7 @@ export function PedidoCheckoutModal({
 
   useLockBodyScroll(open);
 
-  if (!open) return null;
+  if (!open || typeof document === "undefined") return null;
 
   const updateField = (field: keyof typeof form, value: string) => {
     setForm((current) => ({ ...current, [field]: value }));
@@ -142,8 +143,8 @@ export function PedidoCheckoutModal({
     onClose();
   };
 
-  return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/80 p-3 backdrop-blur-sm sm:p-4" role="dialog" aria-modal="true">
+  return createPortal(
+    <div className="fixed inset-0 z-[120] flex items-center justify-center bg-slate-950/80 p-3 backdrop-blur-sm sm:p-4" role="dialog" aria-modal="true">
       <div className="max-h-[calc(100dvh-1.5rem)] w-full max-w-2xl overflow-y-auto overscroll-contain rounded-3xl border border-red-200 bg-white p-4 text-slate-900 shadow-2xl sm:max-h-[92vh] sm:p-7">
         <div className="flex items-start justify-between gap-4">
           <div>
@@ -270,6 +271,7 @@ export function PedidoCheckoutModal({
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
