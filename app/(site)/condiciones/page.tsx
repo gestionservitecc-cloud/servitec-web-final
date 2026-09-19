@@ -210,7 +210,7 @@ export default function CondicionesPage() {
             <li>Las etiquetas de garantía no deben estar alteradas.</li>
           </ul>
           <p>
-            Se ofrece un plazo de prueba de 3 días hábiles desde la entrega para
+            Se ofrece un plazo de prueba de 24 horas hábiles desde la entrega para
             verificar el correcto funcionamiento.
           </p>
 
