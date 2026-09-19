@@ -133,7 +133,11 @@ export default function HomePage() {
                   Necesito reparar <ArrowRight className="size-4" />
                 </Link>
               </Button>
-              <a href={waLink("Hola ServiTec, quiero hacer una consulta")} target="_blank" rel="noopener noreferrer" className="inline-flex h-12 items-center justify-center gap-2 px-3 text-sm font-semibold text-sidebar-foreground/80 transition-colors hover:text-white"><MessageCircle className="size-4 text-whatsapp" /> Consultar por WhatsApp</a>
+              <Pressable lift={false} className="rounded-md">
+                <Button asChild size="lg" className="h-12 bg-whatsapp text-whatsapp-foreground shadow-[0_10px_28px_rgba(37,211,102,0.24)] hover:bg-whatsapp/90 sm:min-w-[210px]">
+                  <a href={waLink("Hola ServiTec, quiero hacer una consulta")} target="_blank" rel="noopener noreferrer"><MessageCircle className="size-4" /> Consultar por WhatsApp</a>
+                </Button>
+              </Pressable>
             </Reveal>
           </div>
 
