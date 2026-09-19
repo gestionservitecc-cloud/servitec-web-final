@@ -10,6 +10,7 @@ import {
   ShieldCheck,
   Smartphone,
   Sparkles,
+  Star,
   Truck,
   Wallet,
 } from "lucide-react";
@@ -24,7 +25,7 @@ import { waLink } from "@/components/site/site-config";
 const trustItems = [
   { icon: ShieldCheck, label: "Garantía escrita" },
   { icon: Wallet, label: "Cuotas sin interés" },
-  { icon: Sparkles, label: "Equipos actualizados" },
+  { icon: Star, label: "4.9 estrellas en Google Maps" },
   { icon: Truck, label: "Armado y asesoramiento" },
 ];
 
@@ -64,16 +65,19 @@ const repairCards = [
     icon: Smartphone,
     title: "Celulares",
     desc: "Pantallas, baterías, pin de carga y microsoldadura.",
+    href: "/servicios/iphone",
   },
   {
     icon: Laptop,
     title: "Computadoras",
     desc: "Notebooks y PC: reparación, upgrades y mantenimiento.",
+    href: "/servicios/notebooks",
   },
   {
     icon: Gamepad2,
     title: "Consolas",
     desc: "PlayStation y Xbox: encendido, mandos y service premium.",
+    href: "/servicios/consolas",
   },
 ];
 
@@ -98,17 +102,16 @@ export default function HomePage() {
               delay={0.05}
               className="mt-5 font-display text-4xl font-bold leading-[1.05] text-balance sm:text-5xl md:text-6xl"
             >
-              Comprá, armá y potenciá tu{" "}
-              <span className="text-primary">tecnología</span>
+              Tecnología para comprar, armar y{" "}
+              <span className="text-primary">volver a disfrutar</span>
             </Reveal>
             <Reveal
               as="p"
               delay={0.12}
               className="mx-auto mt-5 max-w-xl text-base text-sidebar-foreground/70 sm:text-lg"
             >
-              Notebooks, celulares y PC armadas con stock real. Configurá tu PC
-              ideal y sumá los accesorios. Y si algo falla, tenés nuestro servicio
-              técnico con garantía escrita.
+              Elegí equipos con stock real o coordiná la reparación de tu dispositivo.
+              Atención directa, diagnóstico claro y garantía escrita.
             </Reveal>
 
             <Reveal
@@ -117,7 +120,7 @@ export default function HomePage() {
             >
               <Button asChild size="lg" className="h-12 sm:min-w-[180px]">
                 <Link href="/tienda?tipo=equipos">
-                  Ver equipos disponibles <ArrowRight className="size-4" />
+                  Quiero comprar <ArrowRight className="size-4" />
                 </Link>
               </Button>
               <Button
@@ -126,25 +129,11 @@ export default function HomePage() {
                 variant="outline"
                 className="h-12 border-white/20 bg-white/5 text-white hover:bg-white/10 hover:text-white sm:min-w-[180px]"
               >
-                <Link href="/armar-pc">
-                  Armá tu PC <ArrowRight className="size-4" />
+                <Link href="/servicios">
+                  Necesito reparar <ArrowRight className="size-4" />
                 </Link>
               </Button>
-              <Pressable lift={false} className="rounded-md">
-                <Button
-                  asChild
-                  size="lg"
-                  className="h-12 bg-whatsapp text-whatsapp-foreground shadow-[0_0_0_1px_rgba(255,255,255,0.16),0_12px_32px_rgba(37,211,102,0.20)] hover:bg-whatsapp/90 hover:shadow-[0_0_0_1px_rgba(255,255,255,0.28),0_16px_38px_rgba(37,211,102,0.30)] sm:min-w-[200px]"
-                >
-                  <a
-                    href={waLink("Hola ServiTec, quiero hacer una consulta")}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <MessageCircle className="size-4" /> WhatsApp directo
-                  </a>
-                </Button>
-              </Pressable>
+              <a href={waLink("Hola ServiTec, quiero hacer una consulta")} target="_blank" rel="noopener noreferrer" className="inline-flex h-12 items-center justify-center gap-2 px-3 text-sm font-semibold text-sidebar-foreground/80 transition-colors hover:text-white"><MessageCircle className="size-4 text-whatsapp" /> Consultar por WhatsApp</a>
             </Reveal>
           </div>
 
@@ -260,13 +249,14 @@ export default function HomePage() {
           <Stagger className="mt-8 grid gap-4 sm:grid-cols-3">
             {repairCards.map((c) => (
               <StaggerItem key={c.title}>
-                <div className="h-full rounded-2xl border bg-card p-6 shadow-soft transition-all hover:-translate-y-1 hover:border-primary/30 hover:shadow-soft-lg">
+                <Link href={c.href} className="group flex h-full flex-col rounded-2xl border bg-card p-6 shadow-soft transition-all hover:-translate-y-1 hover:border-primary hover:bg-primary hover:text-primary-foreground hover:shadow-soft-lg">
                   <div className="grid size-11 place-items-center rounded-xl bg-primary/10 text-primary">
                     <c.icon className="size-5" />
                   </div>
                   <h3 className="mt-4 font-display text-lg font-bold">{c.title}</h3>
-                  <p className="mt-1.5 text-sm text-muted-foreground">{c.desc}</p>
-                </div>
+                  <p className="mt-1.5 text-sm text-muted-foreground group-hover:text-primary-foreground/80">{c.desc}</p>
+                  <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-primary group-hover:text-primary-foreground">Ver reparación <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-1" /></span>
+                </Link>
               </StaggerItem>
             ))}
           </Stagger>
