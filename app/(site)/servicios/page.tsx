@@ -1,139 +1,22 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import {
-  ArrowRight,
-  BatteryCharging,
-  Cpu,
-  Fan,
-  Gamepad2,
-  HardDrive,
-  Laptop,
-  MessageCircle,
-  ScreenShare,
-  Smartphone,
-  Wrench,
-} from "lucide-react";
-import { PageHero } from "@/components/site/PageHero";
+import { ArrowRight, CheckCircle2, MessageCircle, ShieldCheck, Wrench } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { PageHero } from "@/components/site/PageHero";
 import { Reveal, Stagger, StaggerItem } from "@/components/site/motion";
+import { serviceCategories, services } from "@/content/services";
 import { waLink } from "@/components/site/site-config";
 
-export const metadata: Metadata = {
-  title: "Servicios",
-  description:
-    "Reparación de celulares, computadoras y consolas: cambio de pantalla y batería, microsoldadura, armado de PC, upgrades, mantenimiento y reparación de mandos.",
-};
-
-const serviceGroups = [
-  {
-    title: "Celulares",
-    description: "Reparamos todas las marcas y también ofrecemos equipos sellados.",
-    icon: Smartphone,
-    items: [
-      [ScreenShare, "Cambio de pantalla", "Reemplazo de display y táctil para todas las marcas."],
-      [BatteryCharging, "Cambio de batería", "Baterías de alta calidad con garantía."],
-      [Cpu, "Reparación de placa", "Microsoldadura y diagnóstico avanzado de componentes."],
-      [Smartphone, "Equipos nuevos", "Celulares sellados de fábrica con garantía oficial."],
-    ],
-  },
-  {
-    title: "Computadoras",
-    description: "Reparaciones, armado de PC y mantenimiento completo.",
-    icon: Laptop,
-    items: [
-      [Cpu, "Armado de PC a medida", "Configuraciones gaming, oficina y diseño con los mejores componentes."],
-      [Laptop, "Reparación de notebooks", "Pantalla, teclado, bisagras, carga y más."],
-      [HardDrive, "Upgrade de componentes", "Ampliación de RAM, SSD y optimización de rendimiento."],
-      [Fan, "Mantenimiento preventivo", "Limpieza interna, coolers y cambio de pasta térmica."],
-    ],
-  },
-  {
-    title: "Consolas",
-    description: "Especialistas en PlayStation 4, PlayStation 5 y Xbox.",
-    icon: Gamepad2,
-    items: [
-      [Gamepad2, "Reparación de mandos", "Joysticks, botones y drift de analógicos para PS4, PS5 y Xbox."],
-      [Cpu, "Fallas de encendido", "Reparación de fuentes y microsoldadura en placa base."],
-      [Fan, "Limpieza y pasta térmica", "Evitá sobrecalentamientos con nuestro service premium."],
-      [Wrench, "Diagnóstico general", "Identificamos y solucionamos cualquier falla de tu consola."],
-    ],
-  },
-] as const;
+export const metadata: Metadata = { title: "Servicios técnicos", description: "Reparación de celulares, computadoras, consolas y tecnología. Diagnóstico profesional, presupuesto previo y garantía informada en ServiTec." };
+const accents = { cyan: "border-cyan-200 bg-cyan-50 text-cyan-800 group-hover:border-cyan-400", blue: "border-blue-200 bg-blue-50 text-blue-800 group-hover:border-blue-400", violet: "border-violet-200 bg-violet-50 text-violet-800 group-hover:border-violet-400", amber: "border-amber-200 bg-amber-50 text-amber-800 group-hover:border-amber-400" };
+const hiddenFromMainCatalog = new Set(["sony", "ereaders", "gopro"]);
 
 export default function ServiciosPage() {
-  return (
-    <>
-      <PageHero
-        eyebrow="Servicios"
-        title="Todo lo que hacemos por tus dispositivos"
-        description="Celulares, computadoras y consolas. Diagnóstico, reparación y mantenimiento con garantía escrita."
-      >
-        <div className="flex flex-wrap justify-center gap-3">
-          <Button
-            asChild
-            size="lg"
-            className="bg-whatsapp text-whatsapp-foreground hover:bg-whatsapp/90"
-          >
-            <a
-              href={waLink("Hola ServiTec, quiero consultar por los servicios")}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <MessageCircle className="size-4" /> Consultar por WhatsApp
-            </a>
-          </Button>
-          <Button asChild size="lg" variant="outline" className="border-white/20 bg-white/5 text-white hover:bg-white/10 hover:text-white">
-            <Link href="/presupuesto">Presupuesto online</Link>
-          </Button>
-        </div>
-      </PageHero>
-
-      <section className="container-page space-y-14 py-16 lg:py-24">
-        {serviceGroups.map((group) => (
-          <Reveal key={group.title}>
-            <div className="flex items-center gap-4">
-              <div className="grid size-12 place-items-center rounded-xl bg-primary/10 text-primary">
-                <group.icon className="size-6" />
-              </div>
-              <div>
-                <h2 className="font-display text-2xl font-bold">{group.title}</h2>
-                <p className="text-sm text-muted-foreground">{group.description}</p>
-              </div>
-            </div>
-
-            <Stagger className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {group.items.map(([Icon, title, desc]) => (
-                <StaggerItem
-                  key={title as string}
-                  className="rounded-2xl border bg-card p-5 shadow-soft transition-all hover:-translate-y-1 hover:border-primary/30 hover:shadow-soft-lg"
-                >
-                  <Icon className="size-5 text-primary" />
-                  <h3 className="mt-3 font-display font-semibold">{title as string}</h3>
-                  <p className="mt-1 text-sm text-muted-foreground">{desc as string}</p>
-                </StaggerItem>
-              ))}
-            </Stagger>
-          </Reveal>
-        ))}
-      </section>
-
-      <section className="border-t bg-muted/40 py-14">
-        <div className="container-page flex flex-col items-center gap-4 text-center">
-          <h2 className="font-display text-2xl font-bold">¿Tu equipo necesita atención?</h2>
-          <p className="max-w-xl text-sm text-muted-foreground">
-            Escribinos y coordinamos el ingreso. Presupuesto sin cargo y diagnóstico profesional.
-          </p>
-          <Button asChild size="lg">
-            <a
-              href={waLink("Hola ServiTec, quiero coordinar el ingreso de un equipo")}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Coordinar ingreso <ArrowRight className="size-4" />
-            </a>
-          </Button>
-        </div>
-      </section>
-    </>
-  );
+  return <>
+    <PageHero eyebrow="Servicios técnicos" title="Cuidamos la tecnología que usás todos los días" description="Diagnóstico, reparación y mantenimiento para celulares, computadoras, consolas y mucho más. Elegí tu equipo para conocer el servicio específico."><div className="flex flex-wrap justify-center gap-3"><Button asChild size="lg" className="bg-whatsapp text-whatsapp-foreground hover:bg-whatsapp/90"><a href={waLink("Hola ServiTec, quiero consultar por un servicio técnico")} target="_blank" rel="noopener noreferrer"><MessageCircle className="size-4" /> Consultar por WhatsApp</a></Button><Button asChild size="lg" variant="outline" className="border-white/20 bg-white/5 text-white hover:bg-white/10 hover:text-white"><Link href="#equipos">Ver servicios</Link></Button></div></PageHero>
+    <main><section className="container-page grid gap-4 py-10 sm:grid-cols-3 sm:py-14"><div className="flex gap-3 rounded-2xl border bg-card p-5"><Wrench className="size-5 shrink-0 text-primary" /><div><p className="font-semibold">Diagnóstico profesional</p><p className="mt-1 text-sm text-muted-foreground">Revisamos antes de avanzar.</p></div></div><div className="flex gap-3 rounded-2xl border bg-card p-5"><CheckCircle2 className="size-5 shrink-0 text-primary" /><div><p className="font-semibold">Presupuesto previo</p><p className="mt-1 text-sm text-muted-foreground">Conocé la alternativa disponible.</p></div></div><div className="flex gap-3 rounded-2xl border bg-card p-5"><ShieldCheck className="size-5 shrink-0 text-primary" /><div><p className="font-semibold">Garantía informada</p><p className="mt-1 text-sm text-muted-foreground">Según cada trabajo realizado.</p></div></div></section>
+      <section id="equipos" className="container-page scroll-mt-24 pb-16 lg:pb-24"><div className="mx-auto max-w-2xl text-center"><p className="eyebrow text-primary">Elegí tu equipo</p><h2 className="mt-2 font-display text-3xl font-bold tracking-tight">¿Qué dispositivos reparamos?</h2><p className="mt-3 text-muted-foreground">Cada categoría tiene su propia página con reparaciones habituales, modelos, preguntas frecuentes y una consulta ya preparada para tu equipo.</p></div><div className="mt-10 space-y-12">{serviceCategories.map((category) => { const categoryServices = services.filter((service) => service.category === category && !hiddenFromMainCatalog.has(service.slug)); return <Reveal key={category}><div className="mb-5 flex items-center gap-3"><span className="h-px flex-1 bg-border" /><Badge className="bg-primary/10 px-3 py-1 text-primary hover:bg-primary/10">{category}</Badge><span className="h-px flex-1 bg-border" /></div><Stagger className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{categoryServices.map((service) => { const Icon = service.icon; return <StaggerItem key={service.slug}><Link href={`/servicios/${service.slug}`} className="group flex h-full flex-col rounded-2xl border bg-card p-5 shadow-soft transition-all duration-300 hover:-translate-y-1 hover:border-primary hover:bg-primary hover:text-primary-foreground hover:shadow-[0_16px_32px_-18px_hsl(var(--primary))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"><div className={`flex size-10 items-center justify-center rounded-xl border transition-colors group-hover:border-white/30 group-hover:bg-white/15 group-hover:text-white ${accents[service.accent]}`}><Icon className="size-5" /></div><h3 className="mt-4 font-display text-lg font-bold">{service.shortTitle}</h3><p className="mt-2 text-sm leading-relaxed text-muted-foreground group-hover:text-primary-foreground/80">{service.description}</p><span className="mt-5 flex items-center gap-1 text-sm font-semibold text-primary group-hover:text-primary-foreground">Ver servicio <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" /></span></Link></StaggerItem>; })}</Stagger></Reveal>; })}</div></section></main>
+    <section className="border-t bg-muted/40 py-14"><div className="container-page flex flex-col items-center gap-4 text-center"><h2 className="font-display text-2xl font-bold">¿No ves tu dispositivo?</h2><p className="max-w-xl text-sm text-muted-foreground">Escribinos igual. Contanos marca, modelo y falla para evaluar cómo podemos ayudarte.</p><Button asChild size="lg"><a href={waLink("Hola ServiTec, necesito consultar por un equipo que no veo en Servicios")} target="_blank" rel="noopener noreferrer">Consultar mi equipo <ArrowRight className="size-4" /></a></Button></div></section>
+  </>;
 }

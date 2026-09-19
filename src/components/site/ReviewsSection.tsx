@@ -47,6 +47,17 @@ export function ReviewsSection() {
         <p className="mt-2 text-sm text-muted-foreground">
           Reseñas verificadas en Google
         </p>
+        <a
+          href={CONTACT.reviewsUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mx-auto mt-5 inline-flex items-center gap-2 rounded-full border border-amber-300 bg-amber-50 px-4 py-2 text-sm font-bold text-amber-900 transition-colors hover:bg-amber-100"
+        >
+          <span className="flex gap-0.5 text-amber-500" aria-hidden="true">
+            {Array.from({ length: 5 }).map((_, index) => <Star key={index} className="size-3.5 fill-current" />)}
+          </span>
+          4.9 en Google Maps
+        </a>
       </div>
 
       <div
