@@ -13,8 +13,13 @@ const accents = { cyan: "border-cyan-200 bg-cyan-50 text-cyan-800", blue: "borde
 
 export function generateStaticParams() { return services.map(({ slug }) => ({ slug })); }
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const service = getService((await params).slug);
-  return service ? { title: service.title, description: `${service.description} Consultá por WhatsApp a ServiTec.` } : { title: "Servicio no encontrado" };
+  const { slug } = await params;
+  const service = getService(slug);
+  if (!service) return { title: "Servicio no encontrado" };
+  const path = `/servicios/${slug}`;
+  const description = `${service.description} Consultá por WhatsApp a ServiTec.`;
+  const image = `${path}/opengraph-image`;
+  return { title: service.title, description, alternates: { canonical: path }, openGraph: { type: "website", locale: "es_AR", url: path, siteName: "ServiTec", title: service.title, description, images: [{ url: image, alt: service.title }] }, twitter: { card: "summary_large_image", title: service.title, description, images: [image] } };
 }
 
 export default async function ServiceDetailPage({ params }: PageProps) {

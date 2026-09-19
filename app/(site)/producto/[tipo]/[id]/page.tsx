@@ -31,7 +31,7 @@ export async function generateMetadata({
   if (!product) return fallbackMetadata;
 
   const path = `/producto/${type}/${encodeURIComponent(id)}`;
-  const images = imageForMetadata(product.image);
+  const images = [{ url: `${path}/opengraph-image`, alt: product.name }];
   return {
     title: product.name,
     description: product.description,
@@ -43,13 +43,13 @@ export async function generateMetadata({
       siteName: "ServiTec",
       title: product.name,
       description: product.description,
-      images: images?.map((image) => ({ ...image, alt: product.name })),
+      images,
     },
     twitter: {
-      card: images ? "summary_large_image" : "summary",
+      card: "summary_large_image",
       title: product.name,
       description: product.description,
-      images: images?.map((image) => image.url),
+      images: images.map((image) => image.url),
     },
   };
 }
