@@ -102,7 +102,7 @@ export default function HomePage() {
               delay={0.05}
               className="mt-5 font-display text-4xl font-bold leading-[1.05] text-balance sm:text-5xl md:text-6xl"
             >
-              Tecnología para comprar, armar y{" "}
+              Tecnología para elegir, armar y{" "}
               <span className="text-primary">volver a disfrutar</span>
             </Reveal>
             <Reveal
@@ -120,7 +120,7 @@ export default function HomePage() {
             >
               <Button asChild size="lg" className="h-12 sm:min-w-[180px]">
                 <Link href="/tienda?tipo=equipos">
-                  Quiero comprar <ArrowRight className="size-4" />
+                  Encontrá el equipo ideal <ArrowRight className="size-4" />
                 </Link>
               </Button>
               <Button
