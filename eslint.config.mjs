@@ -7,6 +7,7 @@ const eslintConfig = [
       "legacy/**",
       "functions/**",
       ".next/**",
+      ".next-preview/**",
       "node_modules/**",
       "build/**",
     ],

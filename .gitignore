@@ -56,3 +56,11 @@ functions/lib/
 # scratch
 _seed/
 _*.mjs
+
+# Isolated local review output
+.next-preview/
+*-lint.log
+*-test.log
+*-build.log
+*-types.log
+artifacts/qa/
