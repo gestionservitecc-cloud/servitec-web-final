@@ -1,16 +1,28 @@
-.track {
-  height: 620px;
+.home {
   position: relative;
-  margin-inline: auto;
-  max-width: 720px;
-  padding-inline: 24px;
+  isolation: isolate;
+}
+
+/* Section backgrounds sit below the logo; their content stays above it. */
+.home :global(section) > * {
+  position: relative;
+  z-index: 1;
+}
+
+.track {
+  position: fixed;
+  inset: 64px 0 0;
+  display: grid;
+  place-items: center;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.16;
 }
 
 .stage {
-  position: sticky;
-  top: 100px;
-  height: 360px;
-  width: 100%;
+  position: relative;
+  width: min(100vw, 1200px);
+  height: min(90svh, 1000px);
   pointer-events: none;
 }
 
@@ -26,15 +38,6 @@
 .stage:has([data-ready="true"]) .fallback { visibility: hidden; }
 
 @media (max-width: 767px) {
-  .track { height: 390px; padding-inline: 32px; }
-  .stage { top: 80px; height: 280px; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .track { height: 400px; }
-  .stage { position: relative; top: 0; }
-}
-
-@media (prefers-reduced-motion: reduce) and (max-width: 767px) {
-  .track { height: 310px; }
+  .track { opacity: 0.12; }
+  .stage { width: 100vw; height: 70svh; }
 }

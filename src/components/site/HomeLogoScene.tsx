@@ -127,19 +127,21 @@ export default function HomeLogoScene({ track, onError }: { track: RefObject<HTM
           const fitAngle = Math.min(verticalFov, Math.atan(Math.tan(verticalFov) * camera.aspect));
           camera.position.set(0, 0, radius / Math.sin(fitAngle) * 1.08);
           camera.updateProjectionMatrix();
+          animation?.scrollTrigger?.refresh();
           requestRender();
         };
         resizeObserver = new ResizeObserver(resize);
         resizeObserver.observe(host);
+        resizeObserver.observe(document.body);
         resize();
         gsap.registerPlugin(ScrollTrigger);
         animation = gsap.to(pivot.rotation, {
           y: Math.PI * 2, ease: "none",
           onUpdate: requestRender,
           scrollTrigger: {
-            id: "servitec-home-logo", trigger: section,
-            start: () => `top ${innerWidth < 768 ? 80 : 100}px`,
-            end: () => `+=${Math.max(1, section.offsetHeight - host.offsetHeight)}`,
+            id: "servitec-home-logo",
+            start: 0,
+            end: () => Math.max(1, ScrollTrigger.maxScroll(window)),
             scrub: 0.25, invalidateOnRefresh: true,
           },
         });

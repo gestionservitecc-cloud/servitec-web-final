@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { FeaturedStock } from "@/components/site/FeaturedStock";
 import { HomeVideo } from "@/components/site/HomeVideo";
 import { HomeLogo } from "@/components/site/HomeLogo";
+import logoStyles from "@/components/site/HomeLogo.module.css";
 import { ReviewsSection } from "@/components/site/ReviewsSection";
 import { WhatsAppQuoteForm } from "@/components/site/WhatsAppQuoteForm";
 import { HeroBackdrop } from "@/components/site/HeroBackdrop";
@@ -85,7 +86,8 @@ const repairCards = [
 
 export default function HomePage() {
   return (
-    <>
+    <div className={logoStyles.home}>
+      <HomeLogo />
       <section className="border-b bg-sidebar text-sidebar-foreground">
         <div className="container-page grid items-center gap-10 py-12 sm:py-16 lg:grid-cols-[1.15fr_0.85fr]">
           <div>
@@ -104,7 +106,6 @@ export default function HomePage() {
             <div className="flex items-center justify-between gap-4 p-5"><div><p className="text-xs text-red-300">Estamos cerca</p><p className="mt-1 font-semibold">Un lugar para tu tecnología</p></div><Link href="/conocenos" className="text-sm underline underline-offset-4">Conocenos</Link></div>
           </div>
         </div>
-        <HomeLogo />
       </section>
 
       {/* Ventas primero: stock destacado en vivo */}
@@ -234,7 +235,7 @@ export default function HomePage() {
           <WhatsAppQuoteForm className="mt-8" />
         </Reveal>
       </section>
-    </>
+    </div>
   );
 }
 

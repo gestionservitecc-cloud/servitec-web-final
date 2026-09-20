@@ -18,11 +18,7 @@ async function context(options={}) {
  return c;
 }
 async function position(page,p) {
- await page.locator('[data-home-logo]').evaluate((e,p)=>{
-  const stage=e.firstElementChild;
-  const offset=innerWidth<768?80:100;
-  window.scrollTo(0,e.getBoundingClientRect().top+scrollY-offset+p*(e.offsetHeight-stage.offsetHeight));
- },p);
+ await page.evaluate(p => window.scrollTo(0, p * (document.documentElement.scrollHeight - innerHeight)),p);
  await page.waitForTimeout(650);
 }
 async function angle(page){return Number(await page.locator('[data-logo-scene]').getAttribute('data-rotation'));}
@@ -82,7 +78,7 @@ try {
   }
   assert.ok(await page.evaluate(()=>window.__logoQA.lost>=1),'disposed WebGL context');
   assert.deepEqual(errors,[]);
-  results.push(`${width}px: front/back/full turn/reverse/stop/resize, DPR cap, idle/offscreen rendering stopped, two route cycles and listener/context cleanup passed`);
+  results.push(`${width}px: front/back/full turn/reverse/stop/resize, DPR cap, idle rendering stopped at middle and bottom, two route cycles and listener/context cleanup passed`);
   await c.close();
  }
  for(const mode of ['reduced','failed','no-webgl']) {
