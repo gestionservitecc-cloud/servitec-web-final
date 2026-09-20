@@ -9,6 +9,7 @@ import type { Equipo } from "@/lib/types";
 import { stockCategories } from "@/components/site/site-config";
 import {
   calculateInstallmentPrice,
+  calculateNationalPrice,
   normalizeEquipmentCondition,
   normalizeStockCategoryValue,
 } from "@/lib/utils";
@@ -68,7 +69,7 @@ export function FeaturedStock() {
           loading
         />
       ) : (
-        destacados.filter((_, index) => index === Math.min(active, destacados.length - 1)).map((category, index) => (
+        destacados.filter((_, index) => index === Math.min(active, destacados.length - 1)).map((category) => (
           <StockRow
             key={`${category.value}-${category.condition}`}
             title={`${category.label} ${category.condition === "Sellado" ? "nuevos" : "reacondicionados"} destacados`}
@@ -78,7 +79,6 @@ export function FeaturedStock() {
                 : `/reacondicionados?categoria=${category.value}`
             }
             items={category.items}
-            accent={index === 0 && category.value === "pc-armada"}
             loading={false}
           />
         ))
@@ -92,13 +92,11 @@ function StockRow({
   href,
   items,
   loading,
-  accent = false,
 }: {
   title: string;
   href: string;
   items: Equipo[];
   loading: boolean;
-  accent?: boolean;
 }) {
   if (!loading && items.length === 0) return null;
 
@@ -135,11 +133,9 @@ function StockRow({
                   viewport={{ once: true, margin: "-40px" }}
                   transition={{ duration: 0.45, delay: i * 0.06, ease: [0.16, 1, 0.3, 1] }}
 
-                  className={`group flex flex-col overflow-hidden rounded-2xl border shadow-soft transition-shadow hover:shadow-soft-lg ${
-                    accent ? "border-primary/20 bg-accent/30" : "bg-card"
-                  }`}
+                  className="group flex flex-col overflow-hidden rounded-2xl border bg-card shadow-soft transition-shadow hover:shadow-soft-lg"
                 >
-                  <div className="aspect-[4/3] overflow-hidden bg-muted">
+                  <div className="aspect-[4/3] overflow-hidden bg-white">
                     {item.imagenes?.[0] ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
@@ -150,17 +146,17 @@ function StockRow({
                       />
                     ) : <div className="grid h-full place-items-center p-4 text-sm text-muted-foreground">Imagen no disponible</div>}
                   </div>
-                  <div className="flex flex-1 flex-col gap-3 p-4">
+                  <div className="flex flex-1 flex-col gap-2 p-4">
                     <h3 className="line-clamp-2 min-h-[2.5rem] text-sm font-semibold">
                       {item.nombre}
                     </h3>
-                    <div><p className="text-xs text-muted-foreground">Efectivo / transferencia</p><p className="text-xl font-bold">{currency(price)}</p></div>
-                    <p className="text-xs text-muted-foreground">Total con tarjeta: {currency(installmentPrice)}</p>
+                    <div><p className="text-xs text-muted-foreground">Efectivo / transferencia</p><p className="text-lg font-bold text-emerald-700">{currency(price)}</p>
+                    <p className="text-[11px] font-semibold text-rose-600">Total con tarjeta: {currency(installmentPrice)}</p>
+                    <p className="text-[11px] text-muted-foreground">Sin imp. nac. {currency(calculateNationalPrice(price))}</p></div>
                     <Button
                       asChild
                       size="sm"
                       className="mt-auto w-full"
-                      variant={accent ? "secondary" : "default"}
                     >
                       <Link href={`/producto/equipo/${encodeURIComponent(item.id)}`}>
                         Ver más <ArrowRight className="size-3.5" />

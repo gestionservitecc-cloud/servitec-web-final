@@ -6,17 +6,23 @@ export function HomeVideo() {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
-    const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const syncPlayback = () => {
+    const startPlayback = () => {
       const video = videoRef.current;
-      if (!video) return;
-      video.autoplay = !preference.matches;
-      if (preference.matches) video.pause();
-      else void video.play().catch(() => { /* Respect browser autoplay restrictions. */ });
+      if (!video || document.visibilityState === "hidden") return;
+      video.muted = true;
+      video.defaultMuted = true;
+      void video.play().catch(() => { /* Retry when ready, visible or after interaction. */ });
     };
-    syncPlayback();
-    preference.addEventListener("change", syncPlayback);
-    return () => preference.removeEventListener("change", syncPlayback);
+    const video = videoRef.current;
+    startPlayback();
+    video?.addEventListener("canplay", startPlayback);
+    document.addEventListener("visibilitychange", startPlayback);
+    document.addEventListener("pointerdown", startPlayback);
+    return () => {
+      video?.removeEventListener("canplay", startPlayback);
+      document.removeEventListener("visibilitychange", startPlayback);
+      document.removeEventListener("pointerdown", startPlayback);
+    };
   }, []);
 
   return (

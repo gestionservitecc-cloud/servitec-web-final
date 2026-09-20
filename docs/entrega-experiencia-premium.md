@@ -8,7 +8,7 @@ No hubo push, merge, despliegue ni escrituras de prueba a producción.
 
 | Área | Cambios |
 |---|---|
-| Inicio | Tres entradas claras: tienda, reparación y PC. Video real del local con reproducción automática, sin sonido ni controles y repetición infinita. Respeta la preferencia de movimiento reducido. Destacados por categorías, selección y orden del admin, tarjetas compactas, proceso de reparación en lugar de un bloque promocional repetido. |
+| Inicio | Tres entradas claras: tienda, reparación y PC. Video real del local con reproducción automática, sin sonido ni controles y repetición infinita. El video mantiene autoplay incluso con movimiento reducido, según el pedido posterior. Destacados por categorías, selección y orden del admin, tarjetas compactas, proceso de reparación en lugar de un bloque promocional repetido. |
 | Compartidos | Encabezados compactos, navegación activa, menú móvil, salto al contenido, foco visible, menor movimiento, contraste, proporciones de imágenes y estado sin foto. WhatsApp no tapa fichas ni consultas de especialidad. |
 | Servicios | Catálogo orientado al cliente. Las 11 especialidades solicitadas usan el mismo flujo corregido; conserva reparaciones y familias existentes, acepta modelo personalizado o desconocido, resumen sincronizado, teléfono alternativo opcional y validación de nombre. Ayudas específicas para iPad, MacBook, familias Android, notebook, consola/mando, dron y TV. Se eliminan `main` anidados y títulos con concordancia incorrecta. |
 | Presupuesto y contacto | Revisión de la consulta antes de abrir WhatsApp; no simula cotización automática. Edición conserva campos. Horarios centralizados con los valores existentes. |
@@ -53,7 +53,7 @@ node scripts/preview-local.mjs --build
 
 Los resultados de navegador están en `artifacts/qa/results.json` y `artifacts/qa/state-results.json`. Incluyen escritorio/móvil en 360, 390, 768 y 1440 px; rutas principales y variantes de tienda; las 11 especialidades; páginas informativas; búsqueda y retorno; pago desde ficha; cantidades; actualización de precio; bloqueo de vendido; carga/error/vacío; incompatibilidad AM4/AM5; teclado y navegación móvil. `window.open` se intercepta. No se envían mensajes, no se pulsa el envío final de pedidos y se prohíben requests de escritura en las pruebas de navegador.
 
-Resultado final: build aislado y TypeScript aprobados; lint con 0 errores y 19 advertencias; 23 pruebas unitarias y de contratos aprobadas. Las verificaciones de navegador cubren 61 comprobaciones de rutas y recorridos, 7 de estados críticos y 4 del video (autoplay y reinicio real al terminar en 390/1440 px, sin controles, y pausa por movimiento reducido). Se corrigieron además un retorno inválido de efecto y una diferencia de hidratación detectados durante QA.
+Resultado final: build aislado y TypeScript aprobados; lint con 0 errores y 19 advertencias; 23 pruebas unitarias y de contratos aprobadas. Las verificaciones de navegador cubren 61 comprobaciones de rutas y recorridos, 7 de estados críticos y 4 del video (autoplay y reinicio real al terminar en 390/1440 px, sin controles, y reproducción con movimiento reducido). Se corrigieron además un retorno inválido de efecto y una diferencia de hidratación detectados durante QA.
 
 Capturas generadas:
 
@@ -95,3 +95,10 @@ Playwright se instala fuera del proyecto solo como herramienta de QA; no modific
 - Se preservó un cambio concurrente ajeno en `public/videos/frente-servitec.mp4` (archivo local de aproximadamente 29,5 MB), fuera de los commits de esta tarea. No se optimizó ni sobrescribió. La vista usa el recurso existente con autoplay; conviene revisar ese peso al decidir publicar el video.
 
 La auditoría y matriz inicial están en `experiencia-premium.md`.
+
+## Correcciones posteriores
+
+- Destacados: mismos colores y formato de precios que tienda, incluido «Sin imp. nac.» calculado con el helper vigente.
+- Video: se elimina la pausa por movimiento reducido solicitando autoplay siempre; reintenta al estar listo, volver a la pestaña o interactuar. Las restricciones propias del navegador pueden impedir autoplay. Se verificaron inicio sin interacción y bucle en 390/1440 px.
+- Conocenos: los cuatro originales existen en Blob; se habilitan exclusivamente `Local1.png` a `Local4.png` en la ruta pública. Se verificó HTTP 200 y decodificación real de las cuatro imágenes mediante el servidor local del puerto 3000, sin escrituras remotas. La preview aislada del 3100 sigue sin credenciales Blob.
+- Validación de esta corrección: 24 pruebas aprobadas, TypeScript y lint de archivos afectados sin errores. Capturas: `artifacts/qa/conocenos-fixed.png` y `artifacts/qa/destacados-fixed.png`. `scripts/review-home-fixes.mjs` requiere el servidor local con Blob en el puerto 3000 y usa un fixture solo para el destacado.

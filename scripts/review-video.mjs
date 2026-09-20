@@ -21,8 +21,8 @@ try {
     await page.waitForFunction(() => { const video = document.querySelector("video"); return video.currentTime < 2 && !video.paused; });
     checks.push(`Autoplay without interaction, no controls, muted and loop: ${width}px`);
     await page.emulateMedia({ reducedMotion: "reduce" });
-    await page.waitForFunction(() => document.querySelector("video").paused);
-    checks.push(`Reduced motion pauses playback: ${width}px`);
+    await page.waitForFunction(() => !document.querySelector("video").paused);
+    checks.push(`Autoplay remains enabled with reduced motion: ${width}px`);
     await page.close();
   }
   await writeFile("artifacts/qa/video-results.json", JSON.stringify({ checks }, null, 2));
