@@ -1,0 +1,40 @@
+.track {
+  height: 620px;
+  position: relative;
+  margin-inline: auto;
+  max-width: 720px;
+  padding-inline: 24px;
+}
+
+.stage {
+  position: sticky;
+  top: 100px;
+  height: 360px;
+  width: 100%;
+  pointer-events: none;
+}
+
+.fallback {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 26px;
+  object-fit: contain;
+}
+
+.stage:has([data-ready="true"]) .fallback { visibility: hidden; }
+
+@media (max-width: 767px) {
+  .track { height: 390px; padding-inline: 32px; }
+  .stage { top: 80px; height: 280px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .track { height: 400px; }
+  .stage { position: relative; top: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) and (max-width: 767px) {
+  .track { height: 310px; }
+}
