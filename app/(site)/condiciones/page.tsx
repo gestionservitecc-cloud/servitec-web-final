@@ -3,6 +3,7 @@ import { AlertTriangle } from "lucide-react";
 import { PageHero } from "@/components/site/PageHero";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/condiciones" },
   title: "Condiciones generales",
   description:
     "Política de garantía, plazos, diagnósticos, señas, almacenamiento y condiciones del servicio técnico de ServiTec.",

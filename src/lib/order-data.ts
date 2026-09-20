@@ -2,6 +2,8 @@ export type PedidoItem = {
   nombre: string;
   cantidad: number;
   precio: number;
+  precioBase?: number;
+  paymentMethod?: "efectivo" | "tarjeta";
 };
 
 export type PedidoStored = {

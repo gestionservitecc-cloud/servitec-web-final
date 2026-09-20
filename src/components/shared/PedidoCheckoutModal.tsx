@@ -1,5 +1,7 @@
 "use client";
 
+import { cartItemPrice, cartTotal } from "@/lib/cart-pricing";
+import { useDialogFocus } from "@/hooks/use-dialog-focus";
 import { useState, type FormEvent } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
@@ -48,6 +50,7 @@ export function PedidoCheckoutModal({
   const reduceMotion = useReducedMotion();
 
   useLockBodyScroll(open);
+  const dialogRef = useDialogFocus(open, onClose);
 
   if (!open || typeof document === "undefined") return null;
 
@@ -55,10 +58,13 @@ export function PedidoCheckoutModal({
     setForm((current) => ({ ...current, [field]: value }));
   };
 
-  const efectivoTotal = Number(total || 0);
-  const tarjetaTotal = calculateInstallmentPrice(efectivoTotal);
+  const explicitPayment = items.every(item => Boolean(item.paymentMethod));
+  const effectiveMethod = explicitPayment && items.every(item => item.paymentMethod === items[0]?.paymentMethod) ? items[0]?.paymentMethod : paymentMethod;
+  const efectivoTotal = origen === "tienda" ? cartTotal(items, "efectivo") : Number(total || 0);
+  const tarjetaTotal = origen === "tienda" ? cartTotal(items, "tarjeta") : calculateInstallmentPrice(efectivoTotal);
   const totalSeleccionado = paymentMethod === "tarjeta" ? tarjetaTotal : efectivoTotal;
-  const hasPaymentMethod = paymentMethod !== null;
+  const hasPaymentMethod = paymentMethod !== null || explicitPayment || origen === "armado";
+  const pricedItems = items.map(item => ({ ...item, precio: origen === "tienda" ? cartItemPrice(item) : item.precio }));
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -84,9 +90,9 @@ export function PedidoCheckoutModal({
       id: `pedido-${numeroPedido}`,
       numeroPedido,
       ...payload,
-      items,
+      items: pricedItems,
       total: totalSeleccionado,
-      formaPago: paymentMethod || undefined,
+      formaPago: effectiveMethod || undefined,
       createdAt: new Date().toISOString(),
       origen,
     };
@@ -126,9 +132,9 @@ export function PedidoCheckoutModal({
 
     const fullName = `${payload.nombre} ${payload.apellido}`.trim();
     const lines = [
-      buildPedidoMessage({ numeroPedido, items, total: totalSeleccionado, nombre: fullName }),
+      buildPedidoMessage({ numeroPedido, items: pricedItems, total: totalSeleccionado, nombre: fullName }),
     ];
-    if (paymentMethod) lines.push(`Forma de pago: ${paymentMethod === "tarjeta" ? "Tarjeta (3/6 cuotas)" : "Efectivo / Transferencia"}`);
+    if (effectiveMethod) lines.push(`Forma de pago: ${effectiveMethod === "tarjeta" ? "Tarjeta (3/6 cuotas)" : "Efectivo / Transferencia"}`);
     lines.push("",
       `Nombre y Apellido: ${fullName}`,
       `DNI: ${payload.dni}`,
@@ -144,7 +150,7 @@ export function PedidoCheckoutModal({
   };
 
   return createPortal(
-    <div className="fixed inset-0 z-[120] flex items-center justify-center bg-slate-950/80 p-3 backdrop-blur-sm sm:p-4" role="dialog" aria-modal="true">
+    <div ref={dialogRef} aria-label="Datos y resumen del pedido" className="fixed inset-0 z-[120] flex items-center justify-center bg-slate-950/80 p-3 backdrop-blur-sm sm:p-4" role="dialog" aria-modal="true">
       <div className="max-h-[calc(100dvh-1.5rem)] w-full max-w-2xl overflow-y-auto overscroll-contain rounded-3xl border border-red-200 bg-white p-4 text-slate-900 shadow-2xl sm:max-h-[92vh] sm:p-7">
         <div className="flex items-start justify-between gap-4">
           <div>
@@ -154,6 +160,7 @@ export function PedidoCheckoutModal({
           <button type="button" onClick={onClose} className="text-slate-400 hover:text-slate-700" aria-label="Cerrar formulario">✕</button>
         </div>
 
+        <p className="mt-4 text-sm text-slate-600">Preparás una solicitud por WhatsApp. La disponibilidad y la entrega se coordinan con ServiTec; acá no realizás un pago.</p>
         <form onSubmit={handleSubmit} className="mt-6 space-y-5">
           <div>
             <div className="mb-3 flex items-center gap-2">
@@ -188,13 +195,13 @@ export function PedidoCheckoutModal({
             </div>
           </div>
 
-          {error ? <p className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p> : null}
+          {error ? <p role="alert" className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p> : null}
 
-          {origen === "tienda" && (
+          {origen === "tienda" && !explicitPayment && (
             <div className="rounded-2xl border border-red-100 bg-gradient-to-br from-red-50 via-white to-slate-50 p-4 sm:p-5">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">2. Medio de pago</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">2. Medio de pago para artículos sin selección previa</p>
                   <p className="mt-1 text-sm text-slate-600">Elegí una opción para actualizar el total.</p>
                 </div>
                 <ShieldCheck className="size-5 shrink-0 text-emerald-600" aria-hidden="true" />
@@ -239,8 +246,9 @@ export function PedidoCheckoutModal({
 
           <div className="rounded-2xl border border-red-100 bg-red-50 p-4">
             <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Resumen</p>
+            {!explicitPayment && paymentMethod === "tarjeta" && <p className="mt-2 text-xs text-slate-600">Los artículos sin medio elegido muestran su precio base por unidad. El total aplica el precio con tarjeta a ese subtotal; conserva los medios ya elegidos en las fichas.</p>}
             <div className="mt-3 space-y-2">
-              {items.map((item) => (
+              {pricedItems.map((item) => (
                 <div key={`${item.nombre}-${item.cantidad}`} className="flex items-center justify-between gap-3 text-sm">
                   <span>{item.cantidad} x {item.nombre}</span>
                   <span className="font-semibold">${Number(item.precio || 0).toLocaleString("es-AR")}</span>
@@ -248,7 +256,7 @@ export function PedidoCheckoutModal({
               ))}
             </div>
             <div className="mt-4 flex items-center justify-between border-t border-red-200 pt-3 text-base font-bold">
-              <span>{hasPaymentMethod ? `Total ${paymentMethod === "tarjeta" ? "con tarjeta" : "en efectivo"}` : "Total a confirmar"}</span>
+              <span>{hasPaymentMethod ? "Total según medios elegidos" : "Total a confirmar"}</span>
               <AnimatePresence initial={false} mode="wait">
                 <motion.span
                   key={paymentMethod || "pending"}
@@ -265,7 +273,7 @@ export function PedidoCheckoutModal({
 
           <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
             <Button type="button" variant="outline" onClick={onClose} className="border-slate-600 bg-transparent text-slate-700 hover:bg-slate-100">Cancelar</Button>
-            <Button type="submit" disabled={submitting || (origen === "tienda" && !paymentMethod)} className="bg-secondary text-slate-950 hover:bg-secondary/90">
+            <Button type="submit" disabled={submitting || (origen === "tienda" && !hasPaymentMethod)} className="bg-secondary text-slate-950 hover:bg-secondary/90">
               {submitting ? "Guardando…" : "Enviar por WhatsApp"}
             </Button>
           </div>

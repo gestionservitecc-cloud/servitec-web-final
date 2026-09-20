@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FeaturedStock } from "@/components/site/FeaturedStock";
+import { HomeVideo } from "@/components/site/HomeVideo";
 import { ReviewsSection } from "@/components/site/ReviewsSection";
 import { WhatsAppQuoteForm } from "@/components/site/WhatsAppQuoteForm";
 import { HeroBackdrop } from "@/components/site/HeroBackdrop";
@@ -84,74 +85,23 @@ const repairCards = [
 export default function HomePage() {
   return (
     <>
-      {/* Hero */}
-      <section className="relative overflow-hidden bg-sidebar text-sidebar-foreground">
-        <div
-          aria-hidden
-          className="absolute inset-0 bg-gradient-to-b from-sidebar/70 via-sidebar/85 to-sidebar"
-        />
-        <HeroBackdrop />
-
-        <div className="container-page relative py-20 sm:py-28 lg:py-32">
-          <div className="mx-auto max-w-3xl text-center">
-            <Reveal as="p" y={12} className="eyebrow justify-center text-primary">
-              Venta de equipos · PC a medida · Servicio técnico
-            </Reveal>
-            <Reveal
-              as="h1"
-              delay={0.05}
-              className="mt-5 font-display text-4xl font-bold leading-[1.05] text-balance sm:text-5xl md:text-6xl"
-            >
-              Tecnología para elegir, armar y{" "}
-              <span className="text-primary">volver a disfrutar</span>
-            </Reveal>
-            <Reveal
-              as="p"
-              delay={0.12}
-              className="mx-auto mt-5 max-w-xl text-base text-sidebar-foreground/70 sm:text-lg"
-            >
-              Elegí equipos con stock real o coordiná la reparación de tu dispositivo.
-              Atención directa, diagnóstico claro y garantía escrita.
-            </Reveal>
-
-            <Reveal
-              delay={0.2}
-              className="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:flex-wrap"
-            >
-              <Button asChild size="lg" className="h-12 sm:min-w-[180px]">
-                <Link href="/tienda?tipo=equipos">
-                  Encontrá el equipo ideal <ArrowRight className="size-4" />
-                </Link>
-              </Button>
-              <Button
-                asChild
-                size="lg"
-                variant="outline"
-                className="h-12 border-white/20 bg-white/5 text-white hover:bg-white/10 hover:text-white sm:min-w-[180px]"
-              >
-                <Link href="/servicios">
-                  Necesito reparar <ArrowRight className="size-4" />
-                </Link>
-              </Button>
-              <Pressable lift={false} className="rounded-md">
-                <Button asChild size="lg" className="h-12 bg-whatsapp text-whatsapp-foreground shadow-[0_10px_28px_rgba(37,211,102,0.24)] hover:bg-whatsapp/90 sm:min-w-[210px]">
-                  <a href={waLink("Hola ServiTec, quiero hacer una consulta")} target="_blank" rel="noopener noreferrer"><MessageCircle className="size-4" /> Consultar por WhatsApp</a>
-                </Button>
-              </Pressable>
-            </Reveal>
+      <section className="overflow-hidden border-b bg-sidebar text-sidebar-foreground">
+        <div className="container-page grid items-center gap-10 py-12 sm:py-16 lg:grid-cols-[1.15fr_0.85fr]">
+          <div>
+            <p className="eyebrow text-red-300">Tecnología + servicio técnico · Saavedra</p>
+            <h1 className="mt-5 max-w-2xl text-balance text-4xl font-bold leading-[1.08] sm:text-5xl lg:text-6xl">Tu próximo equipo.<br /><span className="text-red-300">Tu técnico de confianza.</span></h1>
+            <p className="mt-5 max-w-xl text-base leading-relaxed text-slate-300">Elegí tecnología para lo que hacés todos los días. Comprá un equipo, armá tu PC o encontrá una solución para el que ya tenés.</p>
+            <div className="mt-7 flex flex-wrap gap-3">
+              <Button asChild size="lg"><Link href="/tienda">Explorar tienda <ArrowRight className="size-4" /></Link></Button>
+              <Button asChild size="lg" variant="outline" className="border-white/30 bg-transparent text-white hover:bg-white/10 hover:text-white"><Link href="/servicios">Reparar mi equipo</Link></Button>
+              <Button asChild size="lg" variant="ghost" className="text-white hover:bg-white/10 hover:text-white"><Link href="/armar-pc">Armá tu PC <ArrowRight className="size-4" /></Link></Button>
+            </div>
+            <div className="mt-8 flex flex-wrap gap-x-5 gap-y-3 border-t border-white/15 pt-5 text-xs text-slate-300"><span>Atención en Saavedra, CABA</span><span>Asesoramiento directo</span><Link href="/formas-de-pago" className="underline underline-offset-4">Ver medios de pago</Link></div>
           </div>
-
-          <Stagger className="mx-auto mt-14 grid max-w-3xl grid-cols-2 gap-3 sm:grid-cols-4">
-            {trustItems.map((t) => (
-              <StaggerItem
-                key={t.label}
-                className="flex flex-col items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-4 text-center text-xs font-medium text-sidebar-foreground/80"
-              >
-                <t.icon className="size-5 text-primary" />
-                {t.label}
-              </StaggerItem>
-            ))}
-          </Stagger>
+          <div className="overflow-hidden rounded-2xl border border-white/15 bg-white/5">
+            <HomeVideo />
+            <div className="flex items-center justify-between gap-4 p-5"><div><p className="text-xs text-red-300">Estamos cerca</p><p className="mt-1 font-semibold">Un lugar para tu tecnología</p></div><Link href="/conocenos" className="text-sm underline underline-offset-4">Conocenos</Link></div>
+          </div>
         </div>
       </section>
 
@@ -173,13 +123,13 @@ export default function HomePage() {
           </p>
         </Reveal>
 
-        <Stagger className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <Stagger className="mt-8 grid grid-cols-2 gap-3 lg:grid-cols-4">
           {shopCards.map((c) => (
             <StaggerItem key={c.title}>
               <Pressable className="h-full">
                 <Link
                   href={c.href}
-                  className="group flex h-full flex-col rounded-2xl border bg-card p-6 shadow-soft transition-colors hover:border-primary/40"
+                  className="group flex h-full flex-col rounded-2xl border bg-card p-4 sm:p-6 shadow-soft transition-colors hover:border-primary/40"
                 >
                   <div className="grid size-11 place-items-center rounded-xl bg-primary/10 text-primary transition-transform group-hover:scale-110">
                     <c.icon className="size-5" />
@@ -215,25 +165,14 @@ export default function HomePage() {
             footnote="Armado, asesoramiento y garantía escrita incluidos"
           />
         </Reveal>
-        <Reveal delay={0.1}>
-          <PromoCard
-            badge="Servicio técnico"
-            title={
-              <>
-                ¿Se te rompió algo? Lo{" "}
-                <span className="text-primary">reparamos</span>
-              </>
-            }
-            desc="Celulares, notebooks, PC y consolas. Diagnóstico profesional, presupuesto sin cargo y garantía escrita sobre el repuesto."
-            tags={["Celulares", "Notebooks", "Consolas", "Microsoldadura"]}
-            cta={{
-              label: "Ver servicios",
-              href: "/servicios",
-              external: false,
-            }}
-            footnote="Presupuesto sin cargo · Entrega en 24/48 h"
-          />
-        </Reveal>
+        <div className="rounded-3xl border bg-muted/40 p-6 sm:p-8">
+          <p className="eyebrow">Servicio técnico, paso a paso</p>
+          <h2 className="mt-3 text-2xl font-bold">Sabé qué sigue con tu equipo</h2>
+          <ol className="mt-5 space-y-4">
+            {[["Ingreso", "Contanos el modelo y la falla para coordinar la revisión."], ["Diagnóstico", "Revisamos el equipo y te explicamos las opciones."], ["Aprobación", "Conocé el presupuesto antes de avanzar con la reparación."], ["Entrega", "Coordinamos el retiro e informamos la garantía correspondiente."]].map(([title, text], index) => <li key={title} className="flex gap-3"><span className="grid size-7 shrink-0 place-items-center rounded-full bg-primary/10 text-xs font-bold text-primary">{index + 1}</span><div><h3 className="text-sm font-bold">{title}</h3><p className="mt-1 text-sm text-muted-foreground">{text}</p></div></li>)}
+          </ol>
+          <Link href="/presupuesto" className="mt-6 inline-flex text-sm font-semibold text-primary underline underline-offset-4">Consultar por una reparación</Link>
+        </div>
       </section>
 
       {/* Reparación (secundario) */}

@@ -2,21 +2,16 @@ import type { Metadata } from "next";
 import { Clock, Instagram, MapPin, MessageCircle, Phone } from "lucide-react";
 import { PageHero } from "@/components/site/PageHero";
 import { Button } from "@/components/ui/button";
-import { CONTACT, waLink } from "@/components/site/site-config";
+import { CONTACT, waLink, BUSINESS_HOURS } from "@/components/site/site-config";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/contacto" },
   title: "Contacto",
   description:
     "Ubicación, horarios de atención y canales de contacto de ServiTec en Saavedra, CABA.",
 };
 
-const hours = [
-  ["Lunes a Jueves", "10:00 – 19:00", "open"],
-  ["Viernes", "10:00 – 18:00", "open"],
-  ["Sábados", "10:00 – 14:00", "open"],
-  ["Domingos", "Cerrado", "closed"],
-  ["Feriados", "Consultar", "maybe"],
-] as const;
+const hours = [...BUSINESS_HOURS, ["Feriados", "Consultar", "maybe"]] as const;
 
 export default function ContactoPage() {
   return (

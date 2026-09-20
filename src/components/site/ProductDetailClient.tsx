@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { ArrowLeft, Check, Copy, Info, MessageCircle, Share2, ShoppingCart, Smartphone } from "lucide-react";
 import { ProductImageGallery } from "@/components/site/ProductImageGallery";
 import { Button } from "@/components/ui/button";
@@ -40,6 +41,10 @@ type CartItem = {
   componentKey?: ComponentCatalogKey;
   condition?: string;
   cantidad: number;
+  precioBase?: number;
+  paymentMethod?: "efectivo" | "tarjeta";
+  productId?: string;
+  productType?: DetailType;
 };
 
 const humanizeKey = (key: string) =>
@@ -52,8 +57,12 @@ const equipmentCategoryLabel = (value?: string) =>
   stockCategories.find((category) => category.value === normalizeStockCategoryValue(value))?.label || "Equipo";
 
 export function ProductDetailClient({ type, id }: { type: DetailType; id: string }) {
+  const searchParams = useSearchParams();
+  const returnTo = searchParams.get("from");
+  const safeReturn = returnTo && /^\/(tienda|reacondicionados)(\?|$)/.test(returnTo) ? returnTo : null;
   const [component, setComponent] = useState<{ product: CatalogProduct; key: ComponentCatalogKey } | null>(null);
   const [equipment, setEquipment] = useState<Equipo | null>(null);
+  const [loadError, setLoadError] = useState(false);
   const [loading, setLoading] = useState(true);
   const [cartMessage, setCartMessage] = useState("");
   const [shareMessage, setShareMessage] = useState("");
@@ -82,7 +91,7 @@ export function ProductDetailClient({ type, id }: { type: DetailType; id: string
           if (alive && found) setEquipment(found);
         }
       } catch {
-        // The empty state below keeps the route usable when the source is unavailable.
+        if (alive) setLoadError(true);
       } finally {
         if (alive) setLoading(false);
       }
@@ -106,14 +115,21 @@ export function ProductDetailClient({ type, id }: { type: DetailType; id: string
   const isReconditioned = equipmentData && normalizeEquipmentCondition(equipmentData.condition) === "Reacondicionado";
   const categoryLabel = component ? componentCatalogLabels[component.key] : equipmentCategoryLabel(equipmentData?.categoria);
 
+  const unavailable = componentData?.stock === 0 || (equipmentData && (equipmentData.estado === "vendido" || equipmentData.stock === 0));
   const addToCart = () => {
+    if (unavailable || price <= 0) return;
+    const cartId = `${type}:${id}:${paymentMethod}`;
     const item: CartItem = {
-      id,
-      nombre: title,
+      id: cartId,
+      productId: id,
+      productType: type,
+      paymentMethod,
+      precioBase: price,
+      nombre: `${title} · ${paymentMethod === "tarjeta" ? "Tarjeta" : "Efectivo / Transferencia"}`,
       categoria: categoryLabel,
       imagen: images[0] || "",
       imagenes: images,
-      precio: price,
+      precio: selectedPrice,
       stock: 1,
       specs: componentData?.specs as Record<string, string> | undefined || equipmentData?.specs,
       componentKey: component?.key,
@@ -123,9 +139,9 @@ export function ProductDetailClient({ type, id }: { type: DetailType; id: string
     try {
       const stored = JSON.parse(window.localStorage.getItem(CART_KEY) || "[]");
       const current: CartItem[] = Array.isArray(stored) ? stored : [];
-      const next = current.some((cartItem) => String(cartItem.id) === String(id))
-        ? current.map((cartItem) => String(cartItem.id) === String(id)
-          ? { ...cartItem, cantidad: Math.max(0, Number(cartItem.cantidad) || 0) + 1 }
+      const next = current.some((cartItem) => String(cartItem.id) === cartId)
+        ? current.map((cartItem) => String(cartItem.id) === cartId
+          ? { ...item, cantidad: Math.max(0, Number(cartItem.cantidad) || 0) + 1 }
           : cartItem)
         : [...current, item];
       window.localStorage.setItem(CART_KEY, JSON.stringify(next));
@@ -187,6 +203,7 @@ export function ProductDetailClient({ type, id }: { type: DetailType; id: string
     ].filter(([, value]) => value) as Array<readonly [string, string]>;
   }, [component, componentData, equipmentData]);
 
+  if (loadError) return <div role="alert" className="container-page py-16"><h1 className="text-2xl font-bold">No pudimos cargar el producto</h1><Button className="mt-4" onClick={() => window.location.reload()}>Reintentar</Button></div>;
   if (loading) {
     return <div className="container-page grid min-h-[70vh] place-items-center py-16"><div className="h-96 w-full animate-pulse rounded-3xl bg-muted" /></div>;
   }
@@ -200,13 +217,13 @@ export function ProductDetailClient({ type, id }: { type: DetailType; id: string
   }
 
   const equipmentCategory = normalizeStockCategoryValue(equipmentData?.categoria);
-  const backHref = type === "componente"
+  const backHref = safeReturn || (type === "componente"
     ? "/tienda?tipo=componentes"
     : isReconditioned
       ? `/reacondicionados?categoria=${equipmentCategory}`
-      : `/tienda?tipo=${equipmentCategory || "equipos"}`;
+      : `/tienda?tipo=${equipmentCategory || "equipos"}`);
   return (
-    <main className="min-h-screen bg-slate-100 py-6 sm:py-10">
+    <div className="min-h-screen bg-slate-100 py-6 sm:py-10">
       <div className="container-page">
         <Link href={backHref} className="mb-5 inline-flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-red-600"><ArrowLeft className="size-4" /> Volver a {categoryLabel}</Link>
         <section className="grid overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)]">
@@ -219,26 +236,28 @@ export function ProductDetailClient({ type, id }: { type: DetailType; id: string
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-blue-200">{categoryLabel}{isReconditioned ? " · Reacondicionado" : ""}</p>
             <h1 className="mt-3 text-2xl font-black leading-tight sm:text-4xl">{title}</h1>
             <div className="mt-7 rounded-2xl border border-white/15 bg-white/10 p-5 backdrop-blur">
-              <p className="text-sm text-blue-100">Precio final</p>
+              <p className="text-sm text-blue-100">{paymentMethod === "tarjeta" ? "Precio total con tarjeta" : "Efectivo / transferencia"}</p>
               <p className="mt-1 text-3xl font-black text-white sm:text-4xl">{money(selectedPrice)}</p>
               <div className="mt-5 grid gap-2">
                 <button
                   type="button"
+                  aria-pressed={paymentMethod === "efectivo"}
                   onClick={() => setPaymentMethod("efectivo")}
                   className={`rounded-xl border p-3 text-left transition ${paymentMethod === "efectivo" ? "border-emerald-300 bg-white text-slate-900" : "border-white/20 bg-white/5 text-white hover:bg-white/10"}`}
                 >
-                  <p className="text-xs font-bold uppercase tracking-wide text-emerald-700">Efectivo / Transferencia</p>
+                  <p className={`text-xs font-bold uppercase tracking-wide ${paymentMethod === "efectivo" ? "text-emerald-700" : "text-emerald-200"}`}>Efectivo / Transferencia</p>
                   <p className="mt-1 text-lg font-black">{money(price)}</p>
-                  <p className="mt-1 text-xs font-medium text-slate-500">Sin imp. nac. {money(calculateNationalPrice(price))}</p>
+                  <p className={`mt-1 text-xs font-medium ${paymentMethod === "efectivo" ? "text-slate-600" : "text-slate-300"}`}>Sin imp. nac. {money(calculateNationalPrice(price))}</p>
                 </button>
                 <button
                   type="button"
+                  aria-pressed={paymentMethod === "tarjeta"}
                   onClick={() => setPaymentMethod("tarjeta")}
                   className={`rounded-xl border p-3 text-left transition ${paymentMethod === "tarjeta" ? "border-red-300 bg-white text-slate-900" : "border-white/20 bg-white/5 text-white hover:bg-white/10"}`}
                 >
                   <div className="flex items-center justify-between gap-3">
                     <div>
-                      <p className="text-xs font-bold uppercase tracking-wide text-red-600">Tarjeta de crédito</p>
+                      <p className={`text-xs font-bold uppercase tracking-wide ${paymentMethod === "tarjeta" ? "text-red-700" : "text-red-200"}`}>Tarjeta de crédito</p>
                       <p className="mt-1 text-lg font-black">{money(calculateInstallmentPrice(price))}</p>
                     </div>
                     <div className="flex items-center gap-1 rounded-lg bg-white p-1.5">
@@ -246,13 +265,15 @@ export function ProductDetailClient({ type, id }: { type: DetailType; id: string
                       <img src="/pagos/mastercard.svg" alt="Mastercard" className="h-5 w-auto" />
                     </div>
                   </div>
-                  <p className="mt-1 text-xs opacity-75">3/6 cuotas sin interés</p>
+                  <p className="mt-1 text-xs opacity-75">3 cuotas de {money(calculateInstallmentPrice(price) / 3)} o 6 de {money(calculateInstallmentPrice(price) / 6)}. Total: {money(calculateInstallmentPrice(price))}. Importes por cuota aproximados por redondeo.</p>
                 </button>
               </div>
-              <p className="mt-2 flex items-center gap-2 text-sm text-emerald-200"><Check className="size-4" /> Disponible para consultar</p>
+              <p className="mt-2 flex items-center gap-2 text-sm text-emerald-200"><Check className="size-4" /> {unavailable ? "Sin disponibilidad para compra" : "Disponible para consultar"}</p>
             </div>
+            {equipmentData?.warranty && <p className="mt-4 text-sm">Garantía: {equipmentData.warranty}</p>}
+            {unavailable && <a className="mt-4 font-semibold text-white underline" href={waLink(`Hola, busco alternativas a ${title}`)} target="_blank" rel="noopener noreferrer">Consultar alternativas por WhatsApp</a>}
             <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-              <Button type="button" onClick={addToCart} className="w-full bg-red-600 text-white hover:bg-red-700 sm:w-fit"><ShoppingCart className="size-4" /> Agregar al carrito</Button>
+              <Button disabled={Boolean(unavailable) || price <= 0} type="button" onClick={addToCart} className="w-full bg-red-600 text-white hover:bg-red-700 sm:w-fit"><ShoppingCart className="size-4" /> Agregar al carrito</Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button type="button" variant="outline" className="w-full border-white/40 bg-white/10 text-white hover:bg-white/20 sm:w-fit" aria-label="Abrir opciones para compartir">
@@ -289,13 +310,9 @@ export function ProductDetailClient({ type, id }: { type: DetailType; id: string
             </div>
           ) : null}
           {specs.length > 0 ? <div className="mt-5 grid gap-x-8 rounded-xl bg-slate-50 px-3 sm:grid-cols-2">{specs.map(([label, value], index) => <div key={`${label}-${index}`} className="flex items-start justify-between gap-4 border-b border-slate-200 py-3 text-sm"><span className="font-semibold text-slate-600">{label}</span><span className="max-w-[58%] text-right font-medium text-slate-900">{value}</span></div>)}</div> : <p className="mt-6 text-sm text-slate-500">Las especificaciones todavía no fueron cargadas.</p>}
-          {!isReconditioned && (
-            <div className="mt-6 rounded-xl border border-red-200 bg-gradient-to-r from-red-50 via-white to-blue-50 px-4 py-4 text-center shadow-sm">
-              <p className="text-base font-black uppercase tracking-[0.18em] text-red-700 sm:text-lg">GARANTIA OFICIAL</p>
-            </div>
-          )}
+          {!equipmentData?.warranty && <p className="mt-6 text-sm text-slate-600">Consultá la cobertura de garantía para este producto. <Link href="/condiciones" className="font-semibold text-primary underline">Ver condiciones</Link></p>}
         </section>
       </div>
-    </main>
+    </div>
   );
 }

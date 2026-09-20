@@ -4,9 +4,9 @@ import type { ComponenteAdmin, Equipo, Producto } from "./types";
 
 /**
  * Data store. Uses Vercel Blob (one JSON document per collection) when
- * `BLOB_READ_WRITE_TOKEN` is available, and falls back to the JSON snapshots
- * committed under `src/data/seed/` so the site builds and previews with zero
- * configuration.
+ * `BLOB_READ_WRITE_TOKEN` is available. An unconfigured store has empty
+ * collections; public APIs report 503 rather than presenting this as stock.
+ * Read failures propagate so consumers can distinguish error from empty.
  */
 
 const PREFIX = "servitec-data";
@@ -23,12 +23,12 @@ const seeds: Record<Collection, unknown[]> = {
 async function readCollection<T>(name: Collection): Promise<T[]> {
   if (!hasBlob()) return seeds[name] as T[];
   try {
-    const blob = await get(`${PREFIX}/${name}.json`, { access: "private" });
+    const blob = await get(`${PREFIX}/${name}.json`, { access: "private", useCache: false });
     if (!blob) return seeds[name] as T[];
     return (await new Response(blob.stream).json()) as T[];
   } catch (err) {
-    console.error(`store: falling back to seed for "${name}"`, err);
-    return seeds[name] as T[];
+    console.error(`store: unable to read "${name}"`, err);
+    throw new Error("No se pudo leer el catálogo.");
   }
 }
 

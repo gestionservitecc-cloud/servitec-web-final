@@ -13,6 +13,7 @@ import { waLink } from "@/components/site/site-config";
 import { faqs } from "@/content/faqs";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/faqs" },
   title: "Preguntas frecuentes",
   description:
     "Respuestas sobre reparaciones, plazos de diagnóstico, garantías, formas de pago y atención en ServiTec.",

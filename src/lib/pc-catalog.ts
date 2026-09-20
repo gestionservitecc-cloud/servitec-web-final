@@ -24,7 +24,7 @@ const emptyCatalog = (): Record<ComponentCatalogKey, CatalogProduct[]> => Object
 let catalogCache: Record<ComponentCatalogKey, CatalogProduct[]> | null = null;
 
 export async function loadComponentCatalog(): Promise<Record<ComponentCatalogKey, CatalogProduct[]>> {
-  if (catalogCache) return catalogCache;
+  // Fetch on each builder visit so admin updates are not hidden by a session-long cache.
   if (typeof window !== "undefined") {
     const response = await fetch("/api/componentes", { cache: "no-store" }).catch(() => null);
     if (response?.ok) {
@@ -35,6 +35,7 @@ export async function loadComponentCatalog(): Promise<Record<ComponentCatalogKey
         return catalogCache;
       }
     }
+    throw new Error("No se pudo cargar el catálogo de componentes.");
   }
   catalogCache = await loadCatalogFromBlob();
   catalogCache ||= emptyCatalog();

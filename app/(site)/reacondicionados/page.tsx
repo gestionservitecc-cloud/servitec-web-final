@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { StockClient } from "@/components/stock/StockClient";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/reacondicionados" },
   title: "Equipos reacondicionados",
   description:
     "Equipos reacondicionados de ServiTec con garantía. Consultá celulares, notebooks, tablets, PC armadas y TVs disponibles.",

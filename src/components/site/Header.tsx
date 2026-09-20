@@ -3,10 +3,9 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronDown, Menu, MessageCircle, X } from "lucide-react";
+import { ChevronDown, Menu, MessageCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { GooeyNav } from "@/components/ui/gooey-nav";
 import {
   Sheet,
   SheetContent,
@@ -50,7 +49,7 @@ export function Header() {
   }, []);
 
   const isActive = (href: string) =>
-    href === "/" ? pathname === "/" : pathname.startsWith(href);
+    href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`) || (href === "/tienda" && pathname.startsWith("/producto/"));
   const desktopNavItems = [
     ...primaryNav,
     ...secondaryNav,
@@ -70,22 +69,22 @@ export function Header() {
       <div className="container-page flex h-16 items-center justify-between gap-4">
         <Logo />
 
-        <GooeyNav
-          items={desktopNavItems}
-          size="sm"
-          activeColor="hsl(var(--primary))"
-          className="hidden lg:inline-block"
-          aria-label="Navegación principal"
-        />
+        <nav aria-label="Navegación principal" className="hidden items-center gap-1 xl:flex">
+          {desktopNavItems.map(link => <Link key={link.href} href={link.href}
+            aria-current={isActive(link.href) ? "page" : undefined}
+            className={cn("rounded-lg px-3 py-3 text-sm font-semibold transition-colors", isActive(link.href) ? "bg-accent text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground")}>
+            {link.label}
+          </Link>)}
+        </nav>
 
-        <div className="hidden items-center gap-2 lg:flex">
+        <div className="hidden items-center gap-2 xl:flex">
             <Button asChild size="sm" className="shadow-soft">
             <Link href="/presupuesto">Presupuesto online</Link>
           </Button>
           <Button
             asChild
             size="sm"
-            className="bg-whatsapp text-whatsapp-foreground hover:bg-whatsapp/90"
+            variant="ghost" className="text-whatsapp hover:bg-whatsapp/10"
           >
             <a href={waLink("Hola ServiTec, quiero hacer una consulta")} target="_blank" rel="noopener noreferrer">
               <MessageCircle className="size-4" />
@@ -96,7 +95,7 @@ export function Header() {
         </div>
 
         {/* Mobile */}
-        <div className="flex items-center gap-1 lg:hidden">
+        <div className="flex items-center gap-1 xl:hidden">
           <GlobalCart />
           <Button
             asChild
@@ -160,6 +159,7 @@ export function Header() {
                   </Link>
                 ))}
 
+                <Link href="/tienda" onClick={closeMobileMenu} className="rounded-lg px-3 py-3 text-sm font-semibold">Ver toda la tienda</Link>
                 <MobileGroup label="Tienda">
                   {storeCategories.map((c) => (
                     <Link
@@ -238,6 +238,7 @@ function MobileGroup({
     <div className="rounded-lg">
       <button
         type="button"
+        aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
         className="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted"
       >

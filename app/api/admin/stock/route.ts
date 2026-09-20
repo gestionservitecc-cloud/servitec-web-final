@@ -54,7 +54,7 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: "Cotización del dólar inválida." }, { status: 400 });
     }
 
-    await saveEquipos(parsedEquipos.data.map((equipment) => ({
+    await saveEquipos((parsedEquipos.data as Equipo[]).map((equipment) => ({
       ...equipment,
       condition: normalizeEquipmentCondition(equipment.condition),
     })));

@@ -50,7 +50,7 @@ async function findComponent(id: string): Promise<ProductShareData | null> {
 
   const matches = await Promise.all(
     catalogDataKeys.map(async (category) => {
-      const blob = await get(catalogBlobJsonPath(category), { access: "private" }).catch(
+      const blob = await get(catalogBlobJsonPath(category), { access: "private", useCache: false }).catch(
         () => null,
       );
       if (!blob) return null;
@@ -95,5 +95,11 @@ export async function getProductShareData(
   type: ProductShareType,
   id: string,
 ): Promise<ProductShareData | null> {
-  return type === "componente" ? findComponent(id) : findEquipment(id);
+  try {
+    return await (type === "componente" ? findComponent(id) : findEquipment(id));
+  } catch {
+    // Metadata is optional: keep the page usable so its public API can show
+    // the explicit retry state when storage is temporarily unavailable.
+    return null;
+  }
 }

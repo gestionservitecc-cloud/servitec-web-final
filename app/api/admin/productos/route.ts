@@ -20,7 +20,7 @@ export async function PUT(req: Request) {
   try {
     const parsed = parseAdminProductos(await req.json());
     if (!parsed.success) return NextResponse.json({ error: validationMessage(parsed.error) }, { status: 400 });
-    body = parsed.data;
+    body = parsed.data as Producto[];
     if (!Array.isArray(body)) throw new Error("Se esperaba un arreglo de productos");
   } catch (e) {
     return NextResponse.json(

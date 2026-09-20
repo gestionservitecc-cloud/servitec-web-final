@@ -67,5 +67,5 @@ export default async function ProductDetailPage({
 }) {
   const { tipo, id } = await params;
   const type = tipo === "componente" ? "componente" : "equipo";
-  return <ProductDetailClient type={type} id={decodeURIComponent(id)} />;
+  return <ProductDetailClient key={`${type}:${id}`} type={type} id={decodeURIComponent(id)} />;
 }

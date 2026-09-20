@@ -21,7 +21,9 @@ export async function PUT(req: Request) {
   try {
     const parsed = parseAdminEquipos(await req.json());
     if (!parsed.success) return NextResponse.json({ error: validationMessage(parsed.error) }, { status: 400 });
-    body = parsed.data;
+    // Runtime schema validation above guarantees required fields. With this
+    // project's strictNullChecks=false, Zod otherwise infers optional keys.
+    body = parsed.data as Equipo[];
     if (!Array.isArray(body)) throw new Error("Se esperaba un arreglo de equipos");
   } catch (e) {
     return NextResponse.json(
@@ -29,8 +31,9 @@ export async function PUT(req: Request) {
       { status: 400 },
     );
   }
+  let normalizedBody: Equipo[];
   try {
-    const normalizedBody = body.map((e, i) => ({
+    normalizedBody = body.map((e, i) => ({
       ...e,
       condition: normalizeEquipmentCondition(e.condition),
       orden: typeof e.orden === "number" ? e.orden : i,

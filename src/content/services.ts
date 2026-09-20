@@ -8,7 +8,7 @@ export type Service = {
 };
 
 const common = [
-  ["¿El diagnóstico tiene costo?", "Revisamos el equipo y te contamos la solución disponible antes de avanzar con cualquier reparación."],
+  ["¿El diagnóstico tiene costo?", "Consultá el costo de diagnóstico antes del ingreso. Según las condiciones vigentes, puede aplicarse un cargo si no aceptás la reparación; te lo informamos para tu caso."],
   ["¿La reparación tiene garantía?", "Sí. Te informamos la garantía correspondiente al trabajo y al repuesto utilizado al momento de presupuestar."],
 ] as [string, string][];
 

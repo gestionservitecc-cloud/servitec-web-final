@@ -25,14 +25,6 @@ export function ReviewsSection() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [paused, setPaused] = useState(false);
 
-  useEffect(() => {
-    if (paused) return;
-    const timer = window.setInterval(() => {
-      setActiveIndex((current) => (current + 1) % reviews.length);
-    }, 5500);
-    return () => window.clearInterval(timer);
-  }, [paused]);
-
   const goTo = (index: number) => {
     setActiveIndex((index + reviews.length) % reviews.length);
   };

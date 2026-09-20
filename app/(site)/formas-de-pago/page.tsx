@@ -5,6 +5,7 @@ import { PageHero } from "@/components/site/PageHero";
 import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/formas-de-pago" },
   title: "Formas de pago",
   description:
     "Medios de pago aceptados en ServiTec: efectivo con descuento, débito, crédito y transferencia bancaria.",

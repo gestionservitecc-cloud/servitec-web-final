@@ -4,6 +4,7 @@ import { PageHero } from "@/components/site/PageHero";
 import { WhatsAppQuoteForm } from "@/components/site/WhatsAppQuoteForm";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/presupuesto" },
   title: "Presupuesto online",
   description:
     "Pedí tu presupuesto sin cargo. Contanos qué dispositivo tenés y qué necesitás, y te respondemos a la brevedad por WhatsApp.",

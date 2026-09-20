@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
-import { getEquipos } from "@/lib/store";
+import { getEquipos, storeIsPersistent } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
+  if (!storeIsPersistent()) return NextResponse.json({ error: "Catálogo no disponible" }, { status: 503 });
+  try {
   const equipos = await getEquipos();
   const publicEquipos = equipos.map((equipo) => {
     const {
@@ -19,6 +21,7 @@ export async function GET() {
     return publicEquipo;
   });
   return NextResponse.json(publicEquipos, {
-    headers: { "Cache-Control": "public, s-maxage=30, stale-while-revalidate=300" },
+    headers: { "Cache-Control": "no-store" },
   });
+  } catch { return NextResponse.json({ error: "Catálogo no disponible" }, { status: 503 }); }
 }

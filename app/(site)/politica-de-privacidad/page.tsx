@@ -3,6 +3,7 @@ import Link from "next/link";
 import { PageHero } from "@/components/site/PageHero";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/politica-de-privacidad" },
   title: "Política de privacidad",
   description:
     "Conocé cómo ServiTec trata la información personal que recibimos a través de nuestro sitio web.",

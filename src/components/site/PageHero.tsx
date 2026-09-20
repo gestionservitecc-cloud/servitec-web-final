@@ -1,126 +1,16 @@
-"use client";
-
-import { useEffect, useState, type ReactNode } from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
-import FluidOrb from "@/components/ui/fluid-orb";
 
-const ease = [0.16, 1, 0.3, 1] as const;
-
-function DesktopFluidAccent() {
-  const [show, setShow] = useState(false);
-
-  useEffect(() => {
-    const query = window.matchMedia("(min-width: 1024px)");
-    const update = () => setShow(query.matches);
-    update();
-    query.addEventListener("change", update);
-    return () => query.removeEventListener("change", update);
-  }, []);
-
-  if (!show) return null;
-
-  return (
-    <FluidOrb
-      aria-hidden
-      size={330}
-      color="#06b6d4"
-      className="pointer-events-none absolute -right-24 -top-28 opacity-20"
-    />
-  );
-}
-
-export function PageHero({
-  eyebrow,
-  title,
-  description,
-  children,
-  className,
-  align = "center",
-}: {
-  eyebrow?: string;
-  title: ReactNode;
-  description?: ReactNode;
-  children?: ReactNode;
-  className?: string;
-  align?: "center" | "left";
+export function PageHero({ eyebrow, title, description, children, className, align = "left" }: {
+  eyebrow?: string; title: ReactNode; description?: ReactNode; children?: ReactNode;
+  className?: string; align?: "center" | "left";
 }) {
-  const reduce = useReducedMotion();
-  const [mounted, setMounted] = useState(false);
-  const shouldAnimate = mounted && !reduce;
-
-  useEffect(() => {
-    const frame = requestAnimationFrame(() => setMounted(true));
-    return () => cancelAnimationFrame(frame);
-  }, []);
-
-  const item = (delay: number) =>
-    !shouldAnimate
-      ? {}
-      : {
-          initial: { opacity: 0, y: 18 },
-          animate: { opacity: 1, y: 0 },
-          transition: { duration: 0.55, ease, delay },
-        };
-
-  return (
-    <section
-      className={cn(
-        "relative overflow-hidden border-b border-white/5 bg-sidebar text-sidebar-foreground",
-        className,
-      )}
-    >
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-[0.15] surface-grid"
-      />
-      <DesktopFluidAccent />
-      <motion.div
-        aria-hidden
-        className="pointer-events-none absolute -left-12 top-0 h-40 w-40 rounded-full bg-primary/25 blur-3xl sm:-left-32 sm:h-72 sm:w-72"
-        animate={shouldAnimate ? { x: [0, 18, 0], y: [0, -12, 0] } : undefined}
-        transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
-      />
-      <motion.div
-        aria-hidden
-        className="pointer-events-none absolute -right-10 bottom-0 h-40 w-40 rounded-full bg-secondary/20 blur-3xl sm:-right-24 sm:h-72 sm:w-72"
-        animate={shouldAnimate ? { x: [0, -16, 0], y: [0, 12, 0] } : undefined}
-        transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
-      />
-      <div
-        className={cn(
-          "container-page relative py-16 sm:py-20 md:py-24",
-          align === "center" ? "mx-auto max-w-3xl text-center" : "max-w-3xl",
-        )}
-      >
-        {eyebrow ? (
-          <motion.p className="eyebrow mb-4 text-primary/90" {...item(0)}>
-            {eyebrow}
-          </motion.p>
-        ) : null}
-        <motion.h1
-          className="font-display text-3xl font-bold leading-tight text-balance sm:text-4xl md:text-5xl"
-          {...item(0.06)}
-        >
-          {title}
-        </motion.h1>
-        {description ? (
-          <motion.p
-            className={cn(
-              "mt-4 text-base text-sidebar-foreground/70 sm:text-lg",
-              align === "center" && "mx-auto max-w-2xl",
-            )}
-            {...item(0.12)}
-          >
-            {description}
-          </motion.p>
-        ) : null}
-        {children ? (
-          <motion.div className="mt-8" {...item(0.18)}>
-            {children}
-          </motion.div>
-        ) : null}
-      </div>
-    </section>
-  );
+  return <section className={cn("border-b bg-sidebar text-sidebar-foreground", className)}>
+    <div className={cn("container-page py-9 sm:py-12", align === "center" && "text-center")}>
+      {eyebrow && <p className="eyebrow text-red-300">{eyebrow}</p>}
+      <h1 className="mt-3 max-w-4xl text-balance text-3xl font-bold leading-tight sm:text-4xl">{title}</h1>
+      {description && <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-300 sm:text-base">{description}</p>}
+      {children && <div className="mt-6">{children}</div>}
+    </div>
+  </section>;
 }

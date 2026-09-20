@@ -22,9 +22,10 @@ export const stockCategories = [
 ];
 
 export const storeCategories = [
-  { label: "Productos", value: "accesorios" },
-  { label: "Componentes", value: "componentes" },
   { label: "Equipos", value: "equipos" },
+  { label: "PC armadas", value: "pc-armada" },
+  { label: "Componentes", value: "componentes" },
+  { label: "Accesorios", value: "accesorios" },
 ];
 
 export const storeEquipmentCategories = stockCategories;
@@ -36,3 +37,10 @@ export const secondaryNav = [
   { label: "Armá tu PC", href: "/armar-pc" },
   { label: "Servicios", href: "/servicios" },
 ];
+
+export const BUSINESS_HOURS = [
+  ["Lunes a Jueves", "10:00 – 19:00", "open"],
+  ["Viernes", "10:00 – 18:00", "open"],
+  ["Sábados", "10:00 – 14:00", "open"],
+  ["Domingos", "Cerrado", "closed"],
+] as const;

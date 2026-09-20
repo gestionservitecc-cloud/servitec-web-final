@@ -36,7 +36,7 @@
 
     --radius: 0.75rem;
 
-    --whatsapp: 142 70% 40%;
+    --whatsapp: 142 70% 30%;
     --whatsapp-foreground: 0 0% 100%;
 
     --sidebar-background: 222 47% 11%;
@@ -231,7 +231,7 @@
   --builder-panel: #ffffff;
   --builder-panel-raised: #fff7f7;
   --builder-panel-hover: #ffe8ea;
-  --builder-muted: #7f1d1d;
+  --builder-muted: #475569;
   background: #ffffff;
   color: #1f2937;
 }
@@ -267,7 +267,7 @@
 .pc-builder [class*="text-slate-700"],
 .pc-builder [class*="text-slate-800"],
 .pc-builder [class*="text-slate-900"] {
-  color: #7f1d1d !important;
+  color: #334155 !important;
 }
 
 .pc-builder [class*="border-white"] {
@@ -368,3 +368,21 @@
     flex-basis: 6rem;
   }
 }
+
+/* Public experience: predictable focus, readable content and restrained movement. */
+.skip-link { position: fixed; left: 1rem; top: -5rem; z-index: 200; padding: .8rem 1rem; background: white; color: #941321; border: 2px solid currentColor; border-radius: .5rem; }
+.skip-link:focus { top: 1rem; }
+:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 4px; }
+#contenido { scroll-margin-top: 5rem; }
+#contenido p { line-height: 1.65; }
+#contenido .prose { max-width: 75ch; }
+.pc-builder .preset-type { animation: none; text-shadow: none; }
+.pc-builder .power-water-flow { animation: none; }
+@media (pointer: coarse) { button, [role="combobox"] { min-height: 44px; } }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}
+
+.pc-builder .bg-primary, .pc-builder .bg-secondary { color: #fff !important; }
+
+#contenido { --secondary: 222 25% 27%; }

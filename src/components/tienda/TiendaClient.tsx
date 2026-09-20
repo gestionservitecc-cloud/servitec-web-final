@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Info, Minus, Plus, Search, ShoppingCart, SlidersHorizontal, Trash2, X } from "lucide-react";
+import { Info, Plus, Search, ShoppingCart, SlidersHorizontal, X } from "lucide-react";
 import { calculateInstallmentPrice, calculateNationalPrice } from "@/lib/utils";
 import {
   catalogProductImage,
@@ -30,14 +30,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { GlobalCart } from "@/components/site/GlobalCart";
 import { PageHero } from "@/components/site/PageHero";
 import { ProductImageGallery } from "@/components/site/ProductImageGallery";
 import { PriceRangeFilter } from "@/components/site/PriceRangeFilter";
 import { stockCategories, storeCategories, storeEquipmentCategories, waLink } from "@/components/site/site-config";
-import { PedidoCheckoutModal } from "@/components/shared/PedidoCheckoutModal";
-import { buildPedidoMessage, formatPedidoNumero, getNextPedidoNumber, readStoredPedidos } from "@/lib/order-data";
 import { cn, normalizeEquipmentCondition, normalizeStockCategoryValue } from "@/lib/utils";
-import { useLockBodyScroll } from "@/hooks/use-lock-body-scroll";
 import type { Equipo } from "@/lib/types";
 
 interface Producto {
@@ -53,6 +51,10 @@ interface Producto {
   imagenes?: string[];
 }
 interface CartItem extends Producto {
+  productId?: string;
+  productType?: string;
+  paymentMethod?: "efectivo" | "tarjeta";
+  precioBase?: number;
   cantidad: number;
 }
 
@@ -63,7 +65,8 @@ const money = (n: number) => `$${Number(n || 0).toLocaleString("es-AR")}`;
 const loadCart = (): CartItem[] => {
   if (typeof window === "undefined") return [];
   try {
-    return JSON.parse(window.localStorage.getItem(CART_KEY) || "[]") as CartItem[];
+    const value = JSON.parse(window.localStorage.getItem(CART_KEY) || "[]");
+    return Array.isArray(value) ? value : [];
   } catch {
     return [];
   }
@@ -71,7 +74,7 @@ const loadCart = (): CartItem[] => {
 
 export function TiendaClient() {
   const searchParams = useSearchParams();
-  const requestedTipo = searchParams.get("tipo") || "accesorios";
+  const requestedTipo = searchParams.get("tipo") || "equipos";
   const tipo = [...storeCategories, ...storeEquipmentCategories].some((category) => category.value === requestedTipo)
     ? requestedTipo
     : "accesorios";
@@ -80,43 +83,32 @@ export function TiendaClient() {
 
   const [productos, setProductos] = useState<Producto[]>([]);
   const [componentes, setComponentes] = useState<Producto[]>([]);
+  const [loadError, setLoadError] = useState(false);
+  const [attempt, setAttempt] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [busqueda, setBusqueda] = useState("");
-  const [orden, setOrden] = useState<"" | "asc" | "desc">("");
-  const [precioMin, setPrecioMin] = useState<number | null>(null);
-  const [precioMax, setPrecioMax] = useState<number | null>(null);
-  const [categoriaFiltro, setCategoriaFiltro] = useState({ tipo, value: "" });
-  const [carrito, setCarrito] = useState<CartItem[]>(loadCart);
+  const [busqueda, setBusqueda] = useState(searchParams.get("q") || "");
+  const [orden, setOrden] = useState<"" | "asc" | "desc">((searchParams.get("orden") as "asc" | "desc") || "");
+  const [precioMin, setPrecioMin] = useState<number | null>(searchParams.has("min") && Number.isFinite(Number(searchParams.get("min"))) ? Number(searchParams.get("min")) : null);
+  const [precioMax, setPrecioMax] = useState<number | null>(searchParams.has("max") && Number.isFinite(Number(searchParams.get("max"))) ? Number(searchParams.get("max")) : null);
+  const [categoriaFiltro, setCategoriaFiltro] = useState({ tipo, value: searchParams.get("categoria") || "" });
+  const [cartMessage, setCartMessage] = useState("");
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const values = { q: busqueda, orden, min: precioMin === null ? "" : String(precioMin), max: precioMax === null ? "" : String(precioMax), categoria: categoriaFiltro.tipo === tipo ? categoriaFiltro.value : "" };
+    Object.entries(values).forEach(([key, value]) => value ? params.set(key, value) : params.delete(key));
+    window.history.replaceState(null, "", `${window.location.pathname}?${params}`);
+  }, [busqueda, orden, categoriaFiltro, tipo, precioMin, precioMax]);
   const normalizeComponentCategory = (value?: string) => {
     const normalized = (value || "").trim();
     if (!normalized || normalized === "Sin categoría") return "Periféricos";
     return normalized;
   };
-  const [carritoAbierto, setCarritoAbierto] = useState(false);
-  const [checkoutOpen, setCheckoutOpen] = useState(false);
-
-  useEffect(() => {
-    window.localStorage.setItem(CART_KEY, JSON.stringify(carrito));
-    window.dispatchEvent(new Event(CART_EVENT));
-  }, [carrito]);
-
-  useEffect(() => {
-    const syncCart = () => {
-      const next = loadCart();
-      setCarrito((current) =>
-        JSON.stringify(current) === JSON.stringify(next) ? current : next,
-      );
-    };
-    window.addEventListener(CART_EVENT, syncCart);
-    window.addEventListener("storage", syncCart);
-    return () => {
-      window.removeEventListener(CART_EVENT, syncCart);
-      window.removeEventListener("storage", syncCart);
-    };
-  }, []);
-
   useEffect(() => {
     let alive = true;
+    // New remote request: reset feedback before its response arrives.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setLoading(true);
+    setLoadError(false);
     if (tipo === "componentes") {
       fetch("/api/componentes")
         .then((response) => (response.ok ? response.json() : Promise.reject(new Error("No se pudo cargar el catálogo."))))
@@ -134,13 +126,13 @@ export function TiendaClient() {
                 imagen: catalogProductImage(p),
                 imagenes: catalogProductImage(p) ? [catalogProductImage(p)] : [],
                 precio: Number(p.precio || 0),
-                stock: 1,
+                stock: typeof p.stock === "number" ? p.stock : 1,
                 specs: p.specs as Record<string, string> | undefined,
               })),
           );
           setComponentes(items);
         })
-        .catch(() => alive && setComponentes([]))
+        .catch(() => { if (alive) setLoadError(true); })
         .finally(() => alive && setLoading(false));
       return () => {
         alive = false;
@@ -156,7 +148,7 @@ export function TiendaClient() {
         )
         .then((data: Equipo[]) => {
           if (!alive) return;
-          const items = (Array.isArray(data) ? data : [])
+          const items = (Array.isArray(data) ? data : []).sort((a, b) => a.orden - b.orden)
             .filter((equipment) => {
               const category = normalizeStockCategoryValue(equipment.categoria);
               return tipo === "equipos"
@@ -184,7 +176,7 @@ export function TiendaClient() {
             }));
           setProductos(items);
         })
-        .catch(() => alive && setProductos([]))
+        .catch(() => { if (alive) setLoadError(true); })
         .finally(() => alive && setLoading(false));
       return () => {
         alive = false;
@@ -192,7 +184,7 @@ export function TiendaClient() {
     }
 
     fetch("/api/productos")
-      .then((r) => (r.ok ? r.json() : []))
+      .then((r) => (r.ok ? r.json() : Promise.reject()))
       .then((data: Producto[]) => {
           if (alive) {
             setProductos(
@@ -205,12 +197,12 @@ export function TiendaClient() {
             );
           }
       })
-      .catch(() => alive && setProductos([]))
+      .catch(() => { if (alive) setLoadError(true); })
       .finally(() => alive && setLoading(false));
     return () => {
       alive = false;
     };
-  }, [tipo, isEquipmentType]);
+  }, [tipo, isEquipmentType, attempt]);
 
   const base = useMemo(
     () => tipo === "componentes"
@@ -258,39 +250,30 @@ export function TiendaClient() {
     const entries = [...map];
     const motherboardLabel = componentCatalogLabels.motherboard;
     return entries.map(([categoria, items]) => {
-      if (categoria === motherboardLabel) {
+      if (categoria === motherboardLabel && !orden) {
         return [categoria, items.slice().sort((a, b) => a.precio - b.precio)];
       }
       return [categoria, items];
     });
-  }, [filtrados]);
-
-  const totalArticulos = carrito.reduce((t, i) => t + i.cantidad, 0);
-  const totalCarrito = carrito.reduce((t, i) => t + i.precio * i.cantidad, 0);
+  }, [filtrados, orden]);
 
   const agregar = (p: Producto) => {
-    if (!hasCatalogPrice(p.precio)) return;
-    setCarrito((cur) => {
-      const found = cur.find((i) => i.id === p.id);
-      return found
-        ? cur.map((i) => (i.id === p.id ? { ...i, cantidad: i.cantidad + 1 } : i))
-        : [...cur, { ...p, cantidad: 1 }];
-    });
+    if (!hasCatalogPrice(p.precio) || p.stock === 0) return;
+    try {
+      const current = loadCart();
+      const productType = tipo === "componentes" ? "componente" : isEquipmentType ? "equipo" : "producto";
+      const cartId = `${productType}:${p.id}`;
+      const found = current.find(item => item.id === cartId);
+      const item: CartItem = { ...p, id: cartId, productId: p.id, productType, precioBase: p.precio, cantidad: (found?.cantidad || 0) + 1 };
+      const next = found ? current.map(existing => existing.id === cartId ? item : existing) : [...current, item];
+      window.localStorage.setItem(CART_KEY, JSON.stringify(next));
+      window.dispatchEvent(new Event(CART_EVENT));
+      setCartMessage(`${p.nombre}: agregado al carrito. Elegí el medio de pago al preparar el pedido.`);
+    } catch { setCartMessage("No pudimos guardar el carrito en este navegador."); }
   };
-
-  const cambiar = (id: string, delta: number) =>
-    setCarrito((cur) =>
-      cur.flatMap((i) => {
-        if (i.id !== id) return [i];
-        const q = i.cantidad + delta;
-        return q > 0 ? [{ ...i, cantidad: q }] : [];
-      }),
-    );
-
-  const pedidoNumero = useMemo(() => getNextPedidoNumber(readStoredPedidos()), [carrito.length]);
-
-  const pedir = () => {
-    setCheckoutOpen(true);
+  const productHref = (product: Producto) => {
+    const path = tipo === "componentes" ? `/producto/componente/${encodeURIComponent(product.id)}` : `/producto/equipo/${encodeURIComponent(product.id)}`;
+    return `${path}?from=${encodeURIComponent(`/tienda?${searchParams.toString()}`)}`;
   };
 
   return (
@@ -301,8 +284,8 @@ export function TiendaClient() {
           tipo === "componentes"
             ? "Componentes de PC"
             : tipo === "accesorios"
-              ? "Productos"
-              : `${tipo === "equipos" ? "Equipos" : stockCategories.find((category) => category.value === tipo)?.label || "Equipos"} sellados`
+              ? "Accesorios"
+              : `${tipo === "equipos" ? "Equipos" : stockCategories.find((category) => category.value === tipo)?.label || "Equipos"} · Nuevos`
         }
         description="Productos y equipos actualizados. Armá tu pedido y lo coordinamos por WhatsApp."
       >
@@ -368,18 +351,8 @@ export function TiendaClient() {
                 <SelectItem value="desc">Precio: mayor a menor</SelectItem>
               </SelectContent>
             </Select>
-            <Button
-              onClick={() => setCarritoAbierto(true)}
-              className="relative gap-2 lg:w-full"
-              aria-label={`Abrir carrito, ${totalArticulos} artículos`}
-            >
-              <ShoppingCart className="size-4" /> Carrito
-              {totalArticulos > 0 && (
-                <span className="grid min-w-5 place-items-center rounded-full bg-secondary px-1.5 text-xs font-bold text-secondary-foreground">
-                  {totalArticulos}
-                </span>
-              )}
-            </Button>
+            <GlobalCart />
+            <p role="status" className="text-xs text-muted-foreground">{cartMessage}</p>
           </div>
           {showPriceFilter && (
             <div className="mt-3">
@@ -397,6 +370,7 @@ export function TiendaClient() {
         </div>
 
         <div className="min-w-0">
+        <div className="mb-5 flex items-center justify-between gap-3"><p role="status" className="text-sm text-muted-foreground">{loading ? "Cargando catálogo…" : loadError ? "Catálogo no disponible" : `${filtrados.length} productos`}</p><Button variant="ghost" onClick={() => { setBusqueda(""); setOrden(""); setCategoriaFiltro({ tipo, value: "" }); setPrecioMin(null); setPrecioMax(null); }}>Limpiar filtros</Button></div>
         {loading && (
           <div className="grid grid-cols-1 gap-5 min-[420px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
             {Array.from({ length: 8 }).map((_, i) => (
@@ -405,7 +379,8 @@ export function TiendaClient() {
           </div>
         )}
 
-        {!loading && grupos.length === 0 && (
+        {loadError && <div role="alert" className="rounded-2xl border p-8"><h2 className="font-semibold">No pudimos cargar el catálogo</h2><p className="mt-2 text-sm text-muted-foreground">Reintentá para consultar precios y disponibilidad.</p><Button className="mt-4" onClick={() => setAttempt(a => a + 1)}>Reintentar</Button></div>}
+        {!loading && !loadError && grupos.length === 0 && (
           <div className="grid min-h-56 place-items-center rounded-2xl border border-dashed border-slate-300 bg-slate-50/70 p-8 text-center">
             <div>
               <Search className="mx-auto mb-3 size-6 text-primary" aria-hidden="true" />
@@ -415,7 +390,7 @@ export function TiendaClient() {
           </div>
         )}
 
-        {!loading &&
+        {!loading && !loadError &&
           grupos.map(([categoria, items]) => (
             <div key={categoria} className="mb-14">
               <h2 className="mb-6 inline-flex rounded-full border bg-muted px-4 py-1.5 text-sm font-bold">
@@ -470,9 +445,9 @@ export function TiendaClient() {
                             name={p.nombre}
                             showThumbnails={isEquipmentType}
                             href={p.componentKey
-                              ? `/producto/componente/${encodeURIComponent(p.id)}`
+                              ? productHref(p)
                               : isEquipmentType
-                                ? `/producto/equipo/${encodeURIComponent(p.id)}`
+                                ? productHref(p)
                                 : undefined}
                           />
                         ) : (
@@ -481,7 +456,7 @@ export function TiendaClient() {
                       </div>
                       <div className="flex flex-1 flex-col gap-2 p-4">
                         <h3 className="line-clamp-2 min-h-[2.5rem] text-sm font-semibold">
-                          {p.nombre}
+                          {isEquipmentType || tipo === "componentes" ? <Link href={productHref(p)} className="hover:text-primary hover:underline">{p.nombre}</Link> : p.nombre}
                         </h3>
                         {agotado ? (
                           <p className="text-sm font-bold uppercase tracking-wide text-destructive">
@@ -489,11 +464,12 @@ export function TiendaClient() {
                           </p>
                         ) : (
                           <div>
+                            <p className="text-xs text-muted-foreground">Efectivo / transferencia</p>
                             <p className="text-lg font-bold text-emerald-700">
                               {money(p.precio)}
                             </p>
                             <p className="text-[11px] font-semibold text-rose-600">
-                              3/6 cuotas sin interés: {money(calculateInstallmentPrice(p.precio))}
+                              Total con tarjeta: {money(calculateInstallmentPrice(p.precio))}
                             </p>
                             <p className="text-[11px] text-muted-foreground">
                               Sin imp. nac. {money(calculateNationalPrice(p.precio))}
@@ -520,140 +496,6 @@ export function TiendaClient() {
       </div>
       </section>
 
-      {carritoAbierto && (
-        <CartDrawer
-          items={carrito}
-          total={totalCarrito}
-          onClose={() => setCarritoAbierto(false)}
-          onChange={cambiar}
-          onCheckout={pedir}
-        />
-      )}
-      <PedidoCheckoutModal
-        open={checkoutOpen}
-        onClose={() => setCheckoutOpen(false)}
-        items={carrito.map((item) => ({ nombre: item.nombre, cantidad: item.cantidad, precio: item.precio }))}
-        total={totalCarrito}
-        numeroPedido={pedidoNumero}
-        origen="tienda"
-      />
     </>
-  );
-}
-
-function CartDrawer({
-  items,
-  total,
-  onClose,
-  onChange,
-  onCheckout,
-}: {
-  items: CartItem[];
-  total: number;
-  onClose: () => void;
-  onChange: (id: string, delta: number) => void;
-  onCheckout: () => void;
-}) {
-  useLockBodyScroll(true);
-
-  return (
-    <div
-      className="fixed inset-0 z-50 flex justify-end bg-foreground/40 backdrop-blur-sm"
-      role="dialog"
-      aria-modal="true"
-      aria-label="Carrito de compras"
-      onClick={onClose}
-    >
-      <div
-        className="flex h-full w-full max-w-md flex-col bg-background shadow-soft-lg"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-center justify-between border-b p-5">
-          <div>
-            <p className="eyebrow">Tu selección</p>
-            <h2 className="font-display text-xl font-bold">Carrito</h2>
-          </div>
-          <Button variant="ghost" size="icon" onClick={onClose} aria-label="Cerrar">
-            <X className="size-5" />
-          </Button>
-        </div>
-
-        <div className="flex-1 overflow-y-auto p-5">
-          {items.length === 0 ? (
-            <p className="py-16 text-center text-sm text-muted-foreground">
-              Tu carrito está vacío.
-            </p>
-          ) : (
-            <ul className="space-y-3">
-              {items.map((item) => (
-                <li key={item.id} className="flex gap-3 rounded-xl border p-3">
-                  <div className="grid size-16 shrink-0 place-items-center rounded-lg bg-white p-1.5">
-                    {item.imagen ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={item.imagen}
-                        alt=""
-                        className="h-full w-full object-contain"
-                      />
-                    ) : null}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold">{item.nombre}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {money(item.precio)} c/u
-                    </p>
-                    <p className="text-sm font-bold text-primary">
-                      {money(item.precio * item.cantidad)}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-1.5 self-center">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="size-7"
-                      onClick={() => onChange(item.id, -1)}
-                      aria-label="Quitar una unidad"
-                    >
-                      {item.cantidad === 1 ? (
-                        <Trash2 className="size-3.5" />
-                      ) : (
-                        <Minus className="size-3.5" />
-                      )}
-                    </Button>
-                    <span className="w-5 text-center text-sm font-bold">
-                      {item.cantidad}
-                    </span>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="size-7"
-                      onClick={() => onChange(item.id, 1)}
-                      aria-label="Agregar una unidad"
-                    >
-                      <Plus className="size-3.5" />
-                    </Button>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-
-        <div className="border-t p-5">
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">Total</span>
-            <strong className="font-display text-2xl font-bold">{money(total)}</strong>
-          </div>
-          <p className="mt-1 text-xs text-muted-foreground">Envío: a coordinar</p>
-          <Button
-            onClick={onCheckout}
-            disabled={items.length === 0}
-            className="mt-4 w-full gap-2 bg-whatsapp text-whatsapp-foreground hover:bg-whatsapp/90"
-          >
-            <ShoppingCart className="size-4" /> Iniciar pedido por WhatsApp
-          </Button>
-        </div>
-      </div>
-    </div>
   );
 }

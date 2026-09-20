@@ -11,9 +11,9 @@ import {
 export const dynamic = "force-dynamic";
 
 async function readCategory(category: ComponentCatalogKey) {
-  const blob = await get(catalogBlobJsonPath(category), { access: "private" }).catch(() => null);
+  const blob = await get(catalogBlobJsonPath(category), { access: "private", useCache: false });
   if (!blob) return [];
-  const payload = await new Response(blob.stream).json().catch(() => []);
+  const payload = await new Response(blob.stream).json();
   const rows = Array.isArray(payload)
     ? payload
     : Array.isArray(payload?.productos)
@@ -27,6 +27,7 @@ export async function GET() {
     return NextResponse.json({ catalog: {} as ComponentCatalog }, { status: 503 });
   }
 
+  try {
   const entries = await Promise.all(
     catalogDataKeys.map(async (key) => {
       const products = await readCategory(key);
@@ -37,6 +38,8 @@ export async function GET() {
           costoBaseUsd,
           cotizacionDolar,
           costoActualizadoEn,
+          notasPrivadas,
+          originalCatalogPrice,
           ...publicProduct
         } = product;
         return publicProduct;
@@ -47,6 +50,7 @@ export async function GET() {
 
   return NextResponse.json(
     { catalog: Object.fromEntries(entries) as ComponentCatalog },
-    { headers: { "Cache-Control": "public, s-maxage=30, stale-while-revalidate=300" } },
+    { headers: { "Cache-Control": "no-store" } },
   );
+  } catch { return NextResponse.json({ error: "Catálogo no disponible" }, { status: 503 }); }
 }

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Clock, Instagram, MapPin, Phone } from "lucide-react";
 import { Logo } from "./Logo";
-import { CONTACT } from "./site-config";
+import { CONTACT, BUSINESS_HOURS } from "./site-config";
 
 const infoLinks = [
   { label: "FAQs", href: "/faqs" },
@@ -64,9 +64,7 @@ export function Footer() {
             <li className="flex items-start gap-2.5">
               <Clock className="mt-0.5 size-4 shrink-0 text-primary" />
               <span>
-                Lun a Jue 10–19 h · Vie 10–18 h
-                <br />
-                Sáb 10–14 h · Dom cerrado
+                {BUSINESS_HOURS.map(([day, hours]) => <span key={day} className="block">{day}: {hours}</span>)}
               </span>
             </li>
           </ul>

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { asset } from "@/lib/assets";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/conocenos" },
   title: "Conocenos",
   description:
     "ServiTec es un servicio técnico especializado en celulares, consolas y computadoras. Herramientas profesionales, repuestos de calidad y personal capacitado.",

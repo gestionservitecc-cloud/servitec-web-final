@@ -1,5 +1,6 @@
 "use client";
 
+import { useDialogFocus } from "@/hooks/use-dialog-focus";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, useReducedMotion } from "framer-motion";
@@ -465,7 +466,15 @@ const ArmarPc = () => {
   const [catalogExtras, setCatalogExtras] = useState<Extra[]>([]);
   const [catalogExtraOptions, setCatalogExtraOptions] = useState<Partial<Record<ExtraKey, Option[]>>>({});
   const [editablePresets, setEditablePresets] = useState<Record<string, SavedPreset>>({});
+  const [presetsLoading, setPresetsLoading] = useState(true);
+  const [presetsError, setPresetsError] = useState(false);
+  const [catalogLoading, setCatalogLoading] = useState(true);
+  const [catalogError, setCatalogError] = useState(false);
+  const [componentSearch, setComponentSearch] = useState("");
   const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const componentDialogRef = useDialogFocus(Boolean(openGroup), () => setOpenGroup(null));
+  const extraDialogRef = useDialogFocus(Boolean(openExtra), () => setOpenExtra(null));
+  const infoDialogRef = useDialogFocus(Boolean(infoPc), () => setInfoPc(null));
   const [paymentMethod, setPaymentMethod] = useState<"efectivo" | "tarjeta" | null>(null);
 
   const availablePcs = useMemo(
@@ -486,11 +495,11 @@ const ArmarPc = () => {
   useEffect(() => {
     let alive = true;
     fetch("/api/equipos")
-      .then((r) => (r.ok ? r.json() : []))
+      .then((r) => (r.ok ? r.json() : Promise.reject()))
       .then((data: Equipo[]) => {
         if (!alive) return;
         const presets = Object.fromEntries(
-          (Array.isArray(data) ? data : [])
+          (Array.isArray(data) ? data : []).sort((a, b) => a.orden - b.orden)
             .filter(
               (e) =>
                 isPcArmadaCategoryValue(String(e.categoria ?? "")) &&
@@ -510,7 +519,8 @@ const ArmarPc = () => {
         );
         setEditablePresets(presets);
       })
-      .catch(() => alive && setEditablePresets({}));
+      .catch(() => { if (alive) setPresetsError(true); })
+      .finally(() => { if (alive) setPresetsLoading(false); });
     return () => {
       alive = false;
     };
@@ -521,7 +531,7 @@ const ArmarPc = () => {
       const productMap = await loadComponentCatalog() as unknown as Record<string, CatalogProduct[]>;
       const loadedGroups = groups.map((group) => ({
         ...group,
-        options: productMap[group.key]?.map((product) => mapProduct(product)) ?? [],
+        options: productMap[group.key]?.filter(product => product.stock !== 0).map((product) => mapProduct(product)) ?? [],
       }));
       setCatalogGroups(loadedGroups);
       const peripheralProducts = productMap.peripherals ?? [];
@@ -540,7 +550,7 @@ const ArmarPc = () => {
       ]);
       setCatalogExtraOptions(Object.fromEntries(peripheralOptions) as Partial<Record<ExtraKey, Option[]>>);
     };
-    void loadCatalog();
+    void loadCatalog().catch(() => setCatalogError(true)).finally(() => setCatalogLoading(false));
   }, []);
   const pricedCatalogGroups = useMemo(
     () => catalogGroups.map((group) => ({
@@ -594,13 +604,6 @@ const ArmarPc = () => {
       "noopener,noreferrer",
     );
   };
-  useEffect(() => {
-    if (step !== 1) return;
-    const interval = window.setInterval(() => {
-      setActivePresetIndex((index) => (index + 1) % Math.max(availablePcs.length, 1));
-    }, 5000);
-    return () => window.clearInterval(interval);
-  }, [availablePcs.length, step]);
   const currentExtra = catalogExtras.find((extra) => extra.key === openExtra);
   const currentExtraOptions = openExtra ? catalogExtraOptions[openExtra] ?? [currentExtra?.option].filter(Boolean) as Option[] : [];
   const selectedProcessor = selected.processor !== undefined ? catalogGroups.find((group) => group.key === "processor")?.options[selected.processor] : undefined;
@@ -786,7 +789,7 @@ const ArmarPc = () => {
   };
   return (
     <motion.main
-      className="pc-builder relative min-h-screen overflow-x-hidden bg-white text-slate-900"
+      className="pc-builder relative min-h-screen overflow-x-hidden bg-white pb-24 text-slate-900"
       initial={mounted && !reduceMotion ? { opacity: 0, y: 10 } : false}
       animate={mounted && !reduceMotion ? { opacity: 1, y: 0 } : undefined}
       transition={{ duration: 0.28, ease: "easeOut" }}
@@ -804,7 +807,7 @@ const ArmarPc = () => {
           </button>
           <div className="flex min-w-0 items-center gap-2 sm:gap-3">
             <img
-              src={getAssetUrl("logo.png")}
+              src="/logo.png"
               alt="ServiTec"
               className="h-10 w-10 object-contain"
             />
@@ -915,9 +918,10 @@ const ArmarPc = () => {
                 </article>
               </div> : (
                 <p className="mx-auto mt-7 max-w-2xl rounded-xl border border-red-100 bg-red-50 p-5 text-sm text-red-900/70">
-                  No hay configuraciones recomendadas disponibles.
+                  {presetsLoading ? "Cargando configuraciones recomendadas…" : presetsError ? "No pudimos cargar las recomendaciones. Reintentá actualizando la página." : "No hay configuraciones recomendadas disponibles."}
                 </p>
               )}
+              {(catalogLoading || catalogError) && <p role="status" className="mx-auto mt-5 max-w-3xl rounded-xl border p-4 text-sm">{catalogLoading ? "Cargando componentes y precios…" : "No pudimos cargar los componentes. Actualizá la página para reintentar."}</p>}
               <div className="mx-auto mt-7 grid max-w-3xl gap-2 text-left sm:grid-cols-2">
                 {orderedGroups.map((group) => {
                   const Icon = group.icon;
@@ -927,7 +931,7 @@ const ArmarPc = () => {
                     <div key={group.key} className="flex items-center gap-2">
                       <button
                         type="button"
-                        onClick={() => setOpenGroup(group.key)}
+                        onClick={() => { setComponentSearch(""); setOpenGroup(group.key); }} disabled={catalogLoading || catalogError}
                         className={`flex min-w-0 flex-1 items-center gap-3 rounded-xl border border-red-100 bg-white p-3 text-left transition-colors hover:border-secondary/70 hover:bg-red-50 ${value !== undefined || memorySelected ? "border-secondary/60 bg-red-50" : ""}`}
                       >
                         <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${value !== undefined || memorySelected ? "bg-secondary text-slate-950" : "bg-red-50 text-red-800"}`}>
@@ -1230,12 +1234,14 @@ const ArmarPc = () => {
           </div>
         )}
       </div>
+      {selectedGroups.length > 0 && <aside aria-label="Total de tu configuración" className="fixed inset-x-0 bottom-0 z-30 border-t bg-white p-4 shadow-lg"><div className="mx-auto flex max-w-5xl items-center justify-between gap-4"><div><p className="text-xs text-slate-600">{isComponentSelectionComplete ? "Selección de componentes completa" : "Selección parcial · seguí sumando componentes"}</p><p className="mt-1 text-sm font-semibold">Total estimado {paymentMethod === "tarjeta" ? "con tarjeta" : "en efectivo / transferencia"}</p></div><strong className="shrink-0 text-lg text-primary sm:text-2xl">{formatPrice(selectedTotal)}</strong></div></aside>}
       {currentGroup && (
         <div
           className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/80 p-3 backdrop-blur-sm sm:p-4"
           role="dialog"
           aria-modal="true"
           aria-labelledby="component-dialog-title"
+          ref={componentDialogRef}
         >
           <div className="max-h-[calc(100dvh-1.5rem)] w-full max-w-5xl overflow-y-auto overscroll-contain rounded-2xl border border-red-200 bg-white p-4 text-slate-900 shadow-2xl sm:max-h-[90vh] sm:rounded-3xl sm:p-7">
             <div className="sticky top-0 z-10 -mx-4 -mt-4 flex items-start justify-between gap-3 border-b border-red-100 bg-white px-4 py-4 sm:-mx-7 sm:-mt-7 sm:gap-4 sm:px-7 sm:py-7">
@@ -1249,6 +1255,7 @@ const ArmarPc = () => {
                 >
                   {currentGroup.label}
                 </h2>
+                <label className="mt-3 block text-sm">Buscar componente<input value={componentSearch} onChange={event => setComponentSearch(event.target.value)} placeholder="Nombre o característica" className="mt-1 block w-full rounded-lg border px-3 py-2" /></label>
               </div>
               <button
                 type="button"
@@ -1259,8 +1266,9 @@ const ArmarPc = () => {
                 <X size={19} />
               </button>
             </div>
+            {componentSearch && !orderedOptions.some(option => `${option.name} ${option.detail || ""}`.toLowerCase().includes(componentSearch.toLowerCase())) && <p role="status" className="mt-5 text-sm text-slate-600">No encontramos componentes con esa búsqueda.</p>}
             <div className="mt-6 grid gap-3 sm:grid-cols-2">
-              {orderedOptions.map((option) => {
+              {orderedOptions.filter(option => `${option.name} ${option.detail || ""}`.toLowerCase().includes(componentSearch.toLowerCase())).map((option) => {
                 const index = currentGroup.options.indexOf(option);
                 const compatible = isCompatible(currentGroup, option);
                 return (
@@ -1321,7 +1329,7 @@ const ArmarPc = () => {
                       )}
                       {!compatible && (
                         <span className="mt-2 block text-xs font-bold uppercase tracking-wide text-red-400">
-                          No compatible con tu selección
+                          {currentGroup.key === "memory" ? (selectedMemorySlots.length >= maxMemorySlots ? `Ya ocupaste los ${maxMemorySlots} slots de memoria. Quitá un módulo para elegir otro.` : "El tipo de memoria o su plataforma no coincide con tu selección.") : currentGroup.key === "processor" || currentGroup.key === "motherboard" ? "El socket no coincide con el procesador o la motherboard elegidos." : currentGroup.key === "power" ? "La potencia es menor a la recomendada para la placa de video elegida." : currentGroup.key === "storage" ? "La motherboard seleccionada no registra puertos para esta interfaz." : currentGroup.key === "case" ? "El gabinete no admite el formato de la motherboard elegida." : currentGroup.key === "cooling" ? "El socket o la altura del cooler no se ajusta a tu configuración." : "Revisá gráficos integrados, potencia de la fuente y espacio disponible en el gabinete."}
                         </span>
                       )}
                     </span>
@@ -1337,7 +1345,7 @@ const ArmarPc = () => {
         </div>
       )}
       {currentExtra && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/80 p-3 backdrop-blur-sm sm:p-4" role="dialog" aria-modal="true" aria-labelledby="extra-dialog-title">
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/80 p-3 backdrop-blur-sm sm:p-4" role="dialog" aria-modal="true" aria-labelledby="extra-dialog-title" ref={extraDialogRef}>
           <div className="max-h-[calc(100dvh-1.5rem)] w-full max-w-5xl overflow-y-auto overscroll-contain rounded-2xl border border-red-200 bg-white p-4 text-slate-900 shadow-2xl sm:max-h-[90vh] sm:rounded-3xl sm:p-7">
             <div className="flex items-start justify-between">
               <div><p className="text-xs font-semibold uppercase tracking-[0.2em] text-secondary">Seleccionar periferico</p><h2 id="extra-dialog-title" className="mt-1 font-display text-2xl font-bold">{currentExtra.label}</h2></div>
@@ -1386,7 +1394,7 @@ const ArmarPc = () => {
         </div>
       )}
       {infoPc && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="ready-pc-title">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="ready-pc-title" ref={infoDialogRef}>
           <div className="max-h-[92vh] w-full max-w-5xl overflow-y-auto rounded-2xl border border-red-200 bg-white p-5 text-slate-900 shadow-2xl sm:rounded-3xl sm:p-7">
             <div className="flex items-start justify-between gap-4">
               <div><p className="text-xs font-semibold uppercase tracking-[0.2em] text-secondary">Configuración recomendada</p><h2 id="ready-pc-title" className="mt-1 font-display text-2xl font-bold">{infoPc.name}</h2><p className="mt-1 text-sm text-slate-400">{infoPc.detail}</p></div>

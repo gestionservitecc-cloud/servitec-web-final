@@ -29,6 +29,7 @@ import { calculateInstallmentPrice, calculateNationalPrice, isPcArmadaCategoryVa
 import type { Equipo } from "@/lib/types";
 
 interface EquipoStock {
+  orden?: number;
   id: string;
   categoria?: string;
   presetId?: string;
@@ -103,6 +104,7 @@ const isPcArmadaCategory = (category?: string) => isPcArmadaCategoryValue(catego
 /** Map the API `Equipo` shape onto the flat structure this view renders. */
 const toStockShape = (e: Equipo): EquipoStock => ({
   id: e.id,
+  orden: e.orden,
   categoria: e.categoria,
   presetId: "",
   nombre: e.nombre,
@@ -145,14 +147,20 @@ const toStockShape = (e: Equipo): EquipoStock => ({
 });
 
 export const StockClient = () => {
+  const searchParams = useSearchParams();
   const [equipos, setEquipos] = useState<EquipoStock[]>([]);
+  const [loadError, setLoadError] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [busqueda, setBusqueda] = useState("");
-  const [orden, setOrden] = useState<"" | "asc" | "desc">("");
+  const [busqueda, setBusqueda] = useState(searchParams.get("q") || "");
+  const [orden, setOrden] = useState<"" | "asc" | "desc">((searchParams.get("orden") as "asc" | "desc") || "");
   const [precioMin, setPrecioMin] = useState<number | null>(null);
   const [precioMax, setPrecioMax] = useState<number | null>(null);
   const pathname = usePathname();
-  const searchParams = useSearchParams();
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    for (const [key, value] of Object.entries({ q: busqueda, orden })) value ? params.set(key, value) : params.delete(key);
+    window.history.replaceState(null, "", `${window.location.pathname}?${params}`);
+  }, [busqueda, orden]);
   const isReconditionedRoute = pathname === "/reacondicionados";
   const filter = searchParams.get("tipo") || (isReconditionedRoute ? "reacondicionados" : null);
   const categoryFilter = searchParams.get("categoria");
@@ -160,7 +168,7 @@ export const StockClient = () => {
   const isNewStock = filter === "nuevos";
   const isReconditionedStock = filter === "reacondicionados";
   const categoryHref = (value: string) => {
-    const params = new URLSearchParams();
+    const params = new URLSearchParams(searchParams.toString());
     if (filter) params.set("tipo", filter);
     if (value !== "all") params.set("categoria", value);
     const query = params.toString();
@@ -172,11 +180,11 @@ export const StockClient = () => {
     let alive = true;
 
     fetch("/api/equipos")
-      .then((r) => (r.ok ? r.json() : []))
+      .then((r) => (r.ok ? r.json() : Promise.reject()))
       .then((data: Equipo[]) => {
         if (alive) setEquipos((Array.isArray(data) ? data : []).map(toStockShape));
       })
-      .catch(() => alive && setEquipos([]))
+      .catch(() => { if (alive) setLoadError(true); })
       .finally(() => alive && setLoading(false));
 
     return () => {
@@ -210,7 +218,7 @@ export const StockClient = () => {
         if (conditionDifference !== 0) return conditionDifference;
         const priceDifference = Number(a.promo || 0) - Number(b.promo || 0);
         if (orden === "desc") return -priceDifference;
-        return priceDifference;
+        return orden === "asc" ? priceDifference : (a.orden ?? 0) - (b.orden ?? 0);
       });
   }, [equipos, filter, categoryFilter, normalizedCategoryFilter, busqueda, orden, precioMin, precioMax]);
 
@@ -315,6 +323,7 @@ export const StockClient = () => {
               )}
             </div>
           <div className="min-w-0">
+          <div className="mb-5 flex items-center justify-between gap-2"><p role="status" className="text-sm text-muted-foreground">{loading ? "Cargando equipos…" : loadError ? "Catálogo no disponible" : `${sortedProducts.length} equipos`}</p><Button variant="ghost" onClick={() => { setBusqueda(""); setOrden(""); setPrecioMin(null); setPrecioMax(null); }}>Limpiar filtros</Button></div>
           {loading && (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {[...Array(6)].map((_, i) => (
@@ -323,7 +332,8 @@ export const StockClient = () => {
             </div>
           )}
 
-          {!loading && sortedProducts.length === 0 && (
+          {loadError && <p role="alert" className="rounded-xl border p-6">No pudimos cargar los equipos. <button className="text-primary underline" onClick={() => window.location.reload()}>Reintentar</button></p>}
+          {!loading && !loadError && sortedProducts.length === 0 && (
             <div className="grid min-h-56 place-items-center rounded-2xl border border-dashed border-slate-300 bg-slate-50/70 p-8 text-center">
               <div>
                 <Search className="mx-auto mb-3 size-6 text-primary" aria-hidden="true" />
@@ -359,7 +369,7 @@ export const StockClient = () => {
                         const vendido = String(p.estado || "disponible").toLowerCase() === "vendido";
                         const nombreDisplay = p.nombre || `${p.marca || ""} ${p.modelo || ""}`.trim() || "Equipo";
                         const mensaje = vendido
-                          ? `Hola, quiero consultar por ${nombreDisplay} (figura como vendido)`
+                          ? `Hola, busco alternativas a ${nombreDisplay}, que figura como vendido`
                           : `Hola, quiero consultar por ${nombreDisplay} - ${formatPrice(p.promo)} ARS`;
                         const isPcArmada = isPcArmadaCategory(p.categoria) || Boolean(p.presetId);
                         const precioEfectivo = Number(p.promo || p.original || 0);
@@ -504,11 +514,12 @@ export const StockClient = () => {
                                   ) : (
                                     <>
                                       <div className="space-y-1.5">
+                                        <p className="text-xs text-muted-foreground">Efectivo / transferencia</p>
                                         <p className="text-2xl font-black text-emerald-500 sm:text-3xl">
                                           ${formatPrice(precioEfectivo)}
                                         </p>
                                         <p className="text-[11px] font-semibold text-rose-500">
-                                          3/6 cuotas sin interés: ${formatPrice(precioLista)}
+                                          Total con tarjeta: ${formatPrice(precioLista)}
                                         </p>
                                         <p className="text-[11px] font-medium text-slate-400">
                                           Sin imp. nac. ${formatPrice(precioNacional)}
@@ -533,6 +544,8 @@ export const StockClient = () => {
                                     </Dialog>
                                            */}
 
+                                  <p className="text-xs text-muted-foreground">{p.condition}{p.warranty ? ` · Garantía: ${p.warranty}` : ""}</p>
+                                  {p.specs?.accesorios && <p className="text-xs text-muted-foreground">Incluye: {p.specs.accesorios}</p>}
                                   <Button asChild size="sm" className="w-full gap-2">
                                     <a
                                       href={`https://wa.me/5491124873190?text=${encodeURIComponent(mensaje)}`}
@@ -540,7 +553,7 @@ export const StockClient = () => {
                                       rel="noopener noreferrer"
                                     >
                                       <MessageCircle className="size-3.5" />
-                                      Consultar
+                                      {vendido ? "Consultar alternativas" : "Consultar este equipo"}
                                     </a>
                                   </Button>
                                 </div>
