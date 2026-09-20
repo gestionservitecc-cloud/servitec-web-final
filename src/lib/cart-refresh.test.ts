@@ -17,3 +17,14 @@ it("counts the same product across different payment selections", () => {
   expect(checkCartQuantities(rows).every(row => row.unavailable)).toBe(true);
   expect(checkCartQuantities(rows.map(row => ({ ...row, cantidad: 1 }))).every(row => !row.unavailable)).toBe(true);
 });
+
+it("honors equipment admin state despite legacy zero stock without changing source data", () => {
+  const equipment = { id: "legacy", promo: 7500, stock: 0, estado: "disponible" } as Equipo;
+  const item = { id: "equipo:legacy", productId: "legacy", productType: "equipo", nombre: "Equipo", precio: 7500, cantidad: 1, stock: 0, unavailable: true };
+  expect(refreshCart([item], [equipment], [], [])[0]).toMatchObject({ unavailable: false, stock: undefined, precio: 7500 });
+  expect(equipment.stock).toBe(0);
+  expect(refreshCart([item], [{ ...equipment, estado: "vendido" }], [], [])[0].unavailable).toBe(true);
+  const accessory = { ...equipment, precio: 7500 };
+  expect(refreshCart([{ ...item, productType: "producto" }], [], [accessory as never], [])[0].unavailable).toBe(true);
+  expect(refreshCart([{ ...item, productType: "componente" }], [], [], [accessory as never])[0].unavailable).toBe(true);
+});

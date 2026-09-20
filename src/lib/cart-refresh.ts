@@ -1,4 +1,5 @@
 import { cartItemPrice, type PricedCartItem } from "./cart-pricing";
+import { equipmentStock } from "./equipment-availability";
 import type { Equipo, Producto } from "./types";
 import type { CatalogProduct } from "./pc-catalog";
 
@@ -25,7 +26,7 @@ export function refreshCart<T extends RefreshableCartItem>(items: T[], equipos: 
     if (!record) return { ...item, stock: 0, unavailable: true };
     const isEquipment = record === equipment;
     const base = isEquipment ? Number(equipment.promo || equipment.original || 0) : record === component ? Math.round(Number(component.precio || 0) * 1.08) : Number(accessory.precio || 0);
-    const stock = base <= 0 || (isEquipment && equipment.estado === "vendido") ? 0 : typeof record.stock === "number" ? record.stock : undefined;
+    const stock = base <= 0 ? 0 : isEquipment ? equipmentStock(equipment) : typeof record.stock === "number" ? record.stock : undefined;
     const unavailable = base <= 0 || (isEquipment && equipment.estado === "vendido") || stock === 0 || (stock !== undefined && item.cantidad > stock);
     const updated = { ...item, precioBase: base, stock, unavailable };
     return { ...updated, precio: cartItemPrice(updated) };

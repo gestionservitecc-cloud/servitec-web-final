@@ -22,6 +22,7 @@ import {
 import { calculateInstallmentPrice, calculateNationalPrice, normalizeEquipmentCondition, normalizeStockCategoryValue } from "@/lib/utils";
 import { stockCategories, waLink } from "@/components/site/site-config";
 import type { Equipo } from "@/lib/types";
+import { equipmentStock } from "@/lib/equipment-availability";
 
 type DetailType = "componente" | "equipo";
 
@@ -36,7 +37,7 @@ type CartItem = {
   imagen: string;
   imagenes: string[];
   precio: number;
-  stock: number;
+  stock?: number;
   specs?: Record<string, string>;
   componentKey?: ComponentCatalogKey;
   condition?: string;
@@ -115,7 +116,7 @@ export function ProductDetailClient({ type, id }: { type: DetailType; id: string
   const isReconditioned = equipmentData && normalizeEquipmentCondition(equipmentData.condition) === "Reacondicionado";
   const categoryLabel = component ? componentCatalogLabels[component.key] : equipmentCategoryLabel(equipmentData?.categoria);
 
-  const unavailable = componentData?.stock === 0 || (equipmentData && (equipmentData.estado === "vendido" || equipmentData.stock === 0));
+  const unavailable = componentData?.stock === 0 || (equipmentData && equipmentData.estado === "vendido");
   const addToCart = () => {
     if (unavailable || price <= 0) return;
     const cartId = `${type}:${id}:${paymentMethod}`;
@@ -130,7 +131,7 @@ export function ProductDetailClient({ type, id }: { type: DetailType; id: string
       imagen: images[0] || "",
       imagenes: images,
       precio: selectedPrice,
-      stock: 1,
+      stock: equipmentData ? equipmentStock(equipmentData) : typeof componentData?.stock === "number" ? componentData.stock : undefined,
       specs: componentData?.specs as Record<string, string> | undefined || equipmentData?.specs,
       componentKey: component?.key,
       condition: equipmentData?.condition,

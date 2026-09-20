@@ -37,6 +37,7 @@ import { PriceRangeFilter } from "@/components/site/PriceRangeFilter";
 import { stockCategories, storeCategories, storeEquipmentCategories, waLink } from "@/components/site/site-config";
 import { cn, normalizeEquipmentCondition, normalizeStockCategoryValue } from "@/lib/utils";
 import type { Equipo } from "@/lib/types";
+import { equipmentStock } from "@/lib/equipment-availability";
 
 interface Producto {
   id: string;
@@ -44,7 +45,7 @@ interface Producto {
   categoria: string;
   imagen: string;
   precio: number;
-  stock: number;
+  stock?: number;
   specs?: Record<string, string>;
   componentKey?: ComponentCatalogKey;
   condition?: string;
@@ -152,7 +153,7 @@ export function TiendaClient() {
             .filter((equipment) => {
               const category = normalizeStockCategoryValue(equipment.categoria);
               return tipo === "equipos"
-                ? storeEquipmentCategories.some((item) => item.value === category)
+                ? category !== "pc-armada" && storeEquipmentCategories.some((item) => item.value === category)
                 : category === tipo;
             })
             .filter((equipment) => equipment.estado !== "vendido")
@@ -168,9 +169,7 @@ export function TiendaClient() {
               imagen: equipment.imagenes?.[0] || "",
               imagenes: equipment.imagenes || [],
               precio: Number(equipment.promo || equipment.original || 0),
-              stock: equipment.estado === "vendido"
-                ? 0
-                : Number(equipment.stock ?? 1),
+              stock: equipmentStock(equipment),
               specs: equipment.specs,
               condition: normalizeEquipmentCondition(equipment.condition),
             }));

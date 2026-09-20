@@ -1,0 +1,36 @@
+﻿import { createRequire } from 'node:module';
+import assert from 'node:assert/strict';
+const require = createRequire(`${process.env.TEMP}/servitec-qa-tools/package.json`);
+const { chromium } = require('playwright');
+const browser = await chromium.launch({ channel: 'chrome', headless: true });
+try {
+ const page = await browser.newPage();
+ await page.route('**/api/**', route => { assert.equal(route.request().method(), 'GET', 'No writes allowed'); return route.continue(); });
+ const before = await (await fetch('http://localhost:3000/api/equipos')).json();
+ const available = before.find(e=>e.estado==='disponible'&&e.stock===0&&e.condition==='Sellado'&&e.categoria!=='pc-armada');
+ assert.ok(available);
+ await page.goto('http://localhost:3000/tienda');
+ const card=page.locator('article').filter({has:page.getByRole('heading',{name:available.nombre,exact:true})});
+ await card.getByRole('button',{name:'Agregar',exact:true}).click();
+ await page.getByRole('button',{name:'Abrir carrito, 1 articulos'}).first().click();
+ const dialog=page.getByRole('dialog',{name:'Carrito',exact:true});
+ await dialog.getByText('Precios verificados al abrir el carrito.',{exact:true}).waitFor();
+ assert.equal(await dialog.getByText(/No disponible en esta cantidad/).count(),0);
+ assert.equal(await dialog.locator('li').count(),1);
+ await page.getByRole('button',{name:'Cerrar carrito'}).click();
+ await page.getByRole('combobox').first().click();
+ assert.equal(await page.getByRole('option',{name:'PC armada',exact:true}).count(),0);
+ await page.keyboard.press('Escape');
+ await page.getByRole('link',{name:'PC armadas',exact:true}).click();
+ await page.waitForURL(/tipo=pc-armada/);
+ await page.locator('article').first().getByRole('button',{name:'Agregar',exact:true}).click();
+ assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('servitec-tienda-carrito')).length),2);
+ await page.goto(`http://localhost:3000/producto/equipo/${available.id}`);
+ await page.getByRole('button',{name:/Agregar al carrito/}).click();
+ assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('servitec-tienda-carrito')).length),3);
+ await page.getByRole('button',{name:'Abrir carrito, 3 articulos'}).first().click();
+ await dialog.getByText('Precios verificados al abrir el carrito.',{exact:true}).waitFor();
+ assert.equal(await dialog.getByText(/No disponible en esta cantidad/).count(),0);
+ assert.deepEqual(await (await fetch('http://localhost:3000/api/equipos')).json(),before);
+ console.log('Available legacy equipment adds from listing and detail; cart validates; PC tab adds; no PC category in equipment selector; source catalogue unchanged.');
+} finally { await browser.close(); }
