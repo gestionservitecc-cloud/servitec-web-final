@@ -277,7 +277,7 @@ export function TiendaClient() {
 
   return (
     <>
-      <PageHero
+      <PageHero fullWidth
         eyebrow="Tienda"
         title={
           tipo === "componentes"
@@ -307,7 +307,7 @@ export function TiendaClient() {
       </PageHero>
 
       <section className="bg-muted/40">
-      <div className="container-page py-12 lg:py-16">
+      <div className="container-page max-w-none py-12 lg:py-16">
         <div className="lg:grid lg:grid-cols-[18rem_minmax(0,1fr)] lg:items-start lg:gap-8">
           {/* On desktop the fixed filters live beside the catalogue, so they never cover product cards. */}
           <div className="z-20 -mx-3 mb-8 border-b bg-background px-3 py-3 shadow-soft sm:mx-0 sm:mb-10 sm:rounded-2xl sm:border sm:px-4 lg:sticky lg:top-20 lg:mb-0 lg:rounded-2xl lg:border lg:p-4 lg:self-start">
@@ -371,7 +371,7 @@ export function TiendaClient() {
         <div className="min-w-0">
         <div className="mb-5 flex items-center justify-between gap-3"><p role="status" className="text-sm text-muted-foreground">{loading ? "Cargando catálogo…" : loadError ? "Catálogo no disponible" : `${filtrados.length} productos`}</p><Button variant="ghost" onClick={() => { setBusqueda(""); setOrden(""); setCategoriaFiltro({ tipo, value: "" }); setPrecioMin(null); setPrecioMax(null); }}>Limpiar filtros</Button></div>
         {loading && (
-          <div className="grid grid-cols-1 gap-5 min-[420px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-5 min-[420px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-[repeat(auto-fill,minmax(220px,1fr))]">
             {Array.from({ length: 8 }).map((_, i) => (
               <Skeleton key={i} className="h-72 rounded-2xl" />
             ))}
@@ -395,7 +395,7 @@ export function TiendaClient() {
               <h2 className="mb-6 inline-flex rounded-full border bg-muted px-4 py-1.5 text-sm font-bold">
                 {categoria}
               </h2>
-              <div className="grid grid-cols-1 gap-5 min-[420px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
+              <div className="grid grid-cols-1 gap-5 min-[420px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-[repeat(auto-fill,minmax(220px,1fr))]">
                 {items.map((p) => {
                   const agotado = tipo === "accesorios" && p.stock === 0;
                   return (

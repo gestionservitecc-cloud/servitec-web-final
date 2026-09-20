@@ -239,7 +239,7 @@ export const StockClient = () => {
 
   return (
     <>
-      <PageHero
+      <PageHero fullWidth
         eyebrow={isNewStock ? "Equipos nuevos" : isReconditionedStock ? "Reacondicionados" : "Equipos disponibles"}
         title={
           categoryFilter
@@ -260,7 +260,7 @@ export const StockClient = () => {
       />
 
       <section className="py-12 sm:py-16">
-        <div className="container-page">
+        <div className="container-page max-w-none">
           <div className="lg:grid lg:grid-cols-[18rem_minmax(0,1fr)] lg:items-start lg:gap-8">
             {/* A side panel remains available while browsing without overlaying the product grid. */}
             <div className="z-20 -mx-4 mb-10 border-b bg-background px-4 py-3 shadow-soft sm:mx-0 sm:rounded-2xl sm:border sm:px-4 lg:sticky lg:top-20 lg:mb-0 lg:rounded-2xl lg:border lg:p-4 lg:self-start">
@@ -325,7 +325,7 @@ export const StockClient = () => {
           <div className="min-w-0">
           <div className="mb-5 flex items-center justify-between gap-2"><p role="status" className="text-sm text-muted-foreground">{loading ? "Cargando equipos…" : loadError ? "Catálogo no disponible" : `${sortedProducts.length} equipos`}</p><Button variant="ghost" onClick={() => { setBusqueda(""); setOrden(""); setPrecioMin(null); setPrecioMax(null); }}>Limpiar filtros</Button></div>
           {loading && (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-[repeat(auto-fill,minmax(240px,1fr))]">
               {[...Array(6)].map((_, i) => (
                 <Skeleton key={i} className="h-[420px] rounded-2xl" />
               ))}
@@ -359,7 +359,7 @@ export const StockClient = () => {
                       </span>
                     </div>
 
-                    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-[repeat(auto-fill,minmax(240px,1fr))]">
                       {items.map((p) => {
                         const imagenes = (p.imagenes?.length ? p.imagenes : p.imagen || p.image ? [p.imagen || p.image || ""] : [])
                           .map(resolveEquipmentImage);
