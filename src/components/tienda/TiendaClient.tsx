@@ -277,7 +277,7 @@ export function TiendaClient() {
 
   return (
     <>
-      <PageHero fullWidth
+      <PageHero fullWidth background={{ image: "/backgrounds/tienda.png", preset: "tienda", overlay: "dark-image" }}
         eyebrow="Tienda"
         title={
           tipo === "componentes"

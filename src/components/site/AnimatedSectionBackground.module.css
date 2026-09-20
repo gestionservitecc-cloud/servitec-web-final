@@ -1,0 +1,40 @@
+.section {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.background {
+  position: absolute;
+  inset: -24px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.lightImage {
+  background: linear-gradient(90deg, rgba(15, 23, 42, .82) 0%, rgba(15, 23, 42, .76) 45%, rgba(15, 23, 42, .32) 100%);
+}
+
+.darkImage {
+  background: linear-gradient(90deg, rgba(15, 23, 42, .5) 0%, rgba(15, 23, 42, .38) 45%, rgba(15, 23, 42, .2) 100%);
+}
+
+.content { position: relative; }
+
+@media (max-width: 767px) {
+  .lightImage { background: rgba(15, 23, 42, .78); }
+  .darkImage { background: rgba(15, 23, 42, .45); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .background { transform: none !important; will-change: auto; }
+}

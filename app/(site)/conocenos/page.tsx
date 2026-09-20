@@ -35,7 +35,7 @@ const localImages = ["Local1.png", "Local2.png", "Local3.png", "Local4.png"];
 export default function ConocenosPage() {
   return (
     <>
-      <PageHero
+      <PageHero background={{ image: "/backgrounds/nosotros.png", preset: "nosotros", overlay: "dark-image" }}
         eyebrow="Nosotros"
         title="Conocenos"
         description="Transparencia, profesionalismo y atención personalizada en cada servicio."

@@ -239,7 +239,7 @@ export const StockClient = () => {
 
   return (
     <>
-      <PageHero fullWidth
+      <PageHero fullWidth background={isReconditionedRoute ? { image: "/backgrounds/reacondicionados.png", preset: "reacondicionados", overlay: "light-image" } : undefined}
         eyebrow={isNewStock ? "Equipos nuevos" : isReconditionedStock ? "Reacondicionados" : "Equipos disponibles"}
         title={
           categoryFilter
