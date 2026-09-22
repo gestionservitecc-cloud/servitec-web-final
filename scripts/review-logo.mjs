@@ -97,7 +97,7 @@ try {
   await c.close();
  }
  const c=await context();const page=await c.newPage();const requests=[];
- page.on('request',r=>{if(/servitec_logo_3d|HomeLogoScene|node_modules_three|node_modules_gsap/.test(r.url()))requests.push(r.url());});
+ page.on('request',r=>{if(/servitec_logo_3d|HomeLogoScene|node_modules_three/.test(r.url()))requests.push(r.url());});
  for(const path of ['/tienda','/conocenos','/admin']) {await page.goto(base+path);await page.waitForTimeout(300);assert.equal(await page.locator('[data-home-logo]').count(),0);}
  assert.deepEqual(requests,[]);results.push('Direct tienda/conocenos/admin visits: no scene or model/3D chunks requested');await c.close();
  await writeFile('artifacts/qa/logo-results.json',JSON.stringify(results,null,2));console.log(results.join('\n'));

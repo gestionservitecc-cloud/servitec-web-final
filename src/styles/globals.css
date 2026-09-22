@@ -386,3 +386,21 @@
 .pc-builder .bg-primary, .pc-builder .bg-secondary { color: #fff !important; }
 
 #contenido { --secondary: 222 25% 27%; }
+
+/* Precise feedback only on service cards; no tilt or persistent compositor hints. */
+.service-card {
+  transition: transform 260ms cubic-bezier(.22,1,.36,1), border-color 260ms, background-color 260ms, box-shadow 260ms;
+}
+.service-card > div:first-child { transition: transform 260ms cubic-bezier(.22,1,.36,1); }
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .service-card:hover { transform: translateY(-4px); border-color: hsl(var(--primary) / .45); background-color: hsl(var(--accent) / .45); }
+  .service-card:hover > div:first-child { transform: translateY(-2px); }
+}
+.service-card:active { transform: scale(.99); }
+@media (prefers-reduced-motion: reduce) {
+  .service-card, .service-card > div:first-child { transition: none; }
+  .service-card:active { transform: none; }
+}
+
+/* Lenis owns interpolation on eligible desktop devices; keep one scroll smoother. */
+html.lenis { scroll-behavior: auto !important; }

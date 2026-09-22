@@ -1,0 +1,15 @@
+.button { transition-duration: 220ms; }
+.window { display: inline-grid; overflow: hidden; height: 1.4em; line-height: 1.4; }
+.labels { display: grid; transition: transform 450ms cubic-bezier(.22, 1, .36, 1); }
+.labels > span { grid-column: 1; height: 1.4em; }
+.icon { transition: transform 450ms cubic-bezier(.22, 1, .36, 1); }
+@media (hover: hover) and (pointer: fine) {
+  .button:hover .labels { transform: translateY(-50%); }
+  .button:hover .icon { transform: translate(2px, -1px); }
+}
+.button:focus-visible .labels { transform: translateY(-50%); }
+.button:active { transform: scale(.985); }
+@media (prefers-reduced-motion: reduce) {
+  .labels, .icon { transition: none; transform: none !important; }
+  .button:active { transform: none; }
+}

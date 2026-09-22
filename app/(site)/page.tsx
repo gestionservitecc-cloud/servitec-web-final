@@ -17,6 +17,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { FeaturedStock } from "@/components/site/FeaturedStock";
 import { HomeVideo } from "@/components/site/HomeVideo";
+import { AmbientBackground } from "@/components/site/AmbientBackground";
+import { AnimatedButton } from "@/components/site/AnimatedButton";
+import { HomeReveals } from "@/components/site/HomeReveals";
 import { HomeLogo } from "@/components/site/HomeLogo";
 import logoStyles from "@/components/site/HomeLogo.module.css";
 import { ReviewsSection } from "@/components/site/ReviewsSection";
@@ -87,16 +90,18 @@ const repairCards = [
 export default function HomePage() {
   return (
     <div className={logoStyles.home}>
+      <AmbientBackground />
       <HomeLogo />
-      <section className="border-b bg-sidebar text-sidebar-foreground">
+      <HomeReveals />
+      <section className={`${logoStyles.hero} text-sidebar-foreground`}>
         <div className="container-page grid items-center gap-10 py-12 sm:py-16 lg:grid-cols-[1.15fr_0.85fr]">
           <div>
             <p className="eyebrow text-red-300">Tecnología + servicio técnico · Saavedra</p>
-            <h1 className="mt-5 max-w-2xl text-balance text-4xl font-bold leading-[1.08] sm:text-5xl lg:text-6xl">Tu próximo equipo.<br /><span className="text-red-300">Tu técnico de confianza.</span></h1>
-            <p className="mt-5 max-w-xl text-base leading-relaxed text-slate-300">Elegí tecnología para lo que hacés todos los días. Comprá un equipo, armá tu PC o encontrá una solución para el que ya tenés.</p>
+            <h1 data-premium-reveal className="mt-5 max-w-2xl text-balance text-4xl font-bold leading-[1.08] sm:text-5xl lg:text-6xl">Tu próximo equipo.<br /><span className="text-red-300">Tu técnico de confianza.</span></h1>
+            <p data-premium-reveal className="mt-5 max-w-xl text-base leading-relaxed text-slate-300">Elegí tecnología para lo que hacés todos los días. Comprá un equipo, armá tu PC o encontrá una solución para el que ya tenés.</p>
             <div className="mt-7 flex flex-wrap gap-3">
-              <Button asChild size="lg"><Link href="/tienda">Explorar tienda <ArrowRight className="size-4" /></Link></Button>
-              <Button asChild size="lg" variant="outline" className="border-white/30 bg-transparent text-white hover:bg-white/10 hover:text-white"><Link href="/servicios">Reparar mi equipo</Link></Button>
+              <AnimatedButton label="Explorar tienda" hoverLabel="Ver equipos" href="/tienda" icon={<ArrowRight className="size-4" />} />
+              <AnimatedButton label="Reparar mi equipo" hoverLabel="Ver servicios" href="/servicios" variant="outline" className="border-white/30 bg-transparent text-white hover:bg-white/10 hover:text-white" />
               <Button asChild size="lg" variant="ghost" className="text-white hover:bg-white/10 hover:text-white"><Link href="/armar-pc">Armá tu PC <ArrowRight className="size-4" /></Link></Button>
             </div>
             <div className="mt-8 flex flex-wrap gap-x-5 gap-y-3 border-t border-white/15 pt-5 text-xs text-slate-300"><span>Atención en Saavedra, CABA</span><span>Asesoramiento directo</span><Link href="/formas-de-pago" className="underline underline-offset-4">Ver medios de pago</Link></div>
@@ -117,7 +122,7 @@ export default function HomePage() {
       <section className="container-page py-16 lg:py-20">
         <Reveal className="max-w-2xl">
           <p className="eyebrow">Comprá y armá</p>
-          <h2 className="mt-2 font-display text-2xl font-bold sm:text-3xl">
+          <h2 data-premium-reveal className="mt-2 font-display text-2xl font-bold sm:text-3xl">
             Todo para tu próxima compra tech
           </h2>
           <p className="mt-2 text-sm text-muted-foreground">
@@ -170,7 +175,7 @@ export default function HomePage() {
         </Reveal>
         <div className="rounded-3xl border bg-muted/40 p-6 sm:p-8">
           <p className="eyebrow">Servicio técnico, paso a paso</p>
-          <h2 className="mt-3 text-2xl font-bold">Sabé qué sigue con tu equipo</h2>
+          <h2 data-premium-reveal className="mt-3 text-2xl font-bold">Sabé qué sigue con tu equipo</h2>
           <ol className="mt-5 space-y-4">
             {[["Ingreso", "Contanos el modelo y la falla para coordinar la revisión."], ["Diagnóstico", "Revisamos el equipo y te explicamos las opciones."], ["Aprobación", "Conocé el presupuesto antes de avanzar con la reparación."], ["Entrega", "Coordinamos el retiro e informamos la garantía correspondiente."]].map(([title, text], index) => <li key={title} className="flex gap-3"><span className="grid size-7 shrink-0 place-items-center rounded-full bg-primary/10 text-xs font-bold text-primary">{index + 1}</span><div><h3 className="text-sm font-bold">{title}</h3><p className="mt-1 text-sm text-muted-foreground">{text}</p></div></li>)}
           </ol>
@@ -183,7 +188,7 @@ export default function HomePage() {
         <div className="container-page">
           <Reveal className="max-w-2xl">
             <p className="eyebrow">También reparamos</p>
-            <h2 className="mt-2 font-display text-2xl font-bold sm:text-3xl">
+            <h2 data-premium-reveal className="mt-2 font-display text-2xl font-bold sm:text-3xl">
               Servicio técnico con garantía escrita
             </h2>
             <p className="mt-2 text-sm text-muted-foreground">
@@ -195,13 +200,13 @@ export default function HomePage() {
           <Stagger className="mt-8 grid gap-4 sm:grid-cols-3">
             {repairCards.map((c) => (
               <StaggerItem key={c.title}>
-                <Link href={c.href} className="group flex h-full flex-col rounded-2xl border bg-card p-6 shadow-soft transition-all hover:-translate-y-1 hover:border-primary hover:bg-primary hover:text-primary-foreground hover:shadow-soft-lg">
+                <Link href={c.href} className="service-card group flex h-full flex-col rounded-2xl border bg-card p-6 shadow-soft">
                   <div className="grid size-11 place-items-center rounded-xl bg-primary/10 text-primary">
                     <c.icon className="size-5" />
                   </div>
                   <h3 className="mt-4 font-display text-lg font-bold">{c.title}</h3>
-                  <p className="mt-1.5 text-sm text-muted-foreground group-hover:text-primary-foreground/80">{c.desc}</p>
-                  <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-primary group-hover:text-primary-foreground">Ver reparación <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-1" /></span>
+                  <p className="mt-1.5 text-sm text-muted-foreground ">{c.desc}</p>
+                  <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-primary ">Ver reparación <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-1" /></span>
                 </Link>
               </StaggerItem>
             ))}
@@ -224,7 +229,7 @@ export default function HomePage() {
         <Reveal className="mx-auto max-w-2xl rounded-2xl border bg-card p-6 shadow-soft-lg sm:p-8 md:p-10">
           <div className="text-center">
             <p className="eyebrow justify-center">Contacto</p>
-            <h2 className="mt-2 font-display text-2xl font-bold sm:text-3xl">
+            <h2 data-premium-reveal className="mt-2 font-display text-2xl font-bold sm:text-3xl">
               Escribinos
             </h2>
             <p className="mt-2 text-sm text-muted-foreground">

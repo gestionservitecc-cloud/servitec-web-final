@@ -108,7 +108,7 @@ export function StaggerItem({
   );
 }
 
-/** Springy hover/tap wrapper for cards and CTAs. */
+/** Restrained hover/tap feedback for the existing cards and CTAs. */
 export function Pressable({
   children,
   className,
@@ -126,7 +126,7 @@ export function Pressable({
       tabIndex={-1}
       whileHover={reduce ? undefined : lift ? { y: -4 } : { scale: 1.01 }}
       whileTap={reduce ? undefined : { scale: 0.98 }}
-      transition={{ type: "spring", stiffness: 400, damping: 25 }}
+      transition={{ type: "tween", duration: 0.22, ease }}
       {...rest}
     >
       {children}

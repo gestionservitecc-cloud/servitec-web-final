@@ -142,7 +142,7 @@ function StockRow({
                         src={item.imagenes?.[0]}
                         alt={item.nombre}
                         loading="lazy"
-                        className="h-full w-full object-contain p-3 transition-transform duration-300 group-hover:scale-105"
+                        className="h-full w-full object-contain p-3 transition-transform duration-300 motion-safe:group-hover:scale-[1.04]"
                       />
                     ) : <div className="grid h-full place-items-center p-4 text-sm text-muted-foreground">Imagen no disponible</div>}
                   </div>

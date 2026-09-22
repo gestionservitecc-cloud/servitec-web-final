@@ -6,7 +6,23 @@
 /* Section backgrounds sit below the logo; their content stays above it. */
 .home :global(section) > * {
   position: relative;
-  z-index: 1;
+  z-index: 3;
+}
+
+.hero {
+  background: #080b10;
+  padding-bottom: 64px;
+  position: relative;
+}
+
+.hero::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  height: 68px;
+  inset-inline: 0;
+  background: linear-gradient(to bottom, transparent, hsl(var(--background)));
+  pointer-events: none;
 }
 
 .track {
@@ -14,7 +30,7 @@
   inset: 64px 0 0;
   display: grid;
   place-items: center;
-  z-index: 0;
+  z-index: 2;
   pointer-events: none;
   opacity: 0.16;
 }

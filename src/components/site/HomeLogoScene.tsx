@@ -4,8 +4,7 @@ import { useEffect, useRef, type RefObject } from "react";
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { gsap, pageScrollRange } from "@/lib/animations/gsap";
 
 function disposeModel(root: THREE.Object3D) {
   const geometries = new Set<THREE.BufferGeometry>();
@@ -134,14 +133,12 @@ export default function HomeLogoScene({ track, onError }: { track: RefObject<HTM
         resizeObserver.observe(host);
         resizeObserver.observe(document.body);
         resize();
-        gsap.registerPlugin(ScrollTrigger);
-        animation = gsap.to(pivot.rotation, {
+        animation = gsap.fromTo(pivot.rotation, { y: 0 }, {
           y: Math.PI * 2, ease: "none",
           onUpdate: requestRender,
           scrollTrigger: {
             id: "servitec-home-logo",
-            start: 0,
-            end: () => Math.max(1, ScrollTrigger.maxScroll(window)),
+            ...pageScrollRange(),
             scrub: 0.25, invalidateOnRefresh: true,
           },
         });

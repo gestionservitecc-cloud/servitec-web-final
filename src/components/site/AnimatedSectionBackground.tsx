@@ -35,13 +35,12 @@ export function AnimatedSectionBackground({
     let ctx: ReturnType<typeof Gsap.context> | undefined;
     let mm: ReturnType<typeof Gsap.matchMedia> | undefined;
     // Other PageHero users do not download GSAP for this effect.
-    void Promise.all([import("gsap"), import("gsap/ScrollTrigger")]).then(([{ gsap }, { ScrollTrigger }]) => {
+    void import("@/lib/animations/gsap").then(({ gsap, ScrollTrigger }) => {
       const section = sectionRef.current;
       const layer = backgroundRef.current;
       const page = pageRef.current;
       const pageLayer = pageLayerRef.current;
       if (!active || !section || !layer || !page || !pageLayer) return;
-      gsap.registerPlugin(ScrollTrigger);
       ctx = gsap.context(() => {
         mm = gsap.matchMedia();
         mm.add({
