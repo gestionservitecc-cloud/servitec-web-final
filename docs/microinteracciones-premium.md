@@ -42,6 +42,7 @@ Con movimiento reducido: sin Lenis, reveals ni desplazamiento ambiental; se cons
 - Build de producción local y TypeScript: correctos.
 - Lint: 0 errores; 19 advertencias preexistentes.
 - Vitest: 25 pruebas aprobadas.
+- Regresión ampliada en navegador: 61 comprobaciones aprobadas, con rutas públicas en 360, 390, 768 y 1440 px, especialidades de reparación, presupuesto, fichas, carrito y persistencia de filtros.
 - Pruebas de estados: 7 flujos críticos aprobados, incluidos carrito, stock vendido, filtros y compatibilidad del configurador; datos de prueba interceptados, sin escrituras a producción.
 - GLB en 1440 y 390 px: frente, media vuelta, vuelta completa, reversa, detención, resize, DPR y suspensión de render en reposo. Dos ciclos de navegación con limpieza de listeners y contexto. Fallbacks de movimiento reducido, carga fallida y WebGL ausente correctos.
 - Interacciones: rueda responde dentro de 100 ms en la prueba local; carrito bloquea y restaura scroll, ancla de servicios conserva separación del header, foco de teclado y PageDown operativos. URL de WhatsApp preservada; no se envió ningún mensaje.
