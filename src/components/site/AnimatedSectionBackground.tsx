@@ -27,6 +27,8 @@ export function AnimatedSectionBackground({
 }: AnimatedBackgroundOptions & { children: ReactNode; className?: string }) {
   const sectionRef = useRef<HTMLElement>(null);
   const backgroundRef = useRef<HTMLDivElement>(null);
+  const pageRef = useRef<HTMLDivElement>(null);
+  const pageLayerRef = useRef<HTMLDivElement>(null);
 
   useLayoutEffect(() => {
     let active = true;
@@ -36,7 +38,9 @@ export function AnimatedSectionBackground({
     void Promise.all([import("gsap"), import("gsap/ScrollTrigger")]).then(([{ gsap }, { ScrollTrigger }]) => {
       const section = sectionRef.current;
       const layer = backgroundRef.current;
-      if (!active || !section || !layer) return;
+      const page = pageRef.current;
+      const pageLayer = pageLayerRef.current;
+      if (!active || !section || !layer || !page || !pageLayer) return;
       gsap.registerPlugin(ScrollTrigger);
       ctx = gsap.context(() => {
         mm = gsap.matchMedia();
@@ -68,6 +72,31 @@ export function AnimatedSectionBackground({
               scrub: 1, invalidateOnRefresh: true,
             },
           });
+          // Only reveal the page background after the entire heading has left
+          // the viewport. Reversing scroll reverses the handoff as well.
+          const reveal = gsap.fromTo(page, { opacity: 0 }, {
+            opacity: conditions.mobile ? 0.1 : 0.14, ease: "none",
+            scrollTrigger: {
+              trigger: section, start: "bottom top",
+              end: () => `+=${conditions.mobile ? 96 : 160}`,
+              scrub: 0.6, invalidateOnRefresh: true,
+            },
+          });
+          const continuation = gsap.fromTo(pageLayer, values(motion.from), {
+            ...values(motion.to), ease: "none",
+            scrollTrigger: {
+              trigger: section, start: "bottom top",
+              end: () => Math.max(section.getBoundingClientRect().bottom + scrollY + 1, ScrollTrigger.maxScroll(window)),
+              scrub: 1, invalidateOnRefresh: true,
+            },
+          });
+          // Catalogues and images may change the document's height after load.
+          const observer = new ResizeObserver(() => {
+            reveal.scrollTrigger?.refresh();
+            continuation.scrollTrigger?.refresh();
+          });
+          observer.observe(document.body);
+          return () => observer.disconnect();
         }, section);
       }, section);
     }).catch(() => { /* Keep the static CSS background if the animation chunk fails. */ });
@@ -75,10 +104,15 @@ export function AnimatedSectionBackground({
   }, [direction, intensity, preset]);
 
   return (
+    <>
     <section ref={sectionRef} className={cn(styles.section, className)} data-animated-background={preset}>
       <div ref={backgroundRef} className={styles.background} style={{ backgroundImage: `url(${JSON.stringify(image)})` }} aria-hidden="true" data-background-layer />
       {overlay && <div className={cn(styles.overlay, overlay === "light-image" ? styles.lightImage : styles.darkImage)} aria-hidden="true" />}
       <div className={styles.content}>{children}</div>
     </section>
+    <div ref={pageRef} className={styles.pageBackground} aria-hidden="true" data-page-background={preset}>
+      <div ref={pageLayerRef} className={styles.background} style={{ backgroundImage: `url(${JSON.stringify(image)})` }} data-page-background-layer />
+    </div>
+    </>
   );
 }

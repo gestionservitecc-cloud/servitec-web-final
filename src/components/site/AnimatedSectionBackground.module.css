@@ -30,6 +30,27 @@
 
 .content { position: relative; }
 
+/* Scope the layering to routes that actually mount this background. Cards,
+   filters and text paint above it; section background colors stay beneath. */
+:global(main):has(.pageBackground) {
+  position: relative;
+  isolation: isolate;
+}
+
+:global(main):has(.pageBackground) :global(section:not([data-animated-background])) > * {
+  position: relative;
+  z-index: 1;
+}
+
+.pageBackground {
+  position: fixed;
+  inset: 65px 0 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0;
+}
+
 @media (max-width: 767px) {
   .lightImage { background: rgba(15, 23, 42, .78); }
   .darkImage { background: rgba(15, 23, 42, .45); }
@@ -37,4 +58,5 @@
 
 @media (prefers-reduced-motion: reduce) {
   .background { transform: none !important; will-change: auto; }
+  .pageBackground { display: none; }
 }

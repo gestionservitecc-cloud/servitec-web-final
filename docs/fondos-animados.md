@@ -1,6 +1,6 @@
 # Fondos animados por sección
 
-Integración sobre Next.js App Router, React y Tailwind existentes; CSS Module local para capas y overlays. Se reutiliza PageHero sin alterar su contenido, tamaño, navbar ni tipografías. Las únicas secciones afectadas son los encabezados de Servicios, Reacondicionados, Tienda y Conocenos.
+Integración sobre Next.js App Router, React y Tailwind existentes; CSS Module local para capas y overlays. Se reutiliza PageHero sin alterar su contenido, tamaño, navbar ni tipografías. Se integra en Servicios, Reacondicionados, Tienda y Conocenos: comienza en el encabezado y, cuando este sale por completo de la pantalla, continúa como fondo fijo detrás del contenido de la página.
 
 ## Recursos reales
 
@@ -59,6 +59,8 @@ export function AnimatedSectionBackground({
 }: AnimatedBackgroundOptions & { children: ReactNode; className?: string }) {
   const sectionRef = useRef<HTMLElement>(null);
   const backgroundRef = useRef<HTMLDivElement>(null);
+  const pageRef = useRef<HTMLDivElement>(null);
+  const pageLayerRef = useRef<HTMLDivElement>(null);
 
   useLayoutEffect(() => {
     let active = true;
@@ -68,7 +70,9 @@ export function AnimatedSectionBackground({
     void Promise.all([import("gsap"), import("gsap/ScrollTrigger")]).then(([{ gsap }, { ScrollTrigger }]) => {
       const section = sectionRef.current;
       const layer = backgroundRef.current;
-      if (!active || !section || !layer) return;
+      const page = pageRef.current;
+      const pageLayer = pageLayerRef.current;
+      if (!active || !section || !layer || !page || !pageLayer) return;
       gsap.registerPlugin(ScrollTrigger);
       ctx = gsap.context(() => {
         mm = gsap.matchMedia();
@@ -100,6 +104,31 @@ export function AnimatedSectionBackground({
               scrub: 1, invalidateOnRefresh: true,
             },
           });
+          // Only reveal the page background after the entire heading has left
+          // the viewport. Reversing scroll reverses the handoff as well.
+          const reveal = gsap.fromTo(page, { opacity: 0 }, {
+            opacity: conditions.mobile ? 0.1 : 0.14, ease: "none",
+            scrollTrigger: {
+              trigger: section, start: "bottom top",
+              end: () => `+=${conditions.mobile ? 96 : 160}`,
+              scrub: 0.6, invalidateOnRefresh: true,
+            },
+          });
+          const continuation = gsap.fromTo(pageLayer, values(motion.from), {
+            ...values(motion.to), ease: "none",
+            scrollTrigger: {
+              trigger: section, start: "bottom top",
+              end: () => Math.max(section.getBoundingClientRect().bottom + scrollY + 1, ScrollTrigger.maxScroll(window)),
+              scrub: 1, invalidateOnRefresh: true,
+            },
+          });
+          // Catalogues and images may change the document's height after load.
+          const observer = new ResizeObserver(() => {
+            reveal.scrollTrigger?.refresh();
+            continuation.scrollTrigger?.refresh();
+          });
+          observer.observe(document.body);
+          return () => observer.disconnect();
         }, section);
       }, section);
     }).catch(() => { /* Keep the static CSS background if the animation chunk fails. */ });
@@ -107,11 +136,16 @@ export function AnimatedSectionBackground({
   }, [direction, intensity, preset]);
 
   return (
+    <>
     <section ref={sectionRef} className={cn(styles.section, className)} data-animated-background={preset}>
       <div ref={backgroundRef} className={styles.background} style={{ backgroundImage: `url(${JSON.stringify(image)})` }} aria-hidden="true" data-background-layer />
       {overlay && <div className={cn(styles.overlay, overlay === "light-image" ? styles.lightImage : styles.darkImage)} aria-hidden="true" />}
       <div className={styles.content}>{children}</div>
     </section>
+    <div ref={pageRef} className={styles.pageBackground} aria-hidden="true" data-page-background={preset}>
+      <div ref={pageLayerRef} className={styles.background} style={{ backgroundImage: `url(${JSON.stringify(image)})` }} data-page-background-layer />
+    </div>
+    </>
   );
 }
 
@@ -152,6 +186,27 @@ export function AnimatedSectionBackground({
 
 .content { position: relative; }
 
+/* Scope the layering to routes that actually mount this background. Cards,
+   filters and text paint above it; section background colors stay beneath. */
+:global(main):has(.pageBackground) {
+  position: relative;
+  isolation: isolate;
+}
+
+:global(main):has(.pageBackground) :global(section:not([data-animated-background])) > * {
+  position: relative;
+  z-index: 1;
+}
+
+.pageBackground {
+  position: fixed;
+  inset: 65px 0 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0;
+}
+
 @media (max-width: 767px) {
   .lightImage { background: rgba(15, 23, 42, .78); }
   .darkImage { background: rgba(15, 23, 42, .45); }
@@ -159,6 +214,7 @@ export function AnimatedSectionBackground({
 
 @media (prefers-reduced-motion: reduce) {
   .background { transform: none !important; will-change: auto; }
+  .pageBackground { display: none; }
 }
 
 ```
@@ -250,3 +306,13 @@ background={isReconditionedRoute ? {
 Preview: ejecutar `node scripts/preview-local.mjs` y abrir http://127.0.0.1:3100/servicios. La preview aísla las credenciales Blob; la QA intercepta el catálogo con fixtures y no permite escrituras. No se probó en móviles físicos/Safari ni se midieron Core Web Vitals. Los PNG originales conservan su peso.
 
 Referencia de API: [GSAP matchMedia](https://gsap.com/docs/v3/GSAP/gsap.matchMedia()/), [GSAP context](https://gsap.com/docs/v3/GSAP/gsap.context()/).
+
+## Continuidad del fondo al salir del encabezado
+
+Se conserva la capa original del encabezado y se añade una segunda capa decorativa fija, sin eventos de puntero. Cuando el borde inferior del encabezado cruza el borde superior del viewport, ScrollTrigger revela gradualmente el fondo de página durante 160 px en escritorio/tablet y 96 px en móvil. Opacidad máxima: 0,14 / 0,10. El cambio es reversible al subir.
+
+La capa fija mantiene el preset de movimiento sutil desde ese punto hasta el final real del scroll del documento, incluido el footer. Un ResizeObserver actualiza los límites si la carga del catálogo cambia la altura de página. Las capas de contenido quedan por encima. No se añaden espacios, pin ni bloqueos de scroll.
+
+Con movimiento reducido, el fondo del encabezado queda estático y la continuación fija se oculta. Los nuevos triggers, observador y estilos se limpian junto con matchMedia/context al salir. No se modifican datos, operaciones del admin ni el logo 3D de Inicio.
+
+QA reproducible: `node scripts/review-background-handoff.mjs`. Evidencia: `artifacts/qa/background-page-results.json` y `background-page-{ruta}-{ancho}.png`. Incluye las cuatro rutas en 1440/390 px, umbral de salida completa, movimiento hasta el final, retorno al subir, bordes, movimiento reducido y navegación sin duplicados.
