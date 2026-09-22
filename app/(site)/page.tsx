@@ -14,10 +14,8 @@ import {
   Truck,
   Wallet,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { FeaturedStock } from "@/components/site/FeaturedStock";
 import { HomeVideo } from "@/components/site/HomeVideo";
-import { AmbientBackground } from "@/components/site/AmbientBackground";
 import { AnimatedButton } from "@/components/site/AnimatedButton";
 import { HomeReveals } from "@/components/site/HomeReveals";
 import { HomeLogo } from "@/components/site/HomeLogo";
@@ -90,25 +88,24 @@ const repairCards = [
 export default function HomePage() {
   return (
     <div className={logoStyles.home}>
-      <AmbientBackground />
       <HomeLogo />
       <HomeReveals />
-      <section className={`${logoStyles.hero} text-sidebar-foreground`}>
+      <section className={`${logoStyles.hero} text-foreground`}>
         <div className="container-page grid items-center gap-10 py-12 sm:py-16 lg:grid-cols-[1.15fr_0.85fr]">
           <div>
-            <p className="eyebrow text-red-300">Tecnología + servicio técnico · Saavedra</p>
-            <h1 data-premium-reveal className="mt-5 max-w-2xl text-balance text-4xl font-bold leading-[1.08] sm:text-5xl lg:text-6xl">Tu próximo equipo.<br /><span className="text-red-300">Tu técnico de confianza.</span></h1>
-            <p data-premium-reveal className="mt-5 max-w-xl text-base leading-relaxed text-slate-300">Elegí tecnología para lo que hacés todos los días. Comprá un equipo, armá tu PC o encontrá una solución para el que ya tenés.</p>
+            <p className="eyebrow text-primary">Tecnología + servicio técnico · Saavedra</p>
+            <h1 data-premium-reveal className="mt-5 max-w-2xl text-balance text-4xl font-bold leading-[1.08] sm:text-5xl lg:text-6xl">Tu próximo equipo.<br /><span className="text-primary">Tu técnico de confianza.</span></h1>
+            <p data-premium-reveal className="mt-5 max-w-xl text-base leading-relaxed text-muted-foreground">Elegí tecnología para lo que hacés todos los días. Comprá un equipo, armá tu PC o encontrá una solución para el que ya tenés.</p>
             <div className="mt-7 flex flex-wrap gap-3">
               <AnimatedButton label="Explorar tienda" hoverLabel="Ver equipos" href="/tienda" icon={<ArrowRight className="size-4" />} />
-              <AnimatedButton label="Reparar mi equipo" hoverLabel="Ver servicios" href="/servicios" variant="outline" className="border-white/30 bg-transparent text-white hover:bg-white/10 hover:text-white" />
-              <Button asChild size="lg" variant="ghost" className="text-white hover:bg-white/10 hover:text-white"><Link href="/armar-pc">Armá tu PC <ArrowRight className="size-4" /></Link></Button>
+              <AnimatedButton label="Reparar mi equipo" hoverLabel="Ver servicios" href="/servicios" variant="outline" className="" />
+              <AnimatedButton asChild size="lg" variant="ghost" className=""><Link href="/armar-pc">Armá tu PC <ArrowRight className="size-4" /></Link></AnimatedButton>
             </div>
-            <div className="mt-8 flex flex-wrap gap-x-5 gap-y-3 border-t border-white/15 pt-5 text-xs text-slate-300"><span>Atención en Saavedra, CABA</span><span>Asesoramiento directo</span><Link href="/formas-de-pago" className="underline underline-offset-4">Ver medios de pago</Link></div>
+            <div className="mt-8 flex flex-wrap gap-x-5 gap-y-3 border-t border-border pt-5 text-xs text-muted-foreground"><span>Atención en Saavedra, CABA</span><span>Asesoramiento directo</span><Link href="/formas-de-pago" className="underline underline-offset-4">Ver medios de pago</Link></div>
           </div>
-          <div className="overflow-hidden rounded-2xl border border-white/15 bg-white/5">
+          <div className="overflow-hidden rounded-2xl border border-border bg-white/60">
             <HomeVideo />
-            <div className="flex items-center justify-between gap-4 p-5"><div><p className="text-xs text-red-300">Estamos cerca</p><p className="mt-1 font-semibold">Un lugar para tu tecnología</p></div><Link href="/conocenos" className="text-sm underline underline-offset-4">Conocenos</Link></div>
+            <div className="flex items-center justify-between gap-4 p-5"><div><p className="text-xs text-primary">Estamos cerca</p><p className="mt-1 font-semibold">Un lugar para tu tecnología</p></div><Link href="/conocenos" className="text-sm underline underline-offset-4">Conocenos</Link></div>
           </div>
         </div>
       </section>
@@ -213,11 +210,11 @@ export default function HomePage() {
           </Stagger>
 
           <Reveal delay={0.1} className="mt-8">
-            <Button asChild>
+            <AnimatedButton asChild>
               <Link href="/servicios">
                 Ver todos los servicios <ArrowRight className="size-4" />
               </Link>
-            </Button>
+            </AnimatedButton>
           </Reveal>
         </div>
       </section>
@@ -285,7 +282,7 @@ function PromoCard({
         ))}
       </div>
       <div className="mt-auto pt-2">
-        <Button asChild size="lg" className="rounded-full px-6">
+        <AnimatedButton asChild size="lg" className="rounded-full px-6">
           {cta.external ? (
             <a href={cta.href} target="_blank" rel="noopener noreferrer">
               {cta.label} <ArrowRight className="size-4" />
@@ -295,7 +292,7 @@ function PromoCard({
               {cta.label} <ArrowRight className="size-4" />
             </Link>
           )}
-        </Button>
+        </AnimatedButton>
       </div>
       <p className="text-xs text-sidebar-foreground/50">{footnote}</p>
     </div>

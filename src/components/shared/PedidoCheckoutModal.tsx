@@ -6,6 +6,7 @@ import { useState, type FormEvent } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Banknote, CheckCircle2, CreditCard, ShieldCheck } from "lucide-react";
+import { AnimatedButton } from "@/components/site/AnimatedButton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -273,9 +274,9 @@ export function PedidoCheckoutModal({
 
           <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
             <Button type="button" variant="outline" onClick={onClose} className="border-slate-600 bg-transparent text-slate-700 hover:bg-slate-100">Cancelar</Button>
-            <Button type="submit" disabled={submitting || (origen === "tienda" && !hasPaymentMethod)} className="bg-secondary text-slate-950 hover:bg-secondary/90">
+            <AnimatedButton type="submit" disabled={submitting || (origen === "tienda" && !hasPaymentMethod)} className="bg-secondary text-slate-950 hover:bg-secondary/90">
               {submitting ? "Guardando…" : "Enviar por WhatsApp"}
-            </Button>
+            </AnimatedButton>
           </div>
         </form>
       </div>

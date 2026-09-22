@@ -1,9 +1,0 @@
-.ambient { position: fixed; inset: 65px 0 0; overflow: hidden; pointer-events: none; z-index: 1; }
-.ambient > span { position: absolute; border-radius: 50%; filter: blur(100px); }
-.blue { width: 65vw; height: 65vh; top: -15%; left: -20%; background: radial-gradient(ellipse, rgba(20,65,120,.24), transparent 70%); }
-.cyan { width: 55vw; height: 55vh; bottom: -5%; right: -20%; background: radial-gradient(ellipse, rgba(40,125,145,.14), transparent 70%); }
-@media (max-width: 1023px) {
-  .ambient > span { filter: blur(55px); }
-  .blue { width: 100vw; height: 55vh; opacity: .6; }
-  .cyan { display: none; }
-}

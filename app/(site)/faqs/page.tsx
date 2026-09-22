@@ -1,3 +1,4 @@
+import { AnimatedButton } from "@/components/site/AnimatedButton";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { HelpCircle, MessageCircle } from "lucide-react";
@@ -7,7 +8,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Button } from "@/components/ui/button";
 import { PageHero } from "@/components/site/PageHero";
 import { waLink } from "@/components/site/site-config";
 import { faqs } from "@/content/faqs";
@@ -57,7 +57,7 @@ export default function FaqsPage() {
             <p className="mt-1.5 text-sm text-muted-foreground">
               Escribinos y te asesoramos sin compromiso.
             </p>
-            <Button
+            <AnimatedButton
               asChild
               className="mt-4 w-full gap-2 bg-whatsapp text-whatsapp-foreground hover:bg-whatsapp/90"
             >
@@ -69,10 +69,10 @@ export default function FaqsPage() {
                 <MessageCircle className="size-4" />
                 Consultar por WhatsApp
               </a>
-            </Button>
-            <Button asChild variant="outline" className="mt-2 w-full">
+            </AnimatedButton>
+            <AnimatedButton asChild variant="outline" className="mt-2 w-full">
               <Link href="/condiciones">Ver condiciones generales</Link>
-            </Button>
+            </AnimatedButton>
           </div>
         </aside>
       </section>

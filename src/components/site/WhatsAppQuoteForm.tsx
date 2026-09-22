@@ -1,8 +1,8 @@
 "use client";
+import { AnimatedButton } from "@/components/site/AnimatedButton";
 
 import { useState, type FormEvent } from "react";
 import { MessageCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -67,7 +67,7 @@ export function WhatsAppQuoteForm({
       </div>
       {error && <p role="alert" className="mt-4 text-sm text-destructive">{error}</p>}
       {summary && <div role="status" className="mt-4 rounded-xl border bg-muted p-4"><p className="font-semibold">Revisá tu consulta</p><p className="mt-2 text-sm">{summary}</p><p className="mt-2 text-xs text-muted-foreground">Solicitás un presupuesto. No es un precio automático ni una reparación confirmada.</p></div>}
-      <Button
+      <AnimatedButton
         type="submit"
         size="lg"
         disabled={sending}
@@ -75,7 +75,7 @@ export function WhatsAppQuoteForm({
       >
         <MessageCircle className="size-5" />
         {sending ? "Abriendo WhatsApp…" : summary ? "Abrir WhatsApp con esta consulta" : "Revisar consulta"}
-      </Button>
+      </AnimatedButton>
       <p className="mt-3 text-center text-xs text-muted-foreground">
         Te respondemos en horario comercial. Presupuesto sin cargo.
       </p>

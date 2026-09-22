@@ -1,8 +1,8 @@
+import { AnimatedButton } from "@/components/site/AnimatedButton";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { CheckCircle2, ShieldCheck, Users, Wrench } from "lucide-react";
 import { PageHero } from "@/components/site/PageHero";
-import { Button } from "@/components/ui/button";
 import { asset } from "@/lib/assets";
 
 export const metadata: Metadata = {
@@ -91,12 +91,12 @@ export default function ConocenosPage() {
           </ul>
 
           <div className="flex flex-wrap gap-3">
-            <Button asChild>
+            <AnimatedButton asChild>
               <Link href="/servicios">Ver servicios</Link>
-            </Button>
-            <Button asChild variant="outline">
+            </AnimatedButton>
+            <AnimatedButton asChild variant="outline">
               <Link href="/contacto">Cómo llegar</Link>
-            </Button>
+            </AnimatedButton>
           </div>
         </div>
 

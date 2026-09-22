@@ -10,19 +10,9 @@
 }
 
 .hero {
-  background: #080b10;
+  background: transparent;
   padding-bottom: 64px;
   position: relative;
-}
-
-.hero::after {
-  content: "";
-  position: absolute;
-  bottom: -1px;
-  height: 68px;
-  inset-inline: 0;
-  background: linear-gradient(to bottom, transparent, hsl(var(--background)));
-  pointer-events: none;
 }
 
 .track {

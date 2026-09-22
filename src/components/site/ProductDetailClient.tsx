@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { ArrowLeft, Check, Copy, Info, MessageCircle, Share2, ShoppingCart, Smartphone } from "lucide-react";
 import { ProductImageGallery } from "@/components/site/ProductImageGallery";
+import { AnimatedButton } from "./AnimatedButton";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -274,7 +275,7 @@ export function ProductDetailClient({ type, id }: { type: DetailType; id: string
             {equipmentData?.warranty && <p className="mt-4 text-sm">Garantía: {equipmentData.warranty}</p>}
             {unavailable && <a className="mt-4 font-semibold text-white underline" href={waLink(`Hola, busco alternativas a ${title}`)} target="_blank" rel="noopener noreferrer">Consultar alternativas por WhatsApp</a>}
             <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-              <Button disabled={Boolean(unavailable) || price <= 0} type="button" onClick={addToCart} className="w-full bg-red-600 text-white hover:bg-red-700 sm:w-fit"><ShoppingCart className="size-4" /> Agregar al carrito</Button>
+              <AnimatedButton disabled={Boolean(unavailable) || price <= 0} type="button" onClick={addToCart} className="w-full bg-red-600 text-white hover:bg-red-700 sm:w-fit"><ShoppingCart className="size-4" /> Agregar al carrito</AnimatedButton>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button type="button" variant="outline" className="w-full border-white/40 bg-white/10 text-white hover:bg-white/20 sm:w-fit" aria-label="Abrir opciones para compartir">

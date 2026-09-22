@@ -4,6 +4,7 @@ import { useDialogFocus } from "@/hooks/use-dialog-focus";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, useReducedMotion } from "framer-motion";
+import { AnimatedButton } from "@/components/site/AnimatedButton";
 import { Button } from "@/components/ui/button";
 import {
   catalogProductImage,
@@ -1204,14 +1205,14 @@ const ArmarPc = () => {
                     </div>
                   </button>
                 </div>
-                <Button
+                <AnimatedButton
                   type="button"
                   onClick={sendQuote}
                   disabled={!paymentMethod}
                   className="mt-7 w-full gap-2 bg-secondary py-6 text-base font-bold text-slate-950 shadow-lg shadow-secondary/20 hover:bg-secondary/90"
                 >
                   <Send size={18} /> Pedir cotización
-                </Button>
+                </AnimatedButton>
               </aside>
             </div>
             <div className="mt-6 flex justify-center gap-3">

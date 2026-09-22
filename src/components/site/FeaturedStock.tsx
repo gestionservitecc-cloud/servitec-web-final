@@ -1,10 +1,10 @@
 "use client";
+import { AnimatedButton } from "@/components/site/AnimatedButton";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
 import type { Equipo } from "@/lib/types";
 import { stockCategories } from "@/components/site/site-config";
 import {
@@ -153,7 +153,7 @@ function StockRow({
                     <div><p className="text-xs text-muted-foreground">Efectivo / transferencia</p><p className="text-lg font-bold text-emerald-700">{currency(price)}</p>
                     <p className="text-[11px] font-semibold text-rose-600">Total con tarjeta: {currency(installmentPrice)}</p>
                     <p className="text-[11px] text-muted-foreground">Sin imp. nac. {currency(calculateNationalPrice(price))}</p></div>
-                    <Button
+                    <AnimatedButton
                       asChild
                       size="sm"
                       className="mt-auto w-full"
@@ -161,7 +161,7 @@ function StockRow({
                       <Link href={`/producto/equipo/${encodeURIComponent(item.id)}`}>
                         Ver más <ArrowRight className="size-3.5" />
                       </Link>
-                    </Button>
+                    </AnimatedButton>
                   </div>
                 </motion.article>
               );

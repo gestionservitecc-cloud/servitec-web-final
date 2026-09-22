@@ -8,6 +8,7 @@ import { ProductImageGallery } from "@/components/site/ProductImageGallery";
 import { PriceRangeFilter } from "@/components/site/PriceRangeFilter";
 import { stockCategories } from "@/components/site/site-config";
 import { Card, CardContent } from "@/components/ui/card";
+import { AnimatedButton } from "@/components/site/AnimatedButton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -546,7 +547,7 @@ export const StockClient = () => {
 
                                   <p className="text-xs text-muted-foreground">{p.condition}{p.warranty ? ` · Garantía: ${p.warranty}` : ""}</p>
                                   {p.specs?.accesorios && <p className="text-xs text-muted-foreground">Incluye: {p.specs.accesorios}</p>}
-                                  <Button asChild size="sm" className="w-full gap-2">
+                                  <AnimatedButton asChild size="sm" className="w-full gap-2">
                                     <a
                                       href={`https://wa.me/5491124873190?text=${encodeURIComponent(mensaje)}`}
                                       target="_blank"
@@ -555,7 +556,7 @@ export const StockClient = () => {
                                       <MessageCircle className="size-3.5" />
                                       {vendido ? "Consultar alternativas" : "Consultar este equipo"}
                                     </a>
-                                  </Button>
+                                  </AnimatedButton>
                                 </div>
                               </div>
                             </CardContent>

@@ -1,8 +1,8 @@
+import { AnimatedButton } from "@/components/site/AnimatedButton";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Banknote, CreditCard, Landmark, Wallet } from "lucide-react";
 import { PageHero } from "@/components/site/PageHero";
-import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/formas-de-pago" },
@@ -57,9 +57,9 @@ export default function FormasPagoPage() {
         </div>
 
         <div className="mt-8">
-          <Button asChild variant="outline">
+          <AnimatedButton asChild variant="outline">
             <Link href="/condiciones">Ver condiciones generales</Link>
-          </Button>
+          </AnimatedButton>
         </div>
       </section>
     </>

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronDown, Menu, MessageCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { AnimatedButton } from "./AnimatedButton";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -33,7 +34,6 @@ function unstickBody() {
 
 export function Header() {
   const pathname = usePathname();
-  const isHome = pathname === "/";
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -62,36 +62,36 @@ export function Header() {
     <header
       className={cn(
         "sticky top-0 z-50 w-full border-b transition-colors duration-300",
-        isHome ? (scrolled ? "border-white/10 bg-[#080b10]/85 text-white backdrop-blur-xl" : "border-transparent bg-[#080b10] text-white") : scrolled
+        scrolled
           ? "border-border bg-background/85 backdrop-blur supports-[backdrop-filter]:bg-background/70"
-          : "border-transparent bg-background",
+          : "border-transparent bg-background/70 backdrop-blur",
       )}
     >
       <div className="container-page flex h-16 items-center justify-between gap-4">
-        <Logo invert={isHome} />
+        <Logo />
 
         <nav aria-label="Navegación principal" className="hidden items-center gap-1 xl:flex">
           {desktopNavItems.map(link => <Link key={link.href} href={link.href}
             aria-current={isActive(link.href) ? "page" : undefined}
-            className={cn("rounded-lg px-3 py-3 text-sm font-semibold transition-colors", isHome ? (isActive(link.href) ? "bg-white/10 text-red-300" : "text-slate-300 hover:bg-white/10 hover:text-white") : isActive(link.href) ? "bg-accent text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground")}>
+            className={cn("rounded-lg px-3 py-3 text-sm font-semibold transition-colors", isActive(link.href) ? "bg-accent text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground")}>
             {link.label}
           </Link>)}
         </nav>
 
         <div className="hidden items-center gap-2 xl:flex">
-            <Button asChild size="sm" className="shadow-soft">
+            <AnimatedButton asChild size="sm" className="shadow-soft">
             <Link href="/presupuesto">Presupuesto online</Link>
-          </Button>
-          <Button
+          </AnimatedButton>
+          <AnimatedButton
             asChild
             size="sm"
-            variant="ghost" className={cn("hover:bg-whatsapp/10", isHome ? "text-emerald-300" : "text-whatsapp")}
+            variant="ghost" className={cn("hover:bg-whatsapp/10", "text-whatsapp")}
           >
             <a href={waLink("Hola ServiTec, quiero hacer una consulta")} target="_blank" rel="noopener noreferrer">
               <MessageCircle className="size-4" />
               WhatsApp
             </a>
-          </Button>
+          </AnimatedButton>
           <div className="text-foreground"><GlobalCart /></div>
         </div>
 
@@ -102,7 +102,7 @@ export function Header() {
             asChild
             size="icon"
             variant="ghost"
-            className={isHome ? "text-emerald-300" : "text-whatsapp"}
+            className={"text-whatsapp"}
             aria-label="WhatsApp"
           >
             <a href={waLink()} target="_blank" rel="noopener noreferrer">
@@ -202,10 +202,10 @@ export function Header() {
                   Contacto
                 </Link>
 
-                <Button asChild className="mt-3">
+                <AnimatedButton asChild className="mt-3">
                   <Link href="/presupuesto" onClick={closeMobileMenu}>Presupuesto online</Link>
-                </Button>
-                <Button
+                </AnimatedButton>
+                <AnimatedButton
                   asChild
                   variant="outline"
                   className="mt-2 border-whatsapp text-whatsapp hover:bg-whatsapp/10 hover:text-whatsapp"
@@ -214,7 +214,7 @@ export function Header() {
                     <MessageCircle className="size-4" />
                     Escribinos por WhatsApp
                   </a>
-                </Button>
+                </AnimatedButton>
                 <p className="px-3 pt-4 text-xs text-muted-foreground">
                   {CONTACT.address}
                 </p>

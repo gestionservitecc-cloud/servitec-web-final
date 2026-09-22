@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import "@/styles/globals.css";
+import { PublicVisualShell } from "@/components/site/PublicVisualShell";
 import { Providers } from "@/components/providers";
 
 const inter = Inter({
@@ -83,7 +84,7 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-screen bg-background text-foreground">
-        <Providers>{children}</Providers>
+        <Providers><PublicVisualShell>{children}</PublicVisualShell></Providers>
         <Analytics />
       </body>
     </html>

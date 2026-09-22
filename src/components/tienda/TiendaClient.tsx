@@ -13,6 +13,7 @@ import {
   type CatalogProduct,
   type ComponentCatalogKey,
 } from "@/lib/pc-catalog";
+import { AnimatedButton } from "@/components/site/AnimatedButton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -475,14 +476,14 @@ export function TiendaClient() {
                             </p>
                           </div>
                         )}
-                        <Button
+                        <AnimatedButton
                           onClick={() => agregar(p)}
                           disabled={agotado}
                           size="sm"
                           className="mt-auto w-full gap-2"
                         >
                           <Plus className="size-3.5" /> Agregar
-                        </Button>
+                        </AnimatedButton>
                       </div>
                     </article>
                   );

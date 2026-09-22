@@ -1,15 +1,41 @@
-.button { transition-duration: 220ms; }
-.window { display: inline-grid; overflow: hidden; height: 1.4em; line-height: 1.4; }
-.labels { display: grid; transition: transform 450ms cubic-bezier(.22, 1, .36, 1); }
-.labels > span { grid-column: 1; height: 1.4em; }
-.icon { transition: transform 450ms cubic-bezier(.22, 1, .36, 1); }
-@media (hover: hover) and (pointer: fine) {
-  .button:hover .labels { transform: translateY(-50%); }
-  .button:hover .icon { transform: translate(2px, -1px); }
+.button.button {
+  --button-ink: hsl(var(--primary)); position: relative; isolation: isolate; overflow: hidden;
+  height: 46px; padding: 0 26px; gap: 18px; border: 1px solid var(--button-ink); border-radius: 10px;
+  background: transparent; color: var(--button-ink); font-size: 12px; line-height: 20px; font-weight: 700;
+  letter-spacing: .09em; text-transform: uppercase; box-shadow: none;
+  transition: color .35s ease, border-color .35s ease, transform .25s ease;
 }
-.button:focus-visible .labels { transform: translateY(-50%); }
-.button:active { transform: scale(.985); }
-@media (prefers-reduced-motion: reduce) {
-  .labels, .icon { transition: none; transform: none !important; }
-  .button:active { transform: none; }
+.button[data-size="sm"] { height: 40px; padding-inline: 16px; font-size: 11px; gap: 10px; }
+.button[data-variant="outline"], .button[data-variant="ghost"] { --button-ink: hsl(var(--foreground)); }
+.button:global(.bg-whatsapp) { --button-ink: hsl(var(--whatsapp)); }
+.button:focus-visible { outline: 2px solid hsl(var(--ring)); outline-offset: 4px; }
+.fills { position: absolute; inset: 0; z-index: -1; pointer-events: none; }
+.fills i { position: absolute; inset: -100% -20%; transform: skewX(-12deg) scaleX(0); transform-origin: left; transition: transform .65s cubic-bezier(.76,0,.24,1); background: color-mix(in srgb, var(--button-ink) 20%, white); }
+.fills i:nth-child(2) { background: color-mix(in srgb, var(--button-ink) 55%, white); transition-delay: .06s; }
+.fills i:nth-child(3) { background: var(--button-ink); transition-delay: .12s; }
+.window { display: inline-grid; height: 20px; overflow: hidden; position: relative; }
+.labels { display: grid; grid-auto-rows: 20px; transition: transform .55s cubic-bezier(.76,0,.24,1); }
+.labels > span { grid-column: 1; white-space: nowrap; }
+.icon { position: relative; overflow: hidden; width: 18px; height: 18px; flex-shrink: 0; }
+.icon > span { position: absolute; inset: 0; display: grid; place-items: center; transition: transform .55s cubic-bezier(.76,0,.24,1); }
+.icon > span:last-child { transform: translate(-120%,120%); }
+@media (hover:hover) and (pointer:fine) {
+ .button:not(:disabled):hover { color: #fff; background: transparent; }
+ .button:not(:disabled):hover .fills i { transform: skewX(-12deg) scaleX(1); }
+ .button:not(:disabled):hover .labels { transform: translateY(-20px); }
+ .button:not(:disabled):hover .icon > span:first-child { transform: translate(120%,-120%); }
+ .button:not(:disabled):hover .icon > span:last-child { transform: translate(0,0); }
 }
+.button:not(:disabled):active { transform: scale(.98); }
+@media(max-width: 767px) { .button.button { padding-inline: 18px; gap: 12px; font-size: 11px; letter-spacing: .06em; } }
+@media(prefers-reduced-motion: reduce) {
+ .button.button, .fills i, .labels, .icon > span { transition: none; }
+ .button.button .labels, .button.button .icon > span:first-child { transform: none; }
+ .button.button .icon > span:last-child { display: none; }
+ .button:not(:disabled):active { transform: none; }
+}
+
+.button.button:global(.text-white) { background: var(--button-ink); color: #fff; }
+
+.button.button:global(.bg-whatsapp) { background: var(--button-ink); color: #fff; }
+.button:global(.text-whatsapp) { --button-ink: hsl(var(--whatsapp)); }

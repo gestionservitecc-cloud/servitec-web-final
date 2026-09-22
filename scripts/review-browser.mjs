@@ -31,6 +31,8 @@ async function visit(path) {
   assert.ok(await page.locator("h1").count() >= 1, `h1 ${path}`);
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1);
   assert.equal(overflow, false, `overflow ${path}`);
+  assert.equal(await page.locator('[data-global-ambient]').count(), 1, `global field ${path}`);
+  await page.screenshot({ path: `artifacts/qa/global-route-${page.viewportSize().width}-${path.replace(/[^a-z0-9]/gi, '_') || 'home'}.png` });
 }
 try {
   for (const width of [360, 390, 768, 1440]) {

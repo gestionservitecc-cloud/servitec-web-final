@@ -1,0 +1,9 @@
+.ambient { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; background: #fff; opacity: 1; transition: opacity 1.2s ease; }
+.ambient[data-quiet="true"] { opacity: .72; }
+.field { position: absolute; inset: -6vh -5vw; }
+.field > span { position: absolute; pointer-events: none; filter: blur(65px); }
+.ice { width: 125vw; height: 100vh; left: -44vw; top: -38vh; background: radial-gradient(ellipse at 40% 55%, hsl(210 60% 82% / .5), transparent 62%), radial-gradient(ellipse at 70% 30%, hsl(191 60% 75% / .18), transparent 52%); }
+.teal { width: 110vw; height: 110vh; right: -55vw; top: 10vh; background: radial-gradient(ellipse at 45% 65%, hsl(var(--secondary) / .14), transparent 59%); }
+.blue { width: 95vw; height: 85vh; left: -20vw; bottom: -58vh; background: radial-gradient(ellipse at 60% 30%, hsl(215 48% 78% / .34), transparent 58%); }
+@media(max-width: 1023px) { .field > span { filter: blur(36px); } .blue { display: none; } .ice { opacity: .8; } .teal { opacity: .7; } }
+@media(prefers-reduced-motion: reduce) { .ambient { transition: none; } .field, .field > span { transform: none !important; } }

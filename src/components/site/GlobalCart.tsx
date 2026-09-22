@@ -6,6 +6,7 @@ import { useDialogFocus } from "@/hooks/use-dialog-focus";
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { Minus, Plus, ShoppingCart, Trash2, X } from "lucide-react";
+import { AnimatedButton } from "./AnimatedButton";
 import { Button } from "@/components/ui/button";
 import { PedidoCheckoutModal } from "@/components/shared/PedidoCheckoutModal";
 import { getNextPedidoNumber, readStoredPedidos } from "@/lib/order-data";
@@ -110,7 +111,7 @@ export function GlobalCart() {
         open &&
         createPortal(
           <div ref={dialogRef} className="fixed inset-0 z-[100] flex justify-end bg-slate-950/50 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label="Carrito">
-            <div className="flex h-full w-full max-w-md flex-col bg-background shadow-2xl">
+            <div className="flex h-full w-full max-w-md flex-col bg-background/95 shadow-2xl">
               <div className="flex items-center justify-between border-b p-5">
                 <div>
                   <p className="eyebrow">Tu selección</p>
@@ -174,7 +175,7 @@ export function GlobalCart() {
                 </div>
                 <p className="mt-2 text-xs text-muted-foreground">Coordinamos disponibilidad y entrega por WhatsApp. No se realiza un pago online.</p>
                 <Link href="/tienda" onClick={() => setOpen(false)} className="mt-3 block text-sm font-semibold text-primary underline">Seguir comprando</Link>
-                <Button
+                <AnimatedButton
                   type="button"
                   onClick={() => {
                     setOpen(false);
@@ -184,7 +185,7 @@ export function GlobalCart() {
                   className="mt-4 w-full gap-2 bg-whatsapp text-whatsapp-foreground hover:bg-whatsapp/90"
                 >
                   <ShoppingCart className="size-4" /> Iniciar pedido por WhatsApp
-                </Button>
+                </AnimatedButton>
               </div>
             </div>
           </div>,

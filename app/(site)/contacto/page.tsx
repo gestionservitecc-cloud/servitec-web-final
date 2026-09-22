@@ -1,7 +1,7 @@
+import { AnimatedButton } from "@/components/site/AnimatedButton";
 import type { Metadata } from "next";
 import { Clock, Instagram, MapPin, MessageCircle, Phone } from "lucide-react";
 import { PageHero } from "@/components/site/PageHero";
-import { Button } from "@/components/ui/button";
 import { CONTACT, waLink, BUSINESS_HOURS } from "@/components/site/site-config";
 
 export const metadata: Metadata = {
@@ -96,7 +96,7 @@ export default function ContactoPage() {
                 </li>
               ))}
             </ul>
-            <Button
+            <AnimatedButton
               asChild
               className="mt-6 w-full gap-2 bg-whatsapp text-whatsapp-foreground hover:bg-whatsapp/90"
             >
@@ -108,7 +108,7 @@ export default function ContactoPage() {
                 <MessageCircle className="size-4" />
                 Coordinar por WhatsApp
               </a>
-            </Button>
+            </AnimatedButton>
           </div>
         </div>
       </section>
