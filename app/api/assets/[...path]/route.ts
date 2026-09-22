@@ -28,6 +28,9 @@ export async function GET(
       "Cache-Control": "public, max-age=300, stale-while-revalidate=3600",
       "Content-Type": result.blob.contentType || "application/octet-stream",
       "Content-Length": String(result.blob.size),
+      // Uploaded SVGs must not execute scripts when opened as a document.
+      "Content-Security-Policy": "default-src 'none'; style-src 'unsafe-inline'; sandbox",
+      "X-Content-Type-Options": "nosniff",
       ETag: result.blob.etag,
     },
   });

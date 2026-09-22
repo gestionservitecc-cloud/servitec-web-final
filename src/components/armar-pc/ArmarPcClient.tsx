@@ -720,7 +720,7 @@ const ArmarPc = () => {
       + selectedExtras.reduce((sum, key) => sum + parsePrice(catalogExtraOptions[key]?.[selectedExtraModels[key] ?? 0]?.precio || catalogExtras.find((item) => item.key === key)?.option.precio || 0), 0),
     [catalogExtraOptions, catalogExtras, selectedGroups, selected, selectedExtras, selectedExtraModels],
   );
-  
+
   const reset = () => {
     setSelected({});
     setSelectedMemorySlots([]);

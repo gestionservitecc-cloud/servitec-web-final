@@ -4,7 +4,6 @@ import next from "eslint-config-next";
 const eslintConfig = [
   {
     ignores: [
-      "legacy/**",
       "functions/**",
       ".next/**",
       ".next-preview/**",
