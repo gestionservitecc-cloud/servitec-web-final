@@ -326,7 +326,7 @@ export const StockClient = () => {
           <div className="min-w-0">
           <div className="mb-5 flex items-center justify-between gap-2"><p role="status" className="text-sm text-muted-foreground">{loading ? "Cargando equipos…" : loadError ? "Catálogo no disponible" : `${sortedProducts.length} equipos`}</p><Button variant="ghost" onClick={() => { setBusqueda(""); setOrden(""); setPrecioMin(null); setPrecioMax(null); }}>Limpiar filtros</Button></div>
           {loading && (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-[repeat(auto-fill,minmax(240px,1fr))]">
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
               {[...Array(6)].map((_, i) => (
                 <Skeleton key={i} className="h-[420px] rounded-2xl" />
               ))}
@@ -360,7 +360,7 @@ export const StockClient = () => {
                       </span>
                     </div>
 
-                    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-[repeat(auto-fill,minmax(240px,1fr))]">
+                    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
                       {items.map((p) => {
                         const imagenes = (p.imagenes?.length ? p.imagenes : p.imagen || p.image ? [p.imagen || p.image || ""] : [])
                           .map(resolveEquipmentImage);

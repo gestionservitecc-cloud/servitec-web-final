@@ -372,7 +372,7 @@ export function TiendaClient() {
         <div className="min-w-0">
         <div className="mb-5 flex items-center justify-between gap-3"><p role="status" className="text-sm text-muted-foreground">{loading ? "Cargando catálogo…" : loadError ? "Catálogo no disponible" : `${filtrados.length} productos`}</p><Button variant="ghost" onClick={() => { setBusqueda(""); setOrden(""); setCategoriaFiltro({ tipo, value: "" }); setPrecioMin(null); setPrecioMax(null); }}>Limpiar filtros</Button></div>
         {loading && (
-          <div className="grid grid-cols-1 gap-5 min-[420px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-[repeat(auto-fill,minmax(220px,1fr))]">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
             {Array.from({ length: 8 }).map((_, i) => (
               <Skeleton key={i} className="h-72 rounded-2xl" />
             ))}
@@ -396,7 +396,7 @@ export function TiendaClient() {
               <h2 className="mb-6 inline-flex rounded-full border bg-muted px-4 py-1.5 text-sm font-bold">
                 {categoria}
               </h2>
-              <div className="grid grid-cols-1 gap-5 min-[420px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-[repeat(auto-fill,minmax(220px,1fr))]">
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
                 {items.map((p) => {
                   const agotado = tipo === "accesorios" && p.stock === 0;
                   return (

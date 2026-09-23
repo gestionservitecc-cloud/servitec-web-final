@@ -16,6 +16,8 @@ try {
    const result=await page.locator('main .container-page').evaluateAll(nodes=>nodes.map(e=>Math.round(e.getBoundingClientRect().width)));
    assert.ok(result.every(w=>w===width),`${route} uses full viewport: ${result}`);
    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'no overflow');
+   const columns=await page.locator('[class*="xl:grid-cols-3"]').last().evaluate(e=>getComputedStyle(e).gridTemplateColumns.split(' ').length);
+   assert.equal(columns,width>=1280?3:width>=640?2:1,`${route}: responsive column count`);
    if(width===1920) await page.screenshot({path:`artifacts/qa/${route.slice(1)}-fullwidth.png`,fullPage:false});
   }
  }
