@@ -1,5 +1,7 @@
 "use client";
 
+import catalogStyles from "@/components/site/CatalogCards.module.css";
+
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -308,8 +310,8 @@ export function TiendaClient() {
       </PageHero>
 
       <section className="bg-muted/40">
-      <div className="container-page max-w-none py-12 lg:py-16">
-        <div className="lg:grid lg:grid-cols-[18rem_minmax(0,1fr)] lg:items-start lg:gap-8">
+      <div className={`container-page py-12 lg:py-16 ${catalogStyles.shell}`}>
+        <div className={`lg:grid lg:items-start ${catalogStyles.layout}`}>
           {/* On desktop the fixed filters live beside the catalogue, so they never cover product cards. */}
           <div className="z-20 -mx-3 mb-8 border-b bg-background px-3 py-3 shadow-soft sm:mx-0 sm:mb-10 sm:rounded-2xl sm:border sm:px-4 lg:sticky lg:top-20 lg:mb-0 lg:rounded-2xl lg:border lg:p-4 lg:self-start">
           <div className="flex flex-col gap-3 md:flex-row md:items-center lg:flex-col lg:items-stretch">
@@ -402,9 +404,9 @@ export function TiendaClient() {
                   return (
                     <article
                       key={p.id}
-                      className="group flex flex-col overflow-hidden rounded-2xl border bg-card shadow-soft transition-all hover:-translate-y-1 hover:shadow-soft-lg"
+                      className={`group flex flex-col overflow-hidden border transition-shadow hover:shadow-md ${catalogStyles.card}`}
                     >
-                      <div className="relative flex aspect-square w-full items-center justify-center overflow-hidden bg-white p-4 sm:p-5">
+                      <div className={catalogStyles.media}>
                         {tipo === "componentes" && p.componentKey && (
                           <Dialog>
                             <DialogTrigger asChild>

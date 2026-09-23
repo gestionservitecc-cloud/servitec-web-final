@@ -1,5 +1,7 @@
 "use client";
 
+import catalogStyles from "@/components/site/CatalogCards.module.css";
+
 import { useEffect, useMemo, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { BadgeCheck, Info, MessageCircle, Search, SlidersHorizontal } from "lucide-react";
@@ -261,8 +263,8 @@ export const StockClient = () => {
       />
 
       <section className="py-12 sm:py-16">
-        <div className="container-page max-w-none">
-          <div className="lg:grid lg:grid-cols-[18rem_minmax(0,1fr)] lg:items-start lg:gap-8">
+        <div className={`container-page ${catalogStyles.shell}`}>
+          <div className={`lg:grid lg:items-start ${catalogStyles.layout}`}>
             {/* A side panel remains available while browsing without overlaying the product grid. */}
             <div className="z-20 -mx-4 mb-10 border-b bg-background px-4 py-3 shadow-soft sm:mx-0 sm:rounded-2xl sm:border sm:px-4 lg:sticky lg:top-20 lg:mb-0 lg:rounded-2xl lg:border lg:p-4 lg:self-start">
             <div className="flex flex-col gap-3 md:flex-row md:items-center lg:flex-col lg:items-stretch">
@@ -425,8 +427,8 @@ export const StockClient = () => {
                         const hasOfficialWarranty = /sellado/i.test(p.condition || "");
 
                         return (
-                          <Card key={p.id} className="flex h-full flex-col overflow-hidden transition hover:shadow-xl">
-                            <div className="relative aspect-square w-full overflow-hidden bg-slate-900">
+                          <Card key={p.id} className={`flex h-full flex-col overflow-hidden transition-shadow hover:shadow-md ${catalogStyles.card}`}>
+                            <div className={catalogStyles.media}>
                               <ProductImageGallery
                                 images={imagenes}
                                 name={nombreDisplay}
@@ -500,12 +502,10 @@ export const StockClient = () => {
                                   )}
                                 </Dialog>
                               )}
-                              <div className="absolute bottom-0 left-0 w-full bg-slate-950/80 p-3 backdrop-blur-sm sm:p-4">
-                                <p className="mb-2 break-words text-sm font-semibold text-white">{nombreDisplay}</p>
-                              </div>
                             </div>
 
-                            <CardContent className="flex flex-1 flex-col p-4 sm:p-6">
+                            <CardContent className="flex flex-1 flex-col p-4">
+                              <h3 className="mb-3 min-h-10 break-words text-sm font-semibold">{nombreDisplay}</h3>
                               <div className="flex h-full flex-1 flex-col gap-4">
                                 <div className="w-full space-y-3">
                                   {vendido ? (
@@ -516,7 +516,7 @@ export const StockClient = () => {
                                     <>
                                       <div className="space-y-1.5">
                                         <p className="text-xs text-muted-foreground">Efectivo / transferencia</p>
-                                        <p className="text-2xl font-black text-emerald-500 sm:text-3xl">
+                                        <p className="text-xl font-bold text-emerald-700">
                                           ${formatPrice(precioEfectivo)}
                                         </p>
                                         <p className="text-[11px] font-semibold text-rose-500">

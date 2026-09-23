@@ -13,13 +13,13 @@ try {
   console.log(JSON.stringify(sizes));
   for(const route of ['/tienda','/reacondicionados']) {
    await page.goto('http://127.0.0.1:3100'+route);await page.getByText(/Equipo de prueba/).first().waitFor();
-   const result=await page.locator('main .container-page').evaluateAll(nodes=>nodes.map(e=>Math.round(e.getBoundingClientRect().width)));
-   assert.ok(result.every(w=>w===width),`${route} uses full viewport: ${result}`);
+   const result=await page.locator('main .container-page').last().evaluateAll(nodes=>nodes.map(e=>Math.round(e.getBoundingClientRect().width)));
+   assert.ok(result.every(w=>w===Math.min(width,1200)),`${route} uses bounded catalogue width: ${result}`);
    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'no overflow');
    const columns=await page.locator('[class*="xl:grid-cols-3"]').last().evaluate(e=>getComputedStyle(e).gridTemplateColumns.split(' ').length);
    assert.equal(columns,width>=1280?3:width>=640?2:1,`${route}: responsive column count`);
    if(width===1920) await page.screenshot({path:`artifacts/qa/${route.slice(1)}-fullwidth.png`,fullPage:false});
   }
  }
- console.log('Full-width catalogues and responsive layout passed');
+ console.log('Compact catalogues and responsive layout passed');
 } finally {await browser.close();}
