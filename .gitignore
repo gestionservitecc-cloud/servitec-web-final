@@ -11,6 +11,7 @@ next-env.d.ts
 # production
 /build
 /dist
+/artifacts/
 
 # misc
 .DS_Store
@@ -42,7 +43,6 @@ firebase-debug.log*
 .idea
 
 # scraper
-SCRAPPER_JOA_WINNER/
 .secrets/
 __pycache__/
 .venv/

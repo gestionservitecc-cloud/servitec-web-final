@@ -54,6 +54,8 @@ type ComponentKey =
   | "cooling";
 type ExtraKey =
   "monitor" | "headphones" | "mouse" | "mousepad" | "keyboard";
+const isPowerCaseStep = (name: string) =>
+  normalizeCatalogText(name) === normalizeCatalogText("Fuente + Gabinete (Paso siguiente)");
 type Option = {
   name: string;
   detail: string;
@@ -532,7 +534,7 @@ const ArmarPc = () => {
       const productMap = await loadComponentCatalog() as unknown as Record<string, CatalogProduct[]>;
       const loadedGroups = groups.map((group) => ({
         ...group,
-        options: productMap[group.key]?.filter(product => product.stock !== 0).map((product) => mapProduct(product)) ?? [],
+        options: productMap[group.key]?.filter(product => product.stock !== 0 || (group.key === "power" && isPowerCaseStep(product.nombre))).map((product) => mapProduct(product)) ?? [],
       }));
       setCatalogGroups(loadedGroups);
       const peripheralProducts = productMap.peripherals ?? [];
@@ -713,7 +715,12 @@ const ArmarPc = () => {
     return true;
   };
   const orderedOptions = currentGroup
-    ? [...currentGroup.options].sort((left, right) => Number(isCompatible(currentGroup, right)) - Number(isCompatible(currentGroup, left)))
+    ? [...currentGroup.options].sort((left, right) => {
+      const stepPriority = currentGroup.key === "power"
+        ? Number(isPowerCaseStep(right.name)) - Number(isPowerCaseStep(left.name))
+        : 0;
+      return stepPriority || Number(isCompatible(currentGroup, right)) - Number(isCompatible(currentGroup, left));
+    })
     : [];
   const nationalTotal = useMemo(
     () => selectedGroups.reduce((sum, group) => sum + parsePrice(group.options[selected[group.key] ?? 0].precio || 0), 0)
